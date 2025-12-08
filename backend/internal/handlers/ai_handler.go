@@ -53,12 +53,32 @@ type NVIDIAResponse struct {
 // AIComparisonHandler handles AI comparison requests
 func (s *Server) AIComparisonHandler(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
-	log.Printf("🤖 [AI] Received comparison request")
+	clientIP := getClientIP(r)
+	log.Printf("🤖 [AI] Received comparison request from %s", clientIP)
 
 	if r.Method != http.MethodPost {
 		writeJSON(w, http.StatusMethodNotAllowed, AIComparisonResponse{Error: true, Message: "Method not allowed"})
 		return
 	}
+
+	// Check rate limit
+	if !s.aiLimiter.Allow(clientIP) {
+		remaining := s.aiLimiter.GetRemaining(clientIP)
+		log.Printf("⚠️ [AI] Rate limit exceeded for %s", clientIP)
+		w.Header().Set("X-RateLimit-Remaining", fmt.Sprintf("%d", remaining))
+		w.Header().Set("X-RateLimit-Limit", "10")
+		w.Header().Set("Retry-After", "60")
+		writeJSON(w, http.StatusTooManyRequests, AIComparisonResponse{
+			Error:   true,
+			Message: "Rate limit exceeded. Maximum 10 AI requests per minute. Please try again later.",
+		})
+		return
+	}
+
+	// Add rate limit headers
+	remaining := s.aiLimiter.GetRemaining(clientIP)
+	w.Header().Set("X-RateLimit-Remaining", fmt.Sprintf("%d", remaining))
+	w.Header().Set("X-RateLimit-Limit", "10")
 
 	var req AIComparisonRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {

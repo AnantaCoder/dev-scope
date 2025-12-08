@@ -16,10 +16,11 @@ import (
 
 // Server holds the application state
 type Server struct {
-	service   *service.GitHubService
-	cache     *cache.Cache
-	config    *config.Config
-	startTime time.Time
+	service     *service.GitHubService
+	cache       *cache.Cache
+	config      *config.Config
+	startTime   time.Time
+	aiLimiter   *RateLimiter
 }
 
 // NewServer creates a new server instance
@@ -29,6 +30,8 @@ func NewServer(cfg *config.Config, c *cache.Cache, svc *service.GitHubService) *
 		cache:     c,
 		config:    cfg,
 		startTime: time.Now(),
+		// AI rate limit: 10 requests per minute per IP
+		aiLimiter: NewRateLimiter(10, time.Minute),
 	}
 }
 
