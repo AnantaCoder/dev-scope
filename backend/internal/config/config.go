@@ -20,8 +20,13 @@ type Config struct {
 
 // Default returns default configuration
 func Default() *Config {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8000"
+	}
+
 	return &Config{
-		ServerPort:   ":8000",
+		ServerPort:   ":" + port,
 		CacheTTL:     5 * time.Minute,
 		MaxCacheSize: 1000,
 		MaxBatchSize: 10,
