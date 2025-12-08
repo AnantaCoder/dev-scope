@@ -6,6 +6,7 @@ import type {
   HealthResponse,
   CacheStats,
   AIComparisonResponse,
+  ExtendedUserResponse,
 } from "@/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_GO_API_URL || "http://localhost:8000";
@@ -47,6 +48,13 @@ export const api = {
     const { data } = await axiosInstance.post<AIComparisonResponse>(
       "/api/ai/compare",
       { users }
+    );
+    return data;
+  },
+
+  async getExtendedUserInfo(username: string): Promise<ExtendedUserResponse> {
+    const { data } = await axiosInstance.get<ExtendedUserResponse>(
+      `/api/user/${username}/extended`
     );
     return data;
   },

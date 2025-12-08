@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github-api/internal/models"
+	"github-api/backend/internal/models"
 )
 
 // Entry represents a cache entry with expiry
@@ -128,9 +128,7 @@ func (c *Cache) Stats() models.CacheStats {
 }
 
 func (c *Cache) updateAccessOrder(key string) {
-	// Remove from current position
 	c.removeFromAccessOrder(key)
-	// Add to end
 	c.accessOrder = append(c.accessOrder, key)
 }
 

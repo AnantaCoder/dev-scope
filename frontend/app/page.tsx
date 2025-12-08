@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
-import type { GitHubUser, CacheStats, APIResponse } from "@/types";
+import type { GitHubUser, CacheStats, APIResponse, TechStack, StreakInfo } from "@/types";
 import { BackendErrorBanner } from "@/components/BackendErrorBanner";
-import { PerformanceMetrics } from "@/components/PerformanceMetrics";
 import { UserProfileCard } from "@/components/UserProfileCard";
+import { UserComparisonCard } from "@/components/UserComparisonCard";
+import { Footer } from "@/components/Footer";
 import Image from "next/image";
 
 export default function Home() {
@@ -15,363 +16,446 @@ export default function Home() {
   const [error, setError] = useState<string>("");
   const [backendError, setBackendError] = useState<boolean>(false);
   const [singleUser, setSingleUser] = useState<GitHubUser | null>(null);
+  const [techStack, setTechStack] = useState<TechStack | null>(null);
+  const [streak, setStreak] = useState<StreakInfo | null>(null);
   const [batchResults, setBatchResults] = useState<Record<string, APIResponse> | null>(null);
   const [cacheStats, setCacheStats] = useState<CacheStats | null>(null);
   const [aiComparison, setAiComparison] = useState<string>("");
   const [loadingAI, setLoadingAI] = useState<boolean>(false);
+  const [showStatsDropdown, setShowStatsDropdown] = useState(false);
+  const [totalSearches, setTotalSearches] = useState(0);
+  const [clearing, setClearing] = useState(false);
 
-  useEffect(() => {
-    fetchCacheStats();
-  }, []);
+  useEffect(() => { fetchCacheStats(); }, []);
 
   const fetchCacheStats = async () => {
     try {
       const stats = await api.getCacheStats();
       setCacheStats(stats);
       setBackendError(false);
-    } catch (err) {
-      console.error("Failed to fetch cache stats:", err);
-      setBackendError(true);
-    }
+    } catch { setBackendError(true); }
   };
 
   const fetchSingleUser = async () => {
-    if (!username.trim()) {
-      setError("Please enter a username");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-    setSingleUser(null);
-
+    if (!username.trim()) { setError("Please enter a username"); return; }
+    setLoading(true); setError(""); setSingleUser(null); setTechStack(null); setStreak(null);
+    setTotalSearches(prev => prev + 1);
     try {
-      const result = await api.getUserStatus(username);
-      if (result.error) {
-        setError(result.message || "User not found");
-      } else if (result.data) {
-        setSingleUser(result.data);
+      const result = await api.getExtendedUserInfo(username);
+      if (result.error) { setError(result.message || "User not found"); }
+      else if (result.data) {
+        setSingleUser(result.data.user);
+        setTechStack(result.data.tech_stack);
+        setStreak(result.data.streak);
         fetchCacheStats();
       }
-    } catch (err) {
-      setError("Failed to fetch user. Make sure the Go server is running.");
-    } finally {
-      setLoading(false);
-    }
+    } catch { setError("Failed to fetch user. Make sure the Go server is running."); }
+    finally { setLoading(false); }
   };
 
   const fetchBatchUsers = async () => {
     const usernames = batchUsers.split(",").map((u) => u.trim()).filter((u) => u);
-
-    if (usernames.length === 0) {
-      setError("Please enter at least one username");
-      return;
-    }
-
-    if (usernames.length > 10) {
-      setError("Maximum 10 usernames allowed");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-    setBatchResults(null);
-    setAiComparison("");
-
+    if (usernames.length === 0) { setError("Please enter at least one username"); return; }
+    if (usernames.length > 10) { setError("Maximum 10 usernames allowed"); return; }
+    setLoading(true); setError(""); setBatchResults(null); setAiComparison("");
+    setTotalSearches(prev => prev + usernames.length);
     try {
       const result = await api.getBatchStatus(usernames);
-      if (result.error) {
-        setError("Failed to fetch batch data");
-      } else {
-        setBatchResults(result.results);
-        fetchCacheStats();
-      }
-    } catch (err) {
-      setError("Failed to fetch batch data. Make sure the Go server is running.");
-    } finally {
-      setLoading(false);
-    }
+      if (result.error) { setError("Failed to fetch batch data"); }
+      else { setBatchResults(result.results); fetchCacheStats(); }
+    } catch { setError("Failed to fetch batch data. Make sure the Go server is running."); }
+    finally { setLoading(false); }
   };
 
   const getAIComparison = async () => {
     if (!batchResults) return;
-
-    const users = Object.values(batchResults)
-      .filter((r: any) => !r.error && r.data)
-      .map((r: any) => r.data);
-
-    if (users.length < 2) {
-      setError("Need at least 2 users for AI comparison");
-      return;
-    }
-
-    setLoadingAI(true);
-    setAiComparison("");
-
+    const users = Object.values(batchResults).filter((r: APIResponse) => !r.error && r.data).map((r: APIResponse) => r.data);
+    if (users.length < 2) { setError("Need at least 2 users for AI comparison"); return; }
+    setLoadingAI(true); setAiComparison("");
     try {
-      const result = await api.getAIComparison(users);
+      const result = await api.getAIComparison(users as GitHubUser[]);
       setAiComparison(result.comparison);
-    } catch (err) {
-      setError("Failed to get AI comparison. Make sure the Go server is running.");
-    } finally {
-      setLoadingAI(false);
-    }
+    } catch { setError("Failed to get AI comparison."); }
+    finally { setLoadingAI(false); }
   };
 
   const clearCache = async () => {
-    try {
-      await api.clearCache();
-      fetchCacheStats();
-      alert("Cache cleared successfully!");
-    } catch (err) {
-      setError("Failed to clear cache");
-    }
+    setClearing(true);
+    try { await api.clearCache(); fetchCacheStats(); } catch { setError("Failed to clear cache"); }
+    setTimeout(() => setClearing(false), 1000);
   };
 
+  const hitRate = cacheStats ? parseFloat(cacheStats.hit_rate) : 0;
+
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-950 via-gray-900 to-black text-white">
-      {/* Navigation Bar */}
-      <nav className="border-b border-gray-800 bg-black/50 backdrop-blur-lg sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
+    <div className="min-h-screen flex flex-col bg-[#0d1117] text-[#e6edf3]">
+      {/* Premium Header with Stats */}
+      <header className="bg-[#161b22]/95 backdrop-blur-md border-b border-[#30363d] sticky top-0 z-50">
+        <div className="max-w-[1400px] mx-auto px-4 lg:px-8">
+          <div className="h-16 flex items-center justify-between">
+            {/* Logo */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center font-bold text-lg">
-                G
-              </div>
-              <div>
-                <h1 className="text-xl font-bold">GitHub Analytics</h1>
-                <p className="text-xs text-gray-400">Powered by Go & NVIDIA AI</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-400">v1.0.0</span>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Backend Error Banner */}
-        {backendError && <BackendErrorBanner onRetry={fetchCacheStats} />}
-
-        {/* Performance Metrics Dashboard */}
-        {cacheStats && !backendError && (
-          <PerformanceMetrics stats={cacheStats} onClearCache={clearCache} />
-        )}
-
-        {/* Single User Analysis */}
-        <div className="mb-8">
-          <div className="bg-gray-900/50 backdrop-blur border border-gray-800 rounded-xl p-6">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                <span className="text-xl">👤</span>
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold">User Profile Analysis</h2>
-                <p className="text-sm text-gray-400">Search and analyze GitHub developers</p>
+              <Image src="/logo.svg" alt="DevScope" width={36} height={36} className="rounded-lg" />
+              <div className="hidden sm:block">
+                <h1 className="text-lg font-semibold tracking-tight">DevScope</h1>
+                <p className="text-[10px] text-[#8b949e] -mt-0.5">GitHub Analytics</p>
               </div>
             </div>
 
-            <div className="flex gap-3 mb-4">
-              <input
-                type="text"
-                placeholder="Enter GitHub username (e.g., torvalds)"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && fetchSingleUser()}
-                className="flex-1 px-4 py-3 bg-gray-950 border border-gray-700 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 hover:border-gray-600 transition-all duration-300 placeholder:text-gray-500"
-              />
-              <button
-                onClick={fetchSingleUser}
-                disabled={loading}
-                className="px-8 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-lg transition-all duration-300 font-medium flex items-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    <span>Analyzing...</span>
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <span>Search</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            {error && (
-              <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg flex items-center gap-3">
-                <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            {/* Center Stats Pills */}
+            <div className="hidden md:flex items-center gap-2">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0d1117] border border-[#30363d] rounded-full">
+                <div className="w-2 h-2 rounded-full bg-[#238636] animate-pulse"></div>
+                <span className="text-xs text-[#8b949e]">Live</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-[#238636]/10 to-[#238636]/5 border border-[#238636]/30 rounded-full">
+                <svg className="w-3.5 h-3.5 text-[#238636]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-                <span>{error}</span>
+                <span className="text-xs font-medium text-[#238636]">{hitRate.toFixed(0)}% Fast</span>
               </div>
-            )}
-
-            {singleUser && <UserProfileCard user={singleUser} />}
-          </div>
-        </div>
-
-        {/* Batch Comparison */}
-        <div>
-          <div className="bg-gray-900/50 backdrop-blur border border-gray-800 rounded-xl p-6">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                <span className="text-xl">👥</span>
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold">Multi-User Comparison</h2>
-                <p className="text-sm text-gray-400">Compare multiple developers with AI analysis</p>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-[#a371f7]/10 to-[#a371f7]/5 border border-[#a371f7]/30 rounded-full">
+                <svg className="w-3.5 h-3.5 text-[#a371f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <span className="text-xs font-medium text-[#a371f7]">AI Powered</span>
               </div>
             </div>
 
-            <div className="mb-4">
-              <input
-                type="text"
-                placeholder="Enter usernames separated by commas (e.g., torvalds, gvanrossum, kentcdodds)"
-                value={batchUsers}
-                onChange={(e) => setBatchUsers(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-950 border border-gray-700 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 hover:border-gray-600 transition-all duration-300 placeholder:text-gray-500"
-              />
-              <div className="flex items-center justify-between mt-2">
-                <p className="text-xs text-gray-500">Maximum 10 users • Comma separated</p>
-                {batchUsers && (
-                  <p className="text-xs text-gray-400">
-                    {batchUsers.split(',').filter((u: string) => u.trim()).length} user(s)
-                  </p>
-                )}
-              </div>
-            </div>
-            <button
-              onClick={fetchBatchUsers}
-              disabled={loading}
-              className="w-full px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-lg transition-all duration-300 font-medium flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  <span>Analyzing...</span>
-                </>
-              ) : (
-                <>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {/* Right Side - Analytics Button */}
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <button
+                  onClick={() => setShowStatsDropdown(!showStatsDropdown)}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] rounded-lg transition-all group"
+                >
+                  <svg className="w-4 h-4 text-[#58a6ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
-                  <span>Compare Users</span>
-                </>
-              )}
-            </button>
-
-            {/* AI Comparison Button and Results */}
-            {batchResults && Object.keys(batchResults).length > 1 && (
-              <div className="mt-6">
-                <button
-                  onClick={getAIComparison}
-                  disabled={loadingAI}
-                  className="w-full px-6 py-3 bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-700 disabled:to-gray-700 disabled:cursor-not-allowed rounded-lg transition-all duration-300 font-medium flex items-center justify-center gap-2 shadow-lg hover:shadow-purple-500/50"
-                >
-                  {loadingAI ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                      <span>Generating AI Analysis...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-xl">🤖</span>
-                      <span>Get NVIDIA AI Comparison</span>
-                    </>
-                  )}
+                  <span className="text-sm font-medium hidden sm:inline">Insights</span>
+                  <span className="flex items-center justify-center w-5 h-5 text-[10px] font-bold bg-[#58a6ff] text-white rounded-full">{cacheStats?.size || 0}</span>
+                  <svg className={`w-3 h-3 text-[#8b949e] transition-transform ${showStatsDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
                 </button>
-              </div>
-            )}
 
-            {aiComparison && !loadingAI && (
-              <div className="mt-6 bg-linear-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/30 rounded-xl p-6 animate-fade-in">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                    <span className="text-lg">🤖</span>
-                  </div>
-                  <h4 className="font-semibold text-purple-300">NVIDIA AI Comparative Analysis</h4>
-                </div>
-                <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{aiComparison}</p>
-              </div>
-            )}
-
-            {batchResults && (
-              <div className="mt-6 grid md:grid-cols-2 gap-4">
-                {Object.entries(batchResults).map(([username, result]) => (
-                  <div key={username}>
-                    {result.error ? (
-                      <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-xl flex items-center gap-3">
-                        <svg className="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                        </svg>
-                        <div>
-                          <p className="font-medium">@{username}</p>
-                          <p className="text-sm">{result.message || "Not found"}</p>
+                {/* Dropdown */}
+                {showStatsDropdown && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowStatsDropdown(false)}></div>
+                    <div className="absolute right-0 top-full mt-2 w-72 bg-[#161b22] border border-[#30363d] rounded-xl shadow-2xl z-50 overflow-hidden">
+                      <div className="p-4 border-b border-[#30363d] bg-gradient-to-r from-[#58a6ff]/10 to-transparent">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-semibold text-sm">Performance Insights</h3>
+                          <span className="px-2 py-0.5 text-[10px] font-medium bg-[#238636] text-white rounded-full">Live</span>
                         </div>
                       </div>
-                    ) : result.data ? (
-                      <div className="bg-gray-950 border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-all duration-300">
-                        <div className="flex gap-4">
-                          <div className="relative shrink-0">
-                            <Image
-                              src={result.data.avatar_url}
-                              alt={result.data.login}
-                              width={64}
-                              height={64}
-                              className="rounded-xl ring-2 ring-gray-800"
-                            />
-                            {result.cached && (
-                              <div className="absolute -top-1 -right-1 bg-green-500 w-5 h-5 rounded-full border-2 border-gray-950 flex items-center justify-center">
-                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                </svg>
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold truncate">
-                              {result.data.name || result.data.login}
-                            </h3>
-                            <p className="text-sm text-gray-400 truncate">@{result.data.login}</p>
-                            <div className="flex gap-2 mt-3 text-xs">
-                              <div className="bg-gray-900 px-2 py-1 rounded flex items-center gap-1">
-                                <svg className="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                                <span className="text-gray-300">{result.data.public_repos}</span>
-                              </div>
-                              <div className="bg-gray-900 px-2 py-1 rounded flex items-center gap-1">
-                                <svg className="w-3 h-3 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                                  <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                                </svg>
-                                <span className="text-gray-300">{result.data.followers}</span>
-                              </div>
+                      <div className="p-4 space-y-3">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="p-3 bg-[#0d1117] rounded-lg border border-[#30363d]">
+                            <div className="flex items-center gap-2 mb-1">
+                              <svg className="w-4 h-4 text-[#58a6ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                              </svg>
+                              <span className="text-[10px] text-[#8b949e] uppercase">Cached</span>
                             </div>
+                            <p className="text-xl font-bold text-[#e6edf3]">{cacheStats?.size || 0}</p>
+                          </div>
+                          <div className="p-3 bg-[#0d1117] rounded-lg border border-[#30363d]">
+                            <div className="flex items-center gap-2 mb-1">
+                              <svg className="w-4 h-4 text-[#238636]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                              </svg>
+                              <span className="text-[10px] text-[#8b949e] uppercase">Speed</span>
+                            </div>
+                            <p className="text-xl font-bold text-[#238636]">{cacheStats?.hit_rate || 0}%</p>
                           </div>
                         </div>
+
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between p-2 bg-[#0d1117] rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full bg-[#238636]"></div>
+                              <span className="text-xs text-[#8b949e]">Cache Hits</span>
+                            </div>
+                            <span className="text-sm font-semibold text-[#238636]">{cacheStats?.hits || 0}</span>
+                          </div>
+                          <div className="flex items-center justify-between p-2 bg-[#0d1117] rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full bg-[#f85149]"></div>
+                              <span className="text-xs text-[#8b949e]">Cache Misses</span>
+                            </div>
+                            <span className="text-sm font-semibold text-[#f85149]">{cacheStats?.misses || 0}</span>
+                          </div>
+                          <div className="flex items-center justify-between p-2 bg-[#0d1117] rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full bg-[#a371f7]"></div>
+                              <span className="text-xs text-[#8b949e]">Session Searches</span>
+                            </div>
+                            <span className="text-sm font-semibold text-[#a371f7]">{totalSearches}</span>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={clearCache}
+                          disabled={clearing}
+                          className={`w-full py-2 text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-2 ${clearing ? 'bg-[#238636]/20 border border-[#238636] text-[#238636]' : 'bg-[#21262d] hover:bg-[#f85149]/20 border border-[#30363d] hover:border-[#f85149] text-[#8b949e] hover:text-[#f85149]'}`}
+                        >
+                          {clearing ? (
+                            <><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>Cleared!</>
+                          ) : (
+                            <><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>Clear Cache</>
+                          )}
+                        </button>
                       </div>
-                    ) : null}
-                  </div>
-                ))}
+                    </div>
+                  </>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </div>
-      </div>
+      </header>
+
+      <main className="flex-1">
+        <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-6 lg:py-8">
+          {backendError && <BackendErrorBanner onRetry={fetchCacheStats} />}
+
+          {/* Hero Section */}
+          <div className="text-center mb-8">
+            <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-[#e6edf3] via-[#58a6ff] to-[#a371f7] bg-clip-text text-transparent">
+              Analyze GitHub Profiles
+            </h2>
+            <p className="mt-2 text-[#8b949e] max-w-xl mx-auto">
+              Deep insights into developer profiles with AI-powered comparisons
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+            {/* Main Content */}
+            <div className="xl:col-span-8 space-y-6">
+              {/* Search Section */}
+              <div className="bg-[#161b22] border border-[#30363d] rounded-xl overflow-hidden">
+                <div className="px-5 py-4 border-b border-[#30363d] bg-gradient-to-r from-[#58a6ff]/5 to-transparent">
+                  <h2 className="text-sm font-semibold flex items-center gap-2">
+                    <svg className="w-4 h-4 text-[#58a6ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    Profile Analysis
+                  </h2>
+                </div>
+                <div className="p-5">
+                  <div className="flex gap-3">
+                    <div className="flex-1 relative">
+                      <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8b949e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      <input
+                        type="text"
+                        placeholder="Enter GitHub username..."
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        onKeyPress={(e) => e.key === "Enter" && fetchSingleUser()}
+                        className="w-full pl-10 pr-4 py-2.5 text-sm bg-[#0d1117] border border-[#30363d] rounded-lg focus:outline-none focus:border-[#58a6ff] focus:ring-1 focus:ring-[#58a6ff] placeholder:text-[#6e7681] transition-all"
+                      />
+                    </div>
+                    <button
+                      onClick={fetchSingleUser}
+                      disabled={loading}
+                      className="px-5 py-2.5 text-sm font-medium bg-[#238636] hover:bg-[#2ea043] disabled:bg-[#21262d] disabled:text-[#8b949e] text-white rounded-lg transition-all flex items-center gap-2"
+                    >
+                      {loading ? (
+                        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                      ) : "Analyze"}
+                    </button>
+                  </div>
+                  {error && (
+                    <div className="mt-4 px-4 py-3 text-sm bg-[#f8514926] border border-[#f8514966] text-[#f85149] rounded-lg flex items-center gap-2">
+                      <svg className="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
+                      {error}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* User Profile Result */}
+              {singleUser && <UserProfileCard user={singleUser} techStack={techStack || undefined} streak={streak || undefined} />}
+
+              {/* Compare Section */}
+              <div className="bg-[#161b22] border border-[#30363d] rounded-xl overflow-hidden">
+                <div className="px-5 py-4 border-b border-[#30363d] bg-gradient-to-r from-[#a371f7]/5 to-transparent">
+                  <h2 className="text-sm font-semibold flex items-center gap-2">
+                    <svg className="w-4 h-4 text-[#a371f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Compare Developers
+                    <span className="ml-auto px-2 py-0.5 text-[10px] font-medium bg-[#a371f7]/20 text-[#a371f7] rounded-full">Pro</span>
+                  </h2>
+                </div>
+                <div className="p-5">
+                  <div className="relative">
+                    <svg className="absolute left-3 top-3 w-4 h-4 text-[#8b949e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <input
+                      type="text"
+                      placeholder="torvalds, gvanrossum, defunkt..."
+                      value={batchUsers}
+                      onChange={(e) => setBatchUsers(e.target.value)}
+                      className={`w-full pl-10 pr-4 py-2.5 text-sm bg-[#0d1117] border rounded-lg focus:outline-none transition-all placeholder:text-[#6e7681] ${batchUsers.split(',').filter(u => u.trim()).length > 10 ? 'border-[#f85149] focus:border-[#f85149] focus:ring-1 focus:ring-[#f85149]' : 'border-[#30363d] focus:border-[#a371f7] focus:ring-1 focus:ring-[#a371f7]'}`}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between mt-3 text-xs">
+                    <span className="text-[#8b949e]">Separate with commas (max 10)</span>
+                    {batchUsers && (
+                      <span className={`px-2 py-0.5 rounded-full font-medium ${batchUsers.split(',').filter(u => u.trim()).length > 10 ? 'bg-[#f8514926] text-[#f85149]' : 'bg-[#21262d] text-[#8b949e]'}`}>
+                        {batchUsers.split(',').filter(u => u.trim()).length}/10 users
+                      </span>
+                    )}
+                  </div>
+                  {batchUsers.split(',').filter(u => u.trim()).length > 10 && (
+                    <div className="mt-3 px-3 py-2 text-xs bg-[#f8514926] border border-[#f8514966] text-[#f85149] rounded-lg flex items-center gap-2">
+                      <svg className="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+                      Too many users! Please remove {batchUsers.split(',').filter(u => u.trim()).length - 10} to continue.
+                    </div>
+                  )}
+                  <div className="flex gap-2 mt-4">
+                    <button
+                      onClick={fetchBatchUsers}
+                      disabled={loading || batchUsers.split(',').filter(u => u.trim()).length > 10}
+                      className="flex-1 py-2.5 text-sm font-medium bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] hover:border-[#8b949e] disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-all"
+                    >
+                      Compare
+                    </button>
+                    {batchResults && Object.keys(batchResults).length > 1 && (
+                      <button
+                        onClick={getAIComparison}
+                        disabled={loadingAI}
+                        className="flex-1 py-2.5 text-sm font-medium bg-gradient-to-r from-[#8957e5] to-[#a371f7] hover:from-[#9a6aea] hover:to-[#b085f5] disabled:opacity-50 text-white rounded-lg transition-all flex items-center justify-center gap-2"
+                      >
+                        {loadingAI ? <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /></svg>Analyzing...</> : <><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>AI Analysis</>}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* AI Comparison Result */}
+              {aiComparison && !loadingAI && (
+                <div className="bg-[#161b22] border border-[#8957e5] rounded-xl overflow-hidden">
+                  <div className="px-5 py-4 border-b border-[#30363d] bg-gradient-to-r from-[#8957e5]/10 to-transparent">
+                    <h3 className="text-sm font-semibold text-[#d2a8ff] flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                      AI Analysis
+                      <span className="ml-auto text-[10px] px-2 py-0.5 bg-[#8957e5]/20 rounded-full">NVIDIA</span>
+                    </h3>
+                  </div>
+                  <div className="p-5">
+                    <p className="text-sm text-[#e6edf3] leading-relaxed whitespace-pre-wrap">{aiComparison}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Batch Results */}
+              {batchResults && (
+                <div className="space-y-4">
+                  {Object.entries(batchResults).some(([, r]) => r.error) && (
+                    <div className="space-y-2">
+                      {Object.entries(batchResults).filter(([, r]) => r.error).map(([uname, r]) => (
+                        <div key={uname} className="px-4 py-3 text-sm bg-[#f8514926] border border-[#f8514966] text-[#f85149] rounded-lg">
+                          @{uname}: {r.message || "Not found"}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {(() => {
+                    const users = Object.values(batchResults).filter(r => !r.error && r.data).map(r => r.data as GitHubUser);
+                    if (users.length >= 2) return <UserComparisonCard users={users} />;
+                    if (users.length === 1) return (
+                      <div className="bg-[#161b22] border border-[#30363d] rounded-xl p-5 flex items-center gap-4">
+                        <Image src={users[0].avatar_url} alt={users[0].login} width={48} height={48} className="rounded-full ring-2 ring-[#30363d]" />
+                        <div>
+                          <p className="font-medium">{users[0].name || users[0].login}</p>
+                          <p className="text-sm text-[#8b949e]">Add more users to compare</p>
+                        </div>
+                      </div>
+                    );
+                    return null;
+                  })()}
+                </div>
+              )}
+            </div>
+
+            {/* Sidebar */}
+            <aside className="xl:col-span-4 space-y-4">
+              {/* Quick Stats Card */}
+              <div className="bg-[#161b22] border border-[#30363d] rounded-xl overflow-hidden">
+                <div className="px-4 py-3 border-b border-[#30363d]">
+                  <h3 className="text-sm font-semibold flex items-center gap-2">
+                    <svg className="w-4 h-4 text-[#f0883e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Quick Stats
+                  </h3>
+                </div>
+                <div className="p-4 grid grid-cols-2 gap-3">
+                  <div className="p-3 bg-[#0d1117] rounded-lg text-center">
+                    <p className="text-2xl font-bold text-[#58a6ff]">{cacheStats?.size || 0}</p>
+                    <p className="text-[10px] text-[#8b949e] mt-1">Profiles Cached</p>
+                  </div>
+                  <div className="p-3 bg-[#0d1117] rounded-lg text-center">
+                    <p className="text-2xl font-bold text-[#238636]">{cacheStats?.hit_rate || 0}%</p>
+                    <p className="text-[10px] text-[#8b949e] mt-1">Cache Speed</p>
+                  </div>
+                  <div className="p-3 bg-[#0d1117] rounded-lg text-center">
+                    <p className="text-2xl font-bold text-[#a371f7]">{totalSearches}</p>
+                    <p className="text-[10px] text-[#8b949e] mt-1">Searches</p>
+                  </div>
+                  <div className="p-3 bg-[#0d1117] rounded-lg text-center">
+                    <p className="text-2xl font-bold text-[#f0883e]">{(cacheStats?.hits || 0) + (cacheStats?.misses || 0)}</p>
+                    <p className="text-[10px] text-[#8b949e] mt-1">API Calls</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* About Card */}
+              <div className="bg-[#161b22] border border-[#30363d] rounded-xl p-4">
+                <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                  <svg className="w-4 h-4 text-[#8b949e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  About DevScope
+                </h3>
+                <p className="text-sm text-[#8b949e] leading-relaxed">
+                  Analyze GitHub profiles with detailed tech stack insights, activity streaks, and AI-powered comparisons using NVIDIA.
+                </p>
+                <div className="mt-4 pt-4 border-t border-[#30363d] space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-[#8b949e]">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" /></svg>
+                    Open Source
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-[#8b949e]">
+                    <svg className="w-4 h-4 text-[#238636]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    MIT License
+                  </div>
+                </div>
+              </div>
+
+              {/* Tech Stack */}
+              <div className="bg-[#161b22] border border-[#30363d] rounded-xl p-4">
+                <h3 className="text-sm font-semibold mb-3">Built With</h3>
+                <div className="flex flex-wrap gap-2">
+                  {[{ name: 'Go', color: '#00ADD8' }, { name: 'Next.js', color: '#fff' }, { name: 'TypeScript', color: '#3178c6' }, { name: 'NVIDIA AI', color: '#76b900' }, { name: 'Tailwind', color: '#38bdf8' }].map(tech => (
+                    <span key={tech.name} className="px-2.5 py-1 text-xs rounded-full border" style={{ borderColor: tech.color + '40', color: tech.color, backgroundColor: tech.color + '10' }}>{tech.name}</span>
+                  ))}
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </main>
+
+      <Footer />
     </div>
   );
 }

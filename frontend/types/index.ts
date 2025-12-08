@@ -17,6 +17,31 @@ export interface GitHubUser {
   public_gists: number;
 }
 
+export interface TechStack {
+  languages: Record<string, number>;
+  top_language: string;
+  total_repos: number;
+}
+
+export interface StreakInfo {
+  current_streak: number;
+  longest_streak: number;
+  total_days: number;
+  last_active: string;
+}
+
+export interface ExtendedUserInfo {
+  user: GitHubUser;
+  tech_stack: TechStack;
+  streak: StreakInfo;
+}
+
+export interface ExtendedUserResponse {
+  error: boolean;
+  data?: ExtendedUserInfo;
+  message?: string;
+}
+
 export interface APIResponse {
   error: boolean;
   message?: string;

@@ -7,10 +7,9 @@ import (
 	"time"
 )
 
-// CORSMiddleware adds CORS headers
+// CORSMiddleware adds CORS headers and request logging
 func CORSMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Log request
 		startTime := time.Now()
 		log.Printf("📥 [%s] %s %s from %s", time.Now().Format("15:04:05"), r.Method, r.URL.Path, r.RemoteAddr)
 
@@ -20,13 +19,11 @@ func CORSMiddleware(next http.HandlerFunc) http.HandlerFunc {
 
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
-			log.Printf("✅ [%s] OPTIONS preflight for %s - %v", time.Now().Format("15:04:05"), r.URL.Path, time.Since(startTime))
 			return
 		}
 
 		next(w, r)
 
-		// Log response
 		duration := time.Since(startTime)
 		log.Printf("📤 [%s] Response sent for %s - Duration: %v", time.Now().Format("15:04:05"), r.URL.Path, duration)
 	}

@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github-api/internal/cache"
-	"github-api/internal/config"
-	"github-api/internal/models"
-	"github-api/internal/service"
+	"github-api/backend/internal/cache"
+	"github-api/backend/internal/config"
+	"github-api/backend/internal/models"
+	"github-api/backend/internal/service"
 )
 
 // Server holds the application state
@@ -45,17 +45,14 @@ func (s *Server) HomeHandler(w http.ResponseWriter, r *http.Request) {
 			"Native Go performance",
 		},
 		"endpoints": map[string]string{
-			"GET /api/status/{username}": "Fetch GitHub status for a username",
-			"POST /api/status":           "Fetch GitHub status (JSON body)",
-			"POST /api/batch":            "Fetch status for multiple users",
-			"GET /api/health":            "Health check with cache stats",
-			"GET /api/cache/stats":       "Cache statistics",
-			"POST /api/cache/clear":      "Clear cache",
-		},
-		"performance_features": map[string]string{
-			"caching":          fmt.Sprintf("Enabled (TTL: %v, Max: %d)", s.config.CacheTTL, s.config.MaxCacheSize),
-			"concurrent_batch": fmt.Sprintf("Up to %d users simultaneously", s.config.MaxBatchSize),
-			"architecture":     "Clean separation of concerns",
+			"GET /api/status/{username}":      "Fetch GitHub status for a username",
+			"GET /api/user/{username}/extended": "Fetch extended user info with tech stack & streak",
+			"POST /api/status":                "Fetch GitHub status (JSON body)",
+			"POST /api/batch":                 "Fetch status for multiple users",
+			"POST /api/ai/compare":            "AI-powered user comparison",
+			"GET /api/health":                 "Health check with cache stats",
+			"GET /api/cache/stats":            "Cache statistics",
+			"POST /api/cache/clear":           "Clear cache",
 		},
 	}
 	writeJSON(w, http.StatusOK, response)
@@ -83,28 +80,20 @@ func (s *Server) CacheStatsHandler(w http.ResponseWriter, r *http.Request) {
 // CacheClearHandler clears the cache
 func (s *Server) CacheClearHandler(w http.ResponseWriter, r *http.Request) {
 	s.cache.Clear()
-	writeJSON(w, http.StatusOK, map[string]string{
-		"message": "Cache cleared successfully",
-	})
+	writeJSON(w, http.StatusOK, map[string]string{"message": "Cache cleared successfully"})
 }
 
 // GetStatusByPathHandler handles GET /api/status/{username}
 func (s *Server) GetStatusByPathHandler(w http.ResponseWriter, r *http.Request) {
-	// Extract username from path
 	path := strings.TrimPrefix(r.URL.Path, "/api/status/")
 	username := strings.TrimSpace(path)
 
 	if username == "" {
-		writeJSON(w, http.StatusBadRequest, models.APIResponse{
-			Error:   true,
-			Message: "Username cannot be empty",
-		})
+		writeJSON(w, http.StatusBadRequest, models.APIResponse{Error: true, Message: "Username cannot be empty"})
 		return
 	}
 
-	// Check for no_cache query parameter
 	useCache := r.URL.Query().Get("no_cache") != "true"
-
 	result, err := s.service.GetUserStatus(username, useCache)
 	if err != nil {
 		status := http.StatusInternalServerError
@@ -121,26 +110,18 @@ func (s *Server) GetStatusByPathHandler(w http.ResponseWriter, r *http.Request) 
 // GetStatusByBodyHandler handles POST /api/status
 func (s *Server) GetStatusByBodyHandler(w http.ResponseWriter, r *http.Request) {
 	var req models.UsernameRequest
-
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeJSON(w, http.StatusBadRequest, models.APIResponse{
-			Error:   true,
-			Message: "Invalid JSON body",
-		})
+		writeJSON(w, http.StatusBadRequest, models.APIResponse{Error: true, Message: "Invalid JSON body"})
 		return
 	}
 
 	username := strings.TrimSpace(req.Username)
 	if username == "" {
-		writeJSON(w, http.StatusBadRequest, models.APIResponse{
-			Error:   true,
-			Message: "Username cannot be empty",
-		})
+		writeJSON(w, http.StatusBadRequest, models.APIResponse{Error: true, Message: "Username cannot be empty"})
 		return
 	}
 
 	useCache := r.URL.Query().Get("no_cache") != "true"
-
 	result, err := s.service.GetUserStatus(username, useCache)
 	if err != nil {
 		status := http.StatusInternalServerError
@@ -157,20 +138,13 @@ func (s *Server) GetStatusByBodyHandler(w http.ResponseWriter, r *http.Request) 
 // BatchHandler handles POST /api/batch
 func (s *Server) BatchHandler(w http.ResponseWriter, r *http.Request) {
 	var req models.BatchRequest
-
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeJSON(w, http.StatusBadRequest, models.APIResponse{
-			Error:   true,
-			Message: "Invalid JSON body",
-		})
+		writeJSON(w, http.StatusBadRequest, models.APIResponse{Error: true, Message: "Invalid JSON body"})
 		return
 	}
 
 	if len(req.Usernames) == 0 {
-		writeJSON(w, http.StatusBadRequest, models.APIResponse{
-			Error:   true,
-			Message: "Usernames array cannot be empty",
-		})
+		writeJSON(w, http.StatusBadRequest, models.APIResponse{Error: true, Message: "Usernames array cannot be empty"})
 		return
 	}
 
@@ -184,6 +158,31 @@ func (s *Server) BatchHandler(w http.ResponseWriter, r *http.Request) {
 
 	result := s.service.GetBatchStatus(req.Usernames)
 	writeJSON(w, http.StatusOK, result)
+}
+
+// GetExtendedUserHandler handles GET /api/user/{username}/extended
+func (s *Server) GetExtendedUserHandler(w http.ResponseWriter, r *http.Request) {
+	path := strings.TrimPrefix(r.URL.Path, "/api/user/")
+	path = strings.TrimSuffix(path, "/extended")
+	username := strings.TrimSpace(path)
+
+	if username == "" {
+		writeJSON(w, http.StatusBadRequest, models.APIResponse{Error: true, Message: "Username cannot be empty"})
+		return
+	}
+
+	useCache := r.URL.Query().Get("no_cache") != "true"
+	result, err := s.service.GetExtendedUserInfo(username, useCache)
+	if err != nil {
+		status := http.StatusInternalServerError
+		if strings.Contains(err.Error(), "404") {
+			status = http.StatusNotFound
+		}
+		writeJSON(w, status, models.APIResponse{Error: true, Message: err.Error()})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]interface{}{"error": false, "data": result})
 }
 
 // writeJSON writes JSON response

@@ -8,18 +8,22 @@ import (
 	"net/http"
 	"strings"
 
-	"github-api/internal/cache"
-	"github-api/internal/config"
-	"github-api/internal/handlers"
-	"github-api/internal/service"
+	"github-api/backend/internal/cache"
+	"github-api/backend/internal/config"
+	"github-api/backend/internal/handlers"
+	"github-api/backend/internal/service"
 
 	"github.com/joho/godotenv"
 )
 
 func main() {
-	// Load .env file
+	// Load .env file - try multiple locations
 	if err := godotenv.Load(); err != nil {
-		log.Println("⚠️  No .env file found, using system environment variables")
+		if err := godotenv.Load("../.env"); err != nil {
+			if err := godotenv.Load("../../.env"); err != nil {
+				log.Println("⚠️  No .env file found, using system environment variables")
+			}
+		}
 	}
 
 	// Load configuration
@@ -61,6 +65,7 @@ func main() {
 			http.NotFound(w, r)
 		}
 	}))
+	http.HandleFunc("/api/user/", handlers.CORSMiddleware(server.GetExtendedUserHandler))
 
 	// Print startup info
 	fmt.Println("=" + strings.Repeat("=", 69))
@@ -76,14 +81,6 @@ func main() {
 	} else {
 		fmt.Printf("⚠️  AI: NVIDIA API key not configured\n")
 	}
-	fmt.Println("=" + strings.Repeat("=", 69))
-	fmt.Printf("\nPackage Structure:\n")
-	fmt.Println("  internal/")
-	fmt.Println("    ├── config/    - Application configuration")
-	fmt.Println("    ├── models/    - Data structures")
-	fmt.Println("    ├── cache/     - LRU cache with TTL")
-	fmt.Println("    ├── service/   - Business logic")
-	fmt.Println("    └── handlers/  - HTTP handlers & AI")
 	fmt.Println("=" + strings.Repeat("=", 69))
 	fmt.Printf("\nStarting server on port %s...\n", cfg.ServerPort)
 

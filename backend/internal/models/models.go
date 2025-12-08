@@ -20,6 +20,44 @@ type GitHubUser struct {
 	PublicGists     int    `json:"public_gists"`
 }
 
+// GitHubRepo represents a GitHub repository
+type GitHubRepo struct {
+	Name        string `json:"name"`
+	Language    string `json:"language"`
+	Stars       int    `json:"stargazers_count"`
+	Forks       int    `json:"forks_count"`
+	Description string `json:"description"`
+	UpdatedAt   string `json:"updated_at"`
+}
+
+// GitHubEvent represents a GitHub event for streak calculation
+type GitHubEvent struct {
+	Type      string `json:"type"`
+	CreatedAt string `json:"created_at"`
+}
+
+// TechStack represents language statistics
+type TechStack struct {
+	Languages   map[string]int `json:"languages"`
+	TopLanguage string         `json:"top_language"`
+	TotalRepos  int            `json:"total_repos"`
+}
+
+// StreakInfo represents contribution streak data
+type StreakInfo struct {
+	CurrentStreak int    `json:"current_streak"`
+	LongestStreak int    `json:"longest_streak"`
+	TotalDays     int    `json:"total_days"`
+	LastActive    string `json:"last_active"`
+}
+
+// UserExtendedInfo represents extended user information
+type UserExtendedInfo struct {
+	User      *GitHubUser `json:"user"`
+	TechStack *TechStack  `json:"tech_stack"`
+	Streak    *StreakInfo `json:"streak"`
+}
+
 // APIResponse represents a standard API response
 type APIResponse struct {
 	Error   bool        `json:"error"`
