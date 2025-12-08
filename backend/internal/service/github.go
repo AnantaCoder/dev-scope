@@ -36,6 +36,14 @@ func NewGitHubService(cfg *config.Config, c *cache.Cache) *GitHubService {
 	}
 }
 
+// setAuthHeaders adds authentication headers to request
+func (s *GitHubService) setAuthHeaders(req *http.Request) {
+	req.Header.Set("User-Agent", "DevScope-API")
+	if s.config.GitHubToken != "" {
+		req.Header.Set("Authorization", "Bearer "+s.config.GitHubToken)
+	}
+}
+
 // FetchUser fetches GitHub user information from API
 func (s *GitHubService) FetchUser(username string) (*models.GitHubUser, error) {
 	url := s.config.GitHubAPIURL + username
@@ -45,7 +53,7 @@ func (s *GitHubService) FetchUser(username string) (*models.GitHubUser, error) {
 		return nil, fmt.Errorf("error creating request: %v", err)
 	}
 
-	req.Header.Set("User-Agent", "GitHub-Status-API-Go")
+	s.setAuthHeaders(req)
 
 	resp, err := s.httpClient.Do(req)
 	if err != nil {
@@ -138,7 +146,7 @@ func (s *GitHubService) FetchUserRepos(username string) ([]models.GitHubRepo, er
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %v", err)
 	}
-	req.Header.Set("User-Agent", "GitHub-Status-API-Go")
+	s.setAuthHeaders(req)
 
 	resp, err := s.httpClient.Do(req)
 	if err != nil {
@@ -171,7 +179,7 @@ func (s *GitHubService) FetchUserEvents(username string) ([]models.GitHubEvent, 
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %v", err)
 	}
-	req.Header.Set("User-Agent", "GitHub-Status-API-Go")
+	s.setAuthHeaders(req)
 
 	resp, err := s.httpClient.Do(req)
 	if err != nil {

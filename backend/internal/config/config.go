@@ -15,6 +15,7 @@ type Config struct {
 	GitHubAPIURL string
 	Timeout      time.Duration
 	NvidiaAPIKey string
+	GitHubToken  string
 }
 
 // Default returns default configuration
@@ -27,5 +28,6 @@ func Default() *Config {
 		GitHubAPIURL: "https://api.github.com/users/",
 		Timeout:      10 * time.Second,
 		NvidiaAPIKey: os.Getenv("NVIDIA_API_KEY"),
+		GitHubToken:  os.Getenv("GITHUB_TOKEN"),
 	}
 }
