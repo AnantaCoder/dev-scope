@@ -173,7 +173,7 @@ export function NotificationBell() {
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-[#161b22] border border-[#30363d] rounded-xl shadow-xl z-50 overflow-hidden">
+                <div className="fixed sm:absolute inset-x-2 sm:inset-x-auto sm:right-0 top-16 sm:top-auto sm:mt-2 w-auto sm:w-96 max-w-[calc(100vw-1rem)] bg-[#161b22] border border-[#30363d] rounded-xl shadow-xl z-50 overflow-hidden">
                     <div className="px-4 py-3 border-b border-[#30363d] bg-gradient-to-r from-[#58a6ff]/5 to-transparent flex items-center justify-between">
                         <h3 className="text-sm font-semibold text-[#e6edf3] flex items-center gap-2">
                             <svg className="w-4 h-4 text-[#58a6ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -186,7 +186,7 @@ export function NotificationBell() {
                         )}
                     </div>
 
-                    <div className="max-h-[400px] overflow-y-auto">
+                    <div className="max-h-[60vh] sm:max-h-[400px] overflow-y-auto">
                         {loading ? (
                             <div className="p-8 text-center">
                                 <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#58a6ff]"></div>

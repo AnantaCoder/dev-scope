@@ -21,11 +21,11 @@ export const BackendErrorBanner: React.FC<BackendErrorBannerProps> = ({ onRetry 
                     <div className="bg-black/50 rounded-lg p-4 font-mono text-sm">
                         <p className="text-gray-400 mb-2">To start the backend server:</p>
                         <code className="text-green-400">
-                            cd d:\Anantacoder_python\R1<br />
-                            .\github-api.exe
+                            cd d:\dev-scope\R1<br />
+                            .\backend\cmd\go run main.go
                         </code>
                         <p className="text-gray-400 mt-3 text-xs">
-                            The server will automatically load NVIDIA API key from .env file
+                            The server will automatically load all API keys from the  .env file
                         </p>
                     </div>
                     <button
