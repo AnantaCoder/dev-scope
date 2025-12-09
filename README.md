@@ -10,7 +10,7 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 <p align="center">
-  <img src="public/logo.svg" alt="DevScope Logo" width="120" />
+  <img src="frontend/public/logo.svg" alt="DevScope Logo" width="120" />
 </p>
 
 **DevScope** is a full-stack GitHub analytics platform that provides deep insights into developer profiles, real-time performance metrics, and AI-powered comparisons. Built with modern technologies for speed, scalability, and an exceptional user experience.
@@ -113,116 +113,86 @@
 
 ---
 
-### 🚧 Recommended Features for Community Growth
+### 🚧 Upcoming Features
 
-#### 🔐 **User Authentication & Personalization**
+#### 🔐 Enhanced Security
 
-- [ ] GitHub OAuth integration for secure login
-- [ ] Personal dashboards with saved searches
-- [ ] User preferences and custom themes
-- [ ] Watchlists for tracking favorite developers
-- [ ] Email notifications for tracked users
+- [ ] Two-factor authentication support
+- [ ] API key management for programmatic access
+- [ ] Session management dashboard
+- [ ] IP-based login alerts
 
-#### 📈 **Advanced Analytics**
+#### 📊 Advanced Analytics
 
-- [ ] Historical data tracking and trends over time
-- [ ] Repository deep-dive analysis with commit patterns
-- [ ] Pull request and issue statistics
-- [ ] Code quality metrics integration
-- [ ] Language proficiency scoring
+- [ ] Historical data tracking and trends
 - [ ] Contribution heatmaps and calendars
+- [ ] Repository deep-dive analysis
+- [ ] Code quality metrics integration
 
-#### 🌐 **Social Features**
+#### 🌐 Social Features
 
 - [ ] Public profile sharing with custom URLs
-- [ ] Community leaderboards and rankings
 - [ ] Developer badges and achievements
-- [ ] Comparison sharing on social media
-- [ ] Follow/unfollow developers feature
-- [ ] Comments and discussions on profiles
+- [ ] Follow/unfollow developers
+- [ ] Activity feed
 
-#### 🔔 **Notifications & Alerts**
-
-- [ ] Real-time updates when tracked users make contributions
-- [ ] Daily/weekly digest emails
-- [ ] Webhook support for external integrations
-- [ ] Browser push notifications
-- [ ] Custom alert rules and triggers
-
-#### 📊 **Data Export & Reporting**
+#### 📈 Data & Reporting
 
 - [ ] Export analytics to PDF/CSV
 - [ ] Custom report generation
-- [ ] API data export for research
 - [ ] Scheduled report delivery
-- [ ] Data visualization library integration
+- [ ] Data visualization improvements
 
-#### 🤝 **Team & Organization Features**
+#### 🔔 Notifications & Alerts
 
-- [ ] Organization analytics and team insights
-- [ ] Multi-user team comparisons
-- [ ] Recruitment tools and candidate scoring
-- [ ] Team performance dashboards
+- [ ] Email notifications for tracked users
+- [ ] Browser push notifications
+- [ ] Webhook support for integrations
+- [ ] Custom alert rules
+
+#### 🤝 Team Features
+
+- [ ] Organization analytics
+- [ ] Team comparisons
 - [ ] Private team workspaces
+- [ ] Recruitment tools
 
-#### 🎯 **Developer Tools**
+#### 🛠️ Developer Tools
 
 - [ ] Public REST API with API keys
-- [ ] GraphQL endpoint for flexible queries
-- [ ] SDK/Client libraries (Python, JavaScript, Go)
+- [ ] GraphQL endpoint
+- [ ] SDK libraries (Python, JavaScript, Go)
 - [ ] CLI tool for terminal users
-- [ ] Browser extension for quick lookups
-- [ ] VS Code extension integration
+- [ ] VS Code extension
 
-#### 🌍 **Internationalization**
+#### 📱 Mobile Experience
 
-- [ ] Multi-language support (i18n)
-- [ ] Localized date/time formats
-- [ ] Currency conversion for sponsorships
-- [ ] RTL language support
-
-#### 🔍 **Search & Discovery**
-
-- [ ] Advanced search with filters
-- [ ] Trending developers discovery
-- [ ] Topic-based developer recommendations
-- [ ] Similar developer suggestions
-- [ ] Repository search integration
-
-#### 📱 **Mobile Experience**
-
-- [ ] Native mobile apps (iOS/Android)
-- [ ] Progressive Web App (PWA) support
+- [ ] Progressive Web App (PWA)
 - [ ] Offline mode with cached data
 - [ ] Touch-optimized interactions
 - [ ] Mobile push notifications
 
-#### 🧪 **Testing & Quality**
+#### 🌍 Internationalization
 
-- [ ] Unit tests with 80%+ coverage
-- [ ] Integration tests for API endpoints
-- [ ] E2E tests with Playwright/Cypress
-- [ ] Performance benchmarking suite
-- [ ] Automated accessibility testing
+- [ ] Multi-language support (i18n)
+- [ ] Localized date/time formats
+- [ ] RTL language support
 
-#### 🚀 **DevOps & Infrastructure**
+#### 🔍 Search & Discovery
 
-- [ ] Docker containerization
-- [ ] Kubernetes deployment configs
-- [ ] CI/CD pipelines (GitHub Actions)
-- [ ] Monitoring with Prometheus/Grafana
-- [ ] Log aggregation with ELK stack
-- [ ] Auto-scaling configuration
-- [ ] CDN integration for global performance
+- [ ] Advanced search with filters
+- [ ] Trending developers discovery
+- [ ] Similar developer recommendations
+- [ ] Topic-based suggestions
 
-#### 🎨 **UI Enhancements**
+#### 🎨 UI Enhancements
 
 - [ ] Theme customization (light/dark/custom)
-- [ ] Interactive data visualizations (D3.js/Recharts)
-- [ ] Drag-and-drop dashboard builder
+- [ ] Interactive data visualizations
 - [ ] Keyboard shortcuts panel
-- [ ] Accessibility mode toggle
 - [ ] Print-friendly views
+
+> **Note**: See [UPCOMING.md](UPCOMING.md) for detailed roadmap and recently completed features.
 
 ---
 
@@ -230,9 +200,19 @@
 
 ### Prerequisites
 
+#### Option A: Using Docker (Recommended)
+
+- **Docker Desktop** - [Download Docker](https://www.docker.com/products/docker-desktop/)
+- **Docker Compose** - Included with Docker Desktop
+
+#### Option B: Manual Setup
+
 - **Go 1.24.2+** - [Download Go](https://go.dev/dl/)
 - **Node.js 20+** - [Download Node.js](https://nodejs.org/)
 - **npm or yarn** - Package manager
+
+#### Common (Both Options)
+
 - **GitHub Token** (optional) - For higher API rate limits
 - **NVIDIA API Key** (optional) - For AI-powered comparisons
 
@@ -278,7 +258,26 @@ MAX_CACHE_SIZE=1000
 
 </details>
 
-### 3️⃣ Start the Backend
+### 3️⃣ Start the Application
+
+#### Option A: Using Docker (Recommended)
+
+```bash
+docker-compose up --build
+```
+
+**Expected Output:**
+
+```
+✅ Backend running on http://localhost:8000
+✅ Frontend running on http://localhost:3000
+```
+
+That's it! Both services will start automatically. Skip to step 5.
+
+#### Option B: Manual Setup
+
+**Start the Backend:**
 
 ```bash
 cd backend
@@ -302,7 +301,7 @@ go build -o github-api.exe ./cmd/main.go
 =======================================================================
 ```
 
-### 4️⃣ Start the Frontend
+**Start the Frontend:**
 
 ```bash
 cd frontend
@@ -318,7 +317,7 @@ npm run dev
 - Ready in 2.1s
 ```
 
-### 5️⃣ Access the Application
+### 4️⃣ Access the Application
 
 Open your browser and navigate to:
 
@@ -406,6 +405,8 @@ dev-scope/
 
 #### Infrastructure
 
+- **Containerization**: Docker & Docker Compose
+- **Database**: PostgreSQL (Neon)
 - **Cache**: In-memory LRU with TTL (thread-safe)
 - **Rate Limiting**: Token bucket algorithm
 - **CORS**: Configurable cross-origin support
