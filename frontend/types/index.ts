@@ -38,6 +38,9 @@ export interface ExtendedUserInfo {
 
 export interface ExtendedUserResponse {
   error: boolean;
+  user?: GitHubUser;
+  tech_stack?: TechStack;
+  streak?: StreakInfo;
   data?: ExtendedUserInfo;
   message?: string;
 }

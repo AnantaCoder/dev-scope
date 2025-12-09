@@ -4,8 +4,6 @@ import { RankingsTable } from "@/components/RankingsTable";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
-import Image from "next/image";
-import Link from "next/link";
 
 export default function RankingsPage() {
     const { loading, login, isAuthenticated } = useAuth();
@@ -24,17 +22,17 @@ export default function RankingsPage() {
             {/* Main Content */}
             <main className="flex-1 max-w-[1400px] mx-auto px-4 lg:px-8 py-8 w-full relative z-10">
                 {/* Page Header */}
-                <div className="mb-8">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="p-3 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-xl backdrop-blur-sm">
-                            <svg className="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                            </svg>
+                <div className="mb-12">
+                    <div className="flex flex-col items-center text-center mb-8">
+                        <div className="inline-flex items-center gap-3 mb-4">
+                            <div className="p-3 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-xl backdrop-blur-sm">
+                                <svg className="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                                </svg>
+                            </div>
+                            <h1 className="text-4xl md:text-5xl font-bold tracking-tight gradient-text-premium">Global Rankings</h1>
                         </div>
-                        <div>
-                            <h1 className="text-3xl font-bold tracking-tight gradient-text-premium">Developer Rankings</h1>
-                            <p className="text-gray-400 mt-1">Top GitHub developers ranked by comprehensive score</p>
-                        </div>
+                        <p className="text-gray-400 text-lg max-w-2xl">Top GitHub developers ranked by comprehensive performance metrics</p>
                     </div>
 
                     {/* Info Cards */}

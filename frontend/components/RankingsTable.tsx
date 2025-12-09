@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { api } from "@/lib/api";
 import Image from "next/image";
@@ -45,13 +45,8 @@ function calculateScoreBreakdown(ranking: UserRanking) {
 
 function ScoreTooltip({ ranking, show, anchorRect }: { ranking: UserRanking; show: boolean; anchorRect: DOMRect | null }) {
   const breakdown = calculateScoreBreakdown(ranking);
-  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted || !show || !anchorRect) return null;
+  if (!show || !anchorRect) return null;
 
   // Calculate position - show below if near top of viewport, otherwise above
   const tooltipHeight = 280;
@@ -162,11 +157,7 @@ export function RankingsTable() {
   const [total, setTotal] = useState(0);
   const pageSize = 20;
 
-  useEffect(() => {
-    fetchRankings();
-  }, [page]);
-
-  const fetchRankings = async () => {
+  const fetchRankings = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
@@ -183,7 +174,11 @@ export function RankingsTable() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, pageSize]);
+
+  useEffect(() => {
+    fetchRankings();
+  }, [fetchRankings]);
 
   const totalPages = Math.ceil(total / pageSize);
 
@@ -241,66 +236,69 @@ export function RankingsTable() {
     <div className="space-y-8">
       {/* Top 3 Podium - Only show on first page */}
       {page === 1 && top3.length > 0 && (
-        <div className="py-8">
+        <div className="py-12">
           {/* Crown Icon */}
-          <div className="flex justify-center mb-6">
-            <svg className="w-14 h-14 text-[#ffd700]" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z" />
-            </svg>
+          <div className="flex justify-center mb-8">
+            <div className="relative">
+              <div className="absolute inset-0 blur-xl bg-[#ffd700] opacity-50 animate-pulse-glow"></div>
+              <svg className="w-16 h-16 text-[#ffd700] relative z-10 drop-shadow-[0_0_15px_rgba(255,215,0,0.5)]" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z" />
+              </svg>
+            </div>
           </div>
 
           {/* Podium */}
-          <div className="flex items-end justify-center gap-6 mt-4">
+          <div className="flex items-end justify-center gap-8 mt-8">
             {/* 2nd Place - Left */}
             {secondPlace && (
               <Link href={`/profile/${secondPlace.username}`} className="flex flex-col items-center group">
-                <div className="relative mb-2">
-                  <div className="w-20 h-20 rounded-full overflow-hidden ring-4 ring-gray-500 group-hover:ring-blue-500 transition-all">
+                <div className="relative mb-6">
+                  <div className="w-24 h-24 rounded-full overflow-hidden ring-4 ring-[#C0C0C0] group-hover:ring-blue-500 transition-all shadow-xl shadow-gray-500/20">
                     <Image
                       src={secondPlace.avatar_url}
                       alt={secondPlace.username}
-                      width={80}
-                      height={80}
-                      className="object-cover"
-                      unoptimized
-                    />
-                  </div>
-                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-[#21262d] border border-[#8b949e] text-[#8b949e] text-xs font-bold px-2 py-0.5 rounded-full">
-                    #2 Silver
-                  </div>
-                </div>
-                <p className="text-[#e6edf3] font-semibold text-sm mt-3 group-hover:text-[#58a6ff] transition-colors">{secondPlace.username}</p>
-                <p className="text-[#8b949e] text-xs font-bold">{formatScore(secondPlace.score)} pts</p>
-                {/* Silver Podium */}
-                <div className="w-28 h-32 mt-3 bg-gradient-to-b from-[#30363d] to-[#21262d] border border-[#484f58] rounded-t-lg flex items-end justify-center pb-4">
-                  <span className="text-4xl font-bold text-[#8b949e]/50">2</span>
-                </div>
-              </Link>
-            )}
-
-            {/* 1st Place - Center */}
-            {firstPlace && (
-              <Link href={`/profile/${firstPlace.username}`} className="flex flex-col items-center group -mt-8">
-                <div className="relative mb-2">
-                  <div className="w-24 h-24 rounded-full overflow-hidden ring-4 ring-yellow-500 group-hover:ring-blue-500 transition-all shadow-lg shadow-yellow-500/30">
-                    <Image
-                      src={firstPlace.avatar_url}
-                      alt={firstPlace.username}
                       width={96}
                       height={96}
                       className="object-cover"
                       unoptimized
                     />
                   </div>
-                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-[#21262d] border border-[#ffd700] text-[#ffd700] text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
-                    #1 Champion
+                  <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#C0C0C0] to-[#A8A8A8] text-black text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap shadow-lg">
+                    🥈 Silver
                   </div>
                 </div>
-                <p className="text-[#e6edf3] font-bold text-base mt-3 group-hover:text-[#58a6ff] transition-colors">{firstPlace.username}</p>
-                <p className="text-[#ffd700] text-sm font-bold">{formatScore(firstPlace.score)} pts</p>
+                <p className="text-[#e6edf3] font-bold text-base mt-2 group-hover:text-[#58a6ff] transition-colors">{secondPlace.username}</p>
+                <p className="text-[#C0C0C0] text-sm font-bold">{formatScore(secondPlace.score)} pts</p>
+                {/* Silver Podium */}
+                <div className="w-32 h-36 mt-4 bg-gradient-to-b from-[#C0C0C0]/10 to-[#21262d] border-2 border-[#C0C0C0]/50 rounded-t-2xl flex items-end justify-center pb-6 shadow-2xl shadow-gray-500/20">
+                  <span className="text-5xl font-bold text-[#C0C0C0]/40">2</span>
+                </div>
+              </Link>
+            )}
+
+            {/* 1st Place - Center */}
+            {firstPlace && (
+              <Link href={`/profile/${firstPlace.username}`} className="flex flex-col items-center group -mt-12">
+                <div className="relative mb-6">
+                  <div className="w-28 h-28 rounded-full overflow-hidden ring-4 ring-[#FFD700] group-hover:ring-blue-500 transition-all shadow-2xl shadow-yellow-500/40 animate-pulse-slow">
+                    <Image
+                      src={firstPlace.avatar_url}
+                      alt={firstPlace.username}
+                      width={112}
+                      height={112}
+                      className="object-cover"
+                      unoptimized
+                    />
+                  </div>
+                  <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#FFD700] to-[#FFA500] text-black text-sm font-bold px-4 py-1.5 rounded-full whitespace-nowrap shadow-xl animate-pulse-slow">
+                    👑 Champion
+                  </div>
+                </div>
+                <p className="text-[#e6edf3] font-bold text-lg mt-2 group-hover:text-[#58a6ff] transition-colors">{firstPlace.username}</p>
+                <p className="text-[#FFD700] text-base font-bold">{formatScore(firstPlace.score)} pts</p>
                 {/* Gold Podium */}
-                <div className="w-32 h-44 mt-3 bg-gradient-to-b from-[#3d3d00] to-[#21262d] border border-[#ffd700]/50 rounded-t-lg flex items-end justify-center pb-4">
-                  <span className="text-5xl font-bold text-[#ffd700]/30">1</span>
+                <div className="w-36 h-52 mt-4 bg-gradient-to-b from-[#FFD700]/15 to-[#21262d] border-2 border-[#FFD700]/60 rounded-t-2xl flex items-end justify-center pb-8 shadow-2xl shadow-yellow-500/30">
+                  <span className="text-6xl font-bold text-[#FFD700]/40">1</span>
                 </div>
               </Link>
             )}
@@ -308,26 +306,26 @@ export function RankingsTable() {
             {/* 3rd Place - Right */}
             {thirdPlace && (
               <Link href={`/profile/${thirdPlace.username}`} className="flex flex-col items-center group">
-                <div className="relative mb-2">
-                  <div className="w-20 h-20 rounded-full overflow-hidden ring-4 ring-orange-600 group-hover:ring-blue-500 transition-all">
+                <div className="relative mb-6">
+                  <div className="w-24 h-24 rounded-full overflow-hidden ring-4 ring-[#CD7F32] group-hover:ring-blue-500 transition-all shadow-xl shadow-orange-800/20">
                     <Image
                       src={thirdPlace.avatar_url}
                       alt={thirdPlace.username}
-                      width={80}
-                      height={80}
+                      width={96}
+                      height={96}
                       className="object-cover"
                       unoptimized
                     />
                   </div>
-                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-[#21262d] border border-[#cd7f32] text-[#cd7f32] text-xs font-bold px-2 py-0.5 rounded-full">
-                    #3 Bronze
+                  <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#CD7F32] to-[#B87333] text-black text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap shadow-lg">
+                    🥉 Bronze
                   </div>
                 </div>
-                <p className="text-[#e6edf3] font-semibold text-sm mt-3 group-hover:text-[#58a6ff] transition-colors">{thirdPlace.username}</p>
-                <p className="text-[#cd7f32] text-xs font-bold">{formatScore(thirdPlace.score)} pts</p>
+                <p className="text-[#e6edf3] font-bold text-base mt-2 group-hover:text-[#58a6ff] transition-colors">{thirdPlace.username}</p>
+                <p className="text-[#CD7F32] text-sm font-bold">{formatScore(thirdPlace.score)} pts</p>
                 {/* Bronze Podium */}
-                <div className="w-28 h-24 mt-3 bg-gradient-to-b from-[#3d2a1a] to-[#21262d] border border-[#cd7f32]/50 rounded-t-lg flex items-end justify-center pb-4">
-                  <span className="text-4xl font-bold text-[#cd7f32]/30">3</span>
+                <div className="w-32 h-28 mt-4 bg-gradient-to-b from-[#CD7F32]/10 to-[#21262d] border-2 border-[#CD7F32]/50 rounded-t-2xl flex items-end justify-center pb-6 shadow-2xl shadow-orange-800/20">
+                  <span className="text-5xl font-bold text-[#CD7F32]/40">3</span>
                 </div>
               </Link>
             )}

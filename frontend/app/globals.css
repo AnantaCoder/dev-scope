@@ -54,6 +54,10 @@ body {
   box-shadow: 0 0 40px -10px rgba(16, 185, 129, 0.5);
 }
 
+.glow-orange {
+  box-shadow: 0 0 40px -10px rgba(251, 146, 60, 0.5);
+}
+
 /* Grid Pattern */
 .grid-pattern {
   background-image:
@@ -68,6 +72,15 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.gradient-text-premium {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 30%, #FFD700 60%, #FFF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s ease-in-out infinite;
+  background-size: 200% auto;
 }
 
 /* Animations */
@@ -117,6 +130,20 @@ body {
   }
 }
 
+@keyframes pulse-slow {
+
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
+  }
+
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px 10px rgba(255, 215, 0, 0.3);
+  }
+}
+
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
@@ -141,6 +168,10 @@ body {
 
 .animate-pulse-glow {
   animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 2s ease-in-out infinite;
 }
 
 .animate-shimmer {

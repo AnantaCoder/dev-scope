@@ -46,8 +46,8 @@ export default function Home() {
         setError(result.message || "User not found");
       } else if (result.user) {
         setSingleUser(result.user);
-        setTechStack(result.tech_stack);
-        setStreak(result.streak);
+        setTechStack(result.tech_stack || null);
+        setStreak(result.streak || null);
         fetchCacheStats();
       }
     } catch (err: any) {

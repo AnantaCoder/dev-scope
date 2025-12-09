@@ -370,28 +370,20 @@ func (h *AuthHandler) NotificationsHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// Get the user's access token from session
-	cookie, err := r.Cookie("session_token")
-	if err != nil {
-		writeJSON(w, http.StatusUnauthorized, map[string]interface{}{
-			"error":   true,
-			"message": "No session found",
-		})
-		return
-	}
-
+	// Get the user's access token
 	ctx := r.Context()
-	session, err := h.authService.GetSession(ctx, cookie.Value)
-	if err != nil || session == nil {
+	// Get user with access token
+	userWithToken, err := h.authService.GetUserWithToken(ctx, user.ID)
+	if err != nil || userWithToken == nil {
 		writeJSON(w, http.StatusUnauthorized, map[string]interface{}{
 			"error":   true,
-			"message": "Invalid session",
+			"message": "Unable to retrieve access token",
 		})
 		return
 	}
 
 	// Fetch notifications from GitHub API
-	notifications, err := h.fetchGitHubNotifications(session.AccessToken)
+	notifications, err := h.fetchGitHubNotifications(userWithToken.AccessToken)
 	if err != nil {
 		log.Printf("❌ [Notifications] Failed to fetch for user %s: %v", user.Username, err)
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
@@ -473,6 +465,15 @@ func (h *AuthHandler) MarkNotificationReadHandler(w http.ResponseWriter, r *http
 		return
 	}
 
+	user, ok := r.Context().Value("user").(*models.User)
+	if !ok {
+		writeJSON(w, http.StatusUnauthorized, map[string]interface{}{
+			"error":   true,
+			"message": "Unauthorized",
+		})
+		return
+	}
+
 	// Extract notification ID from path
 	path := r.URL.Path
 	// Path format: /api/notifications/{id}/read
@@ -486,22 +487,13 @@ func (h *AuthHandler) MarkNotificationReadHandler(w http.ResponseWriter, r *http
 	}
 	notificationID := parts[2]
 
-	// Get user session
-	cookie, err := r.Cookie("session_token")
-	if err != nil {
-		writeJSON(w, http.StatusUnauthorized, map[string]interface{}{
-			"error":   true,
-			"message": "No session found",
-		})
-		return
-	}
-
 	ctx := r.Context()
-	session, err := h.authService.GetSession(ctx, cookie.Value)
-	if err != nil || session == nil {
+	// Get user with access token
+	userWithToken, err := h.authService.GetUserWithToken(ctx, user.ID)
+	if err != nil || userWithToken == nil {
 		writeJSON(w, http.StatusUnauthorized, map[string]interface{}{
 			"error":   true,
-			"message": "Invalid session",
+			"message": "Unable to retrieve access token",
 		})
 		return
 	}
@@ -516,7 +508,7 @@ func (h *AuthHandler) MarkNotificationReadHandler(w http.ResponseWriter, r *http
 		return
 	}
 
-	req.Header.Set("Authorization", "Bearer "+session.AccessToken)
+	req.Header.Set("Authorization", "Bearer "+userWithToken.AccessToken)
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
 	req.Header.Set("User-Agent", "DevScope-App")
 
