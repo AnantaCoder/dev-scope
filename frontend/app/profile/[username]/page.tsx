@@ -26,11 +26,23 @@ interface UserRanking {
 }
 
 interface PrivateData {
+    private_repos: number;
     total_private_repos: number;
     owned_private_repos: number;
     private_gists: number;
     disk_usage: number;
     collaborators: number;
+    two_factor_enabled: boolean;
+    plan_name: string;
+    plan_space: number;
+    primary_email: string;
+    emails_count: number;
+    verified_emails_count: number;
+    organizations_count: number;
+    starred_repos_count: number;
+    watching_repos_count: number;
+    ssh_keys_count: number;
+    gpg_keys_count: number;
 }
 
 export default function ProfilePage() {
@@ -90,37 +102,42 @@ export default function ProfilePage() {
         fetchData();
     }, [username]);
 
-    // Fetch private data separately when auth is ready
+    // Fetch private data separately when auth is ready (SECURE: only fetches own data)
     useEffect(() => {
         const fetchPrivate = async () => {
-            // Debug logging
-            console.log("Private data fetch check:", {
-                authLoading,
-                isAuthenticated,
-                authUsername: authUser?.username,
-                pageUsername: username,
-                shouldFetch: !authLoading && isAuthenticated && authUser?.username === username
-            });
-
-            if (authLoading || !isAuthenticated || authUser?.username !== username) return;
+            // Only fetch private data for the authenticated user's own profile
+            // The backend endpoint /api/me/private ONLY returns the authenticated user's data
+            // This ensures users can NEVER access other users' private data
+            if (authLoading || !isAuthenticated || authUser?.username !== username) {
+                return;
+            }
 
             try {
-                console.log("Fetching private data...");
-                const fullData = await api.getFullUserData();
-                console.log("Full data response:", fullData);
+                console.log("Fetching private data for own profile...");
+                // Use the secure endpoint that only returns authenticated user's own data
+                const result = await api.getMyPrivateData();
+                console.log("Private data response:", result);
 
-                if (!fullData.error && fullData.data) {
-                    const newPrivateData = {
-                        total_private_repos: fullData.data.total_private_repos || 0,
-                        owned_private_repos: fullData.data.owned_private_repos || 0,
-                        private_gists: fullData.data.private_gists || 0,
-                        disk_usage: fullData.data.disk_usage || 0,
-                        collaborators: fullData.data.collaborators || 0,
-                    };
-                    console.log("Setting private data:", newPrivateData);
-                    setPrivateData(newPrivateData);
-                } else {
-                    console.log("No data in response or error:", fullData);
+                if (!result.error && result.data) {
+                    setPrivateData({
+                        private_repos: result.data.private_repos || 0,
+                        total_private_repos: result.data.total_private_repos || 0,
+                        owned_private_repos: result.data.owned_private_repos || 0,
+                        private_gists: result.data.private_gists || 0,
+                        disk_usage: result.data.disk_usage || 0,
+                        collaborators: result.data.collaborators || 0,
+                        two_factor_enabled: result.data.two_factor_enabled || false,
+                        plan_name: result.data.plan_name || "Free",
+                        plan_space: result.data.plan_space || 0,
+                        primary_email: result.data.primary_email || "",
+                        emails_count: result.data.emails_count || 0,
+                        verified_emails_count: result.data.verified_emails_count || 0,
+                        organizations_count: result.data.organizations_count || 0,
+                        starred_repos_count: result.data.starred_repos_count || 0,
+                        watching_repos_count: result.data.watching_repos_count || 0,
+                        ssh_keys_count: result.data.ssh_keys_count || 0,
+                        gpg_keys_count: result.data.gpg_keys_count || 0,
+                    });
                 }
             } catch (err) {
                 console.error("Failed to fetch private data:", err);
@@ -368,24 +385,96 @@ export default function ProfilePage() {
                                         Private Stats
                                         <span className="ml-auto px-2 py-0.5 text-[10px] font-medium bg-[#a371f7]/20 text-[#a371f7] rounded-full">Only You</span>
                                     </h3>
-                                    <div className="grid grid-cols-2 gap-3">
+
+                                    {/* Repository Stats */}
+                                    <div className="grid grid-cols-2 gap-3 mb-4">
                                         <div className="p-3 bg-black/40 backdrop-blur-sm border border-purple-500/20 rounded-xl text-center hover:border-purple-500/40 transition-all">
                                             <p className="text-xl font-bold text-purple-400">{privateData.total_private_repos}</p>
                                             <p className="text-xs text-gray-400">Private Repos</p>
-                                        </div>
-                                        <div className="p-3 bg-black/40 backdrop-blur-sm border border-purple-500/20 rounded-xl text-center hover:border-purple-500/40 transition-all">
-                                            <p className="text-xl font-bold text-purple-400">{privateData.owned_private_repos}</p>
-                                            <p className="text-xs text-gray-400">Owned Private</p>
                                         </div>
                                         <div className="p-3 bg-black/40 backdrop-blur-sm border border-purple-500/20 rounded-xl text-center hover:border-purple-500/40 transition-all">
                                             <p className="text-xl font-bold text-purple-400">{privateData.private_gists}</p>
                                             <p className="text-xs text-gray-400">Private Gists</p>
                                         </div>
                                         <div className="p-3 bg-black/40 backdrop-blur-sm border border-purple-500/20 rounded-xl text-center hover:border-purple-500/40 transition-all">
-                                            <p className="text-xl font-bold text-purple-400">{(privateData.disk_usage / 1024).toFixed(1)} MB</p>
-                                            <p className="text-xs text-gray-400">Disk Usage</p>
+                                            <p className="text-xl font-bold text-purple-400">{privateData.starred_repos_count}</p>
+                                            <p className="text-xs text-gray-400">Starred</p>
+                                        </div>
+                                        <div className="p-3 bg-black/40 backdrop-blur-sm border border-purple-500/20 rounded-xl text-center hover:border-purple-500/40 transition-all">
+                                            <p className="text-xl font-bold text-purple-400">{privateData.watching_repos_count}</p>
+                                            <p className="text-xs text-gray-400">Watching</p>
                                         </div>
                                     </div>
+
+                                    {/* Account Details */}
+                                    <div className="space-y-2 mb-4">
+                                        <div className="p-3 bg-black/40 backdrop-blur-sm border border-purple-500/20 rounded-xl">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs text-gray-400 flex items-center gap-2">
+                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                                    </svg>
+                                                    Organizations
+                                                </span>
+                                                <span className="text-sm font-bold text-white">{privateData.organizations_count}</span>
+                                            </div>
+                                        </div>
+                                        <div className="p-3 bg-black/40 backdrop-blur-sm border border-purple-500/20 rounded-xl">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs text-gray-400 flex items-center gap-2">
+                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                                                    </svg>
+                                                    Disk Usage
+                                                </span>
+                                                <span className="text-sm font-bold text-white">{(privateData.disk_usage / 1024).toFixed(1)} MB</span>
+                                            </div>
+                                        </div>
+                                        <div className="p-3 bg-black/40 backdrop-blur-sm border border-purple-500/20 rounded-xl">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs text-gray-400 flex items-center gap-2">
+                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                                    </svg>
+                                                    Verified Emails
+                                                </span>
+                                                <span className="text-sm font-bold text-white">{privateData.verified_emails_count} / {privateData.emails_count}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Security Section */}
+                                    <div className="p-3 bg-black/40 backdrop-blur-sm border border-purple-500/20 rounded-xl">
+                                        <p className="text-xs text-gray-400 mb-2 flex items-center gap-2">
+                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                            </svg>
+                                            Security
+                                        </p>
+                                        <div className="flex flex-wrap gap-2">
+                                            <span className={`px-2 py-1 text-[10px] font-medium rounded-full ${privateData.two_factor_enabled ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                                                {privateData.two_factor_enabled ? '✓ 2FA Enabled' : '✗ 2FA Disabled'}
+                                            </span>
+                                            <span className="px-2 py-1 text-[10px] font-medium bg-blue-500/20 text-blue-400 rounded-full">
+                                                {privateData.ssh_keys_count} SSH Keys
+                                            </span>
+                                            <span className="px-2 py-1 text-[10px] font-medium bg-blue-500/20 text-blue-400 rounded-full">
+                                                {privateData.gpg_keys_count} GPG Keys
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Plan Info */}
+                                    {privateData.plan_name && (
+                                        <div className="mt-3 p-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-purple-500/30 rounded-xl">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs text-gray-400">GitHub Plan</span>
+                                                <span className="text-sm font-bold text-purple-300 capitalize">{privateData.plan_name}</span>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Total Repos Summary */}
                                     <div className="mt-3 p-3 bg-black/40 backdrop-blur-sm border border-purple-500/20 rounded-xl">
                                         <div className="flex items-center justify-between">
                                             <span className="text-xs text-gray-400">Total Repositories</span>

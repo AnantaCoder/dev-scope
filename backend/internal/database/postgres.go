@@ -127,6 +127,58 @@ func (db *DB) InitSchema(ctx context.Context) error {
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 	);
 
+	-- User private GitHub data (only accessible to authenticated users)
+	CREATE TABLE IF NOT EXISTS user_private_data (
+		id SERIAL PRIMARY KEY,
+		user_id INT UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+		github_id BIGINT UNIQUE NOT NULL,
+		
+		-- Private repository stats
+		private_repos INT DEFAULT 0,
+		owned_private_repos INT DEFAULT 0,
+		total_private_repos INT DEFAULT 0,
+		
+		-- Private gists
+		private_gists INT DEFAULT 0,
+		
+		-- Account details
+		disk_usage BIGINT DEFAULT 0,
+		collaborators INT DEFAULT 0,
+		two_factor_enabled BOOLEAN DEFAULT FALSE,
+		
+		-- Plan information
+		plan_name VARCHAR(100),
+		plan_space BIGINT DEFAULT 0,
+		plan_collaborators INT DEFAULT 0,
+		plan_private_repos INT DEFAULT 0,
+		
+		-- Email settings
+		primary_email VARCHAR(255),
+		emails_count INT DEFAULT 0,
+		verified_emails_count INT DEFAULT 0,
+		
+		-- Organization membership
+		organizations_count INT DEFAULT 0,
+		organizations_data JSONB,
+		
+		-- Repository details
+		starred_repos_count INT DEFAULT 0,
+		watching_repos_count INT DEFAULT 0,
+		
+		-- SSH/GPG keys
+		ssh_keys_count INT DEFAULT 0,
+		gpg_keys_count INT DEFAULT 0,
+		
+		-- Recent private activity (stored as JSON for flexibility)
+		recent_private_repos JSONB,
+		recent_events JSONB,
+		
+		-- Timestamps
+		fetched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+	);
+
 	-- Indexes for performance
 	CREATE INDEX IF NOT EXISTS idx_users_github_id ON users(github_id);
 	CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
@@ -138,6 +190,8 @@ func (db *DB) InitSchema(ctx context.Context) error {
 	CREATE INDEX IF NOT EXISTS idx_activity_logs_created_at ON activity_logs(created_at DESC);
 	CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
 	CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);
+	CREATE INDEX IF NOT EXISTS idx_user_private_data_user_id ON user_private_data(user_id);
+	CREATE INDEX IF NOT EXISTS idx_user_private_data_github_id ON user_private_data(github_id);
 	`
 
 	_, err := db.ExecContext(ctx, schema)

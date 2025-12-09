@@ -75,10 +75,12 @@ func main() {
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(db)
 	rankingRepo := repository.NewRankingRepository(db)
+	privateDataRepo := repository.NewPrivateDataRepository(db)
 
 	// Initialize services
 	githubService := service.NewGitHubService(cfg, cacheInstance)
 	rankingService := service.NewRankingService(rankingRepo, githubService)
+	privateDataService := service.NewPrivateDataService(privateDataRepo)
 
 	// Initialize auth service
 	authConfig := auth.GitHubOAuthConfig{
@@ -94,6 +96,7 @@ func main() {
 	server := handlers.NewServer(cfg, cacheInstance, githubService, rankingService, searchHandler)
 	authHandler := handlers.NewAuthHandler(authService, userRepo, cfg.FrontendURL, rankingService)
 	rankingHandler := handlers.NewRankingHandler(rankingService)
+	privateDataHandler := handlers.NewPrivateDataHandler(privateDataService, authService)
 	authMiddleware := handlers.NewAuthMiddleware(authService)
 
 	// Setup routes - Public endpoints
@@ -113,6 +116,10 @@ func main() {
 
 	// Search history endpoints (protected)
 	http.HandleFunc("/api/search/history", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(searchHandler.GetSearchHistoryHandler)))
+
+	// Private data endpoints (protected - users can ONLY access their own data)
+	http.HandleFunc("/api/me/private", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(privateDataHandler.GetMyPrivateDataHandler)))
+	http.HandleFunc("/api/me/private/refresh", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(privateDataHandler.RefreshPrivateDataHandler)))
 
 	// Notification endpoints (protected)
 	http.HandleFunc("/api/notifications", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(authHandler.NotificationsHandler)))

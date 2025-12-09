@@ -141,4 +141,23 @@ export const api = {
       return { error: true, message: "Failed to update ranking" };
     }
   },
+
+  // Private data endpoints (only accessible for own profile)
+  async getMyPrivateData(): Promise<any> {
+    try {
+      const { data } = await axiosInstance.get("/api/me/private");
+      return data;
+    } catch (error: any) {
+      return { error: true, message: "Failed to fetch private data" };
+    }
+  },
+
+  async refreshMyPrivateData(): Promise<any> {
+    try {
+      const { data } = await axiosInstance.post("/api/me/private/refresh");
+      return data;
+    } catch (error: any) {
+      return { error: true, message: "Failed to refresh private data" };
+    }
+  },
 };
