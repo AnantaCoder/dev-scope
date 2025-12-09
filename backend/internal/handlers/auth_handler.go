@@ -154,7 +154,7 @@ func (h *AuthHandler) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Set session cookie with production-ready settings
 	isProduction := h.isProduction()
-	http.SetCookie(w, &http.Cookie{
+	cookie := &http.Cookie{
 		Name:     "session_token",
 		Value:    session.ID,
 		Path:     "/",
@@ -162,10 +162,21 @@ func (h *AuthHandler) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 		Secure:   isProduction, // true in production (HTTPS required)
 		SameSite: getSameSiteMode(isProduction),
 		MaxAge:   30 * 24 * 60 * 60, // 30 days
-	})
+	}
+	
+	// In production, set Domain to allow cross-subdomain cookies if needed
+	if isProduction {
+		log.Printf("🔐 [Auth] Setting secure cookie for production (Secure=true, SameSite=None)")
+	}
+	
+	http.SetCookie(w, cookie)
+	
+	log.Printf("✅ [Auth] Cookie set for user %s (avatar: %s)", user.Username, user.AvatarURL)
 
 	// Redirect to frontend
-	http.Redirect(w, r, fmt.Sprintf("%s?login=success", h.frontendURL), http.StatusTemporaryRedirect)
+	redirectURL := fmt.Sprintf("%s?login=success", h.frontendURL)
+	log.Printf("🔄 [Auth] Redirecting to: %s", redirectURL)
+	http.Redirect(w, r, redirectURL, http.StatusTemporaryRedirect)
 }
 
 // MeHandler returns current user information

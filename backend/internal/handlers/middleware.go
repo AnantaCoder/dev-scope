@@ -4,6 +4,8 @@ package handlers
 import (
 	"log"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 )
 
@@ -15,16 +17,17 @@ func CORSMiddleware(next http.HandlerFunc) http.HandlerFunc {
 
 		// Get origin from request
 		origin := r.Header.Get("Origin")
-		if origin == "" {
-			origin = "http://localhost:3000"
-		}
+
+		// Validate origin against allowed origins
+		allowedOrigin := getAllowedOrigin(origin)
 
 		// Allow credentials with specific origin
-		w.Header().Set("Access-Control-Allow-Origin", origin)
+		w.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, Cookie")
 		w.Header().Set("Access-Control-Expose-Headers", "Set-Cookie")
+		w.Header().Set("Vary", "Origin")
 
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
@@ -36,4 +39,39 @@ func CORSMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		duration := time.Since(startTime)
 		log.Printf("📤 [%s] Response sent for %s - Duration: %v", time.Now().Format("15:04:05"), r.URL.Path, duration)
 	}
+}
+
+// getAllowedOrigin validates and returns the allowed origin
+func getAllowedOrigin(origin string) string {
+	// Get frontend URL from environment
+	frontendURL := os.Getenv("FRONTEND_URL")
+	if frontendURL == "" {
+		frontendURL = "http://localhost:3000"
+	}
+
+	// List of allowed origins
+	allowedOrigins := []string{
+		frontendURL,
+		"http://localhost:3000",
+		"http://localhost:8080",
+		"https://dev-scope-roan.vercel.app/", // Production Vercel frontend
+		"https://*.vercel.app",         // All Vercel preview deployments
+	}
+
+	// Check if origin is in allowed list
+	for _, allowed := range allowedOrigins {
+		if origin == allowed {
+			return origin
+		}
+		// Handle wildcard domains (e.g., *.vercel.app)
+		if strings.Contains(allowed, "*") {
+			domain := strings.TrimPrefix(allowed, "https://*")
+			if strings.HasSuffix(origin, domain) && strings.HasPrefix(origin, "https://") {
+				return origin
+			}
+		}
+	}
+
+	// Default to frontend URL if origin is not recognized
+	return frontendURL
 }
