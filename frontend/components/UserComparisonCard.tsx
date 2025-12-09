@@ -69,150 +69,153 @@ export const UserComparisonCard: React.FC<UserComparisonCardProps> = ({ users })
     const maxOverallScore = Math.max(...overallScores);
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-6">
             {/* User Cards - Responsive Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-                {users.map((user, idx) => {
-                    const isTopOverall = overallScores[idx] === maxOverallScore;
-                    const winsCount = metrics.filter((m) => rankings[m.key][idx].isTop).length;
-                    return (
-                        <div
-                            key={user.login}
-                            className={`bg-[#161b22] border rounded-xl p-3 sm:p-4 text-center relative ${isTopOverall ? 'border-[#d29922] ring-1 ring-[#d29922]/20' : 'border-[#30363d]'}`}
-                        >
-                            {isTopOverall && (
-                                <div className="absolute -top-2 left-1/2 -translate-x-1/2">
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium bg-[#d29922] text-black rounded-full shadow-lg">
-                                        👑 Winner
-                                    </span>
-                                </div>
-                            )}
-                            <Image src={user.avatar_url} alt={user.login} width={56} height={56} className="rounded-full mx-auto ring-2 ring-[#30363d] mt-1" />
-                            <h3 className="mt-2 text-sm font-semibold text-[#e6edf3] truncate">{user.name || user.login}</h3>
-                            <p className="text-xs text-[#8b949e] truncate">@{user.login}</p>
-                            <div className="mt-2 flex items-center justify-center gap-1">
-                                <span className="text-xs font-medium text-[#d29922]">{winsCount}</span>
-                                <span className="text-[10px] text-[#8b949e]">wins</span>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-
-            {/* Metrics Comparison - Mobile Friendly */}
-            <div className="bg-[#161b22] border border-[#30363d] rounded-xl overflow-hidden">
-                <div className="px-4 py-3 border-b border-[#30363d] bg-gradient-to-r from-[#58a6ff]/5 to-transparent">
-                    <h4 className="text-sm font-semibold text-[#e6edf3] flex items-center gap-2">
-                        <svg className="w-4 h-4 text-[#58a6ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                        Metrics Battle
-                    </h4>
-                </div>
-                <div className="p-4 space-y-4">
-                    {metrics.map((metric) => {
-                        const values = users.map((u) => getUserValue(u, metric.key));
-                        const maxValue = Math.max(...values, 1);
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 lg:gap-4">
+                    {users.map((user, idx) => {
+                        const isTopOverall = overallScores[idx] === maxOverallScore;
+                        const winsCount = metrics.filter((m) => rankings[m.key][idx].isTop).length;
                         return (
-                            <div key={metric.key} className="space-y-2">
-                                <div className="flex items-center gap-2 text-sm">
-                                    <span style={{ color: metric.color }}>{metric.icon}</span>
-                                    <span className="text-[#8b949e] font-medium">{metric.label}</span>
+                            <div
+                                key={user.login}
+                                className={`premium-card p-4 text-center relative group hover:scale-105 transition-all ${isTopOverall ? 'border-yellow-500/50 glow-orange ring-2 ring-yellow-500/20' : ''}`}
+                            >
+                                {isTopOverall && (
+                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold bg-gradient-to-r from-yellow-500 to-orange-500 text-black rounded-full shadow-xl animate-pulse-glow">
+                                            👑 Winner
+                                        </span>
+                                    </div>
+                                )}
+                                <div className="relative inline-block mt-2">
+                                    <Image src={user.avatar_url} alt={user.login} width={64} height={64} className="rounded-full mx-auto ring-2 ring-white/20 shadow-xl group-hover:ring-white/40 transition-all" />
+                                    {isTopOverall && <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-yellow-500/20 to-orange-500/20 animate-pulse" />}
                                 </div>
-                                {/* Mobile: Stack vertically, Desktop: Grid */}
-                                <div className="space-y-2 sm:space-y-0 sm:grid sm:gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(users.length, 5)}, minmax(0, 1fr))` }}>
-                                    {users.map((user, idx) => {
-                                        const value = values[idx];
-                                        const percentage = (value / maxValue) * 100;
-                                        const { isTop } = rankings[metric.key][idx];
-                                        const displayValue = metric.key === 'experience' ? `${value}y` : formatNumber(value);
-                                        return (
-                                            <div key={user.login} className="flex sm:flex-col items-center gap-2 sm:gap-1">
-                                                <Image src={user.avatar_url} alt={user.login} width={24} height={24} className="rounded-full sm:hidden shrink-0" />
-                                                <div className="flex-1 sm:w-full">
-                                                    <div className="flex items-center justify-between sm:justify-center gap-2 mb-1">
-                                                        <span className="text-xs text-[#8b949e] sm:hidden truncate max-w-[80px]">{user.login}</span>
-                                                        <span className={`text-sm font-semibold ${isTop ? 'text-[#e6edf3]' : 'text-[#8b949e]'}`}>{displayValue}</span>
-                                                        {isTop && <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#238636] text-white shrink-0">#1</span>}
-                                                    </div>
-                                                    <div className="h-2 bg-[#21262d] rounded-full overflow-hidden">
-                                                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${percentage}%`, backgroundColor: metric.color, opacity: isTop ? 1 : 0.5 }}></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
+                                <h3 className="mt-3 text-sm font-semibold text-white truncate">{user.name || user.login}</h3>
+                                <p className="text-xs text-gray-400 truncate">@{user.login}</p>
+                                <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 rounded-full">
+                                    <span className="text-sm font-bold text-yellow-400">{winsCount}</span>
+                                    <span className="text-[10px] text-gray-400 font-medium">wins</span>
                                 </div>
                             </div>
                         );
                     })}
                 </div>
-            </div>
 
-            {/* Overall Leaderboard */}
-            <div className="bg-[#161b22] border border-[#30363d] rounded-xl overflow-hidden">
-                <div className="px-4 py-3 border-b border-[#30363d] bg-gradient-to-r from-[#d29922]/5 to-transparent">
-                    <h4 className="text-sm font-semibold text-[#e6edf3] flex items-center gap-2">
-                        <span>🏆</span>
-                        Leaderboard
-                    </h4>
-                </div>
-                <div className="p-4 space-y-2">
-                    {users
-                        .map((user, idx) => ({ user, score: overallScores[idx], idx }))
-                        .sort((a, b) => b.score - a.score)
-                        .map(({ user, score, idx }, position) => {
-                            const percentage = (score / (metrics.length * users.length)) * 100;
-                            const isTop = score === maxOverallScore;
-                            const medals = ['🥇', '🥈', '🥉'];
+                {/* Metrics Comparison - Mobile Friendly */}
+                <div className="premium-card overflow-hidden">
+                    <div className="px-4 sm:px-5 py-4 border-b border-white/5 bg-gradient-to-r from-blue-500/10 to-purple-500/10">
+                        <h4 className="text-sm font-semibold gradient-text flex items-center gap-2">
+                            <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            Metrics Battle
+                        </h4>
+                    </div>
+                    <div className="p-4 sm:p-5 space-y-5">
+                        {metrics.map((metric) => {
+                            const values = users.map((u) => getUserValue(u, metric.key));
+                            const maxValue = Math.max(...values, 1);
                             return (
-                                <div key={user.login} className={`flex items-center gap-3 p-3 rounded-lg ${isTop ? 'bg-[#d29922]/10 border border-[#d29922]/30' : 'bg-[#0d1117]'}`}>
-                                    <span className="text-lg w-6 text-center">{medals[position] || `#${position + 1}`}</span>
-                                    <Image src={user.avatar_url} alt={user.login} width={36} height={36} className="rounded-full ring-1 ring-[#30363d] shrink-0" />
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center justify-between gap-2">
-                                            <span className="text-sm font-medium text-[#e6edf3] truncate">{user.name || user.login}</span>
-                                            <span className={`text-sm font-bold ${isTop ? 'text-[#d29922]' : 'text-[#8b949e]'}`}>{score} pts</span>
-                                        </div>
-                                        <div className="h-1.5 bg-[#21262d] rounded-full overflow-hidden mt-1">
-                                            <div className={`h-full rounded-full transition-all duration-700 ${isTop ? 'bg-gradient-to-r from-[#d29922] to-[#f0883e]' : 'bg-[#58a6ff]'}`} style={{ width: `${percentage}%` }}></div>
-                                        </div>
+                                <div key={metric.key} className="space-y-3">
+                                    <div className="flex items-center gap-2 text-sm">
+                                        <span style={{ color: metric.color }}>{metric.icon}</span>
+                                        <span className="text-gray-300 font-semibold">{metric.label}</span>
+                                    </div>
+                                    {/* Mobile: Stack vertically, Desktop: Grid */}
+                                    <div className="space-y-2.5 sm:space-y-0 sm:grid sm:gap-3" style={{ gridTemplateColumns: `repeat(${Math.min(users.length, 5)}, minmax(0, 1fr))` }}>
+                                        {users.map((user, idx) => {
+                                            const value = values[idx];
+                                            const percentage = (value / maxValue) * 100;
+                                            const { isTop } = rankings[metric.key][idx];
+                                            const displayValue = metric.key === 'experience' ? `${value}y` : formatNumber(value);
+                                            return (
+                                                <div key={user.login} className="flex sm:flex-col items-center gap-2 sm:gap-1.5 group">
+                                                    <Image src={user.avatar_url} alt={user.login} width={28} height={28} className="rounded-full sm:hidden shrink-0 ring-1 ring-white/20" />
+                                                    <div className="flex-1 sm:w-full">
+                                                        <div className="flex items-center justify-between sm:justify-center gap-2 mb-1.5">
+                                                            <span className="text-xs text-gray-400 sm:hidden truncate max-w-[80px] font-medium">{user.login}</span>
+                                                            <span className={`text-sm font-bold ${isTop ? 'text-white' : 'text-gray-400'}`}>{displayValue}</span>
+                                                            {isTop && <span className="text-[10px] px-2 py-0.5 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold shrink-0 shadow-lg">#1</span>}
+                                                        </div>
+                                                        <div className="h-2.5 bg-black/40 rounded-full overflow-hidden backdrop-blur-sm border border-white/5">
+                                                            <div className={`h-full rounded-full transition-all duration-700 ${isTop ? 'shadow-lg' : ''}`} style={{ width: `${percentage}%`, backgroundColor: metric.color, opacity: isTop ? 1 : 0.6, boxShadow: isTop ? `0 0 10px ${metric.color}` : 'none' }}></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             );
                         })}
+                    </div>
                 </div>
-            </div>
 
-            {/* Quick Stats Grid - Mobile Friendly */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                {users.map((user, idx) => {
-                    const winsCount = metrics.filter((m) => rankings[m.key][idx].isTop).length;
-                    const followerRatio = user.following > 0 ? (user.followers / user.following).toFixed(1) : user.followers.toString();
-                    return (
-                        <div key={user.login} className="bg-[#161b22] border border-[#30363d] rounded-xl p-3">
-                            <div className="flex items-center gap-2 mb-2">
-                                <Image src={user.avatar_url} alt={user.login} width={20} height={20} className="rounded-full" />
-                                <span className="text-xs text-[#8b949e] truncate">{user.login}</span>
+                {/* Overall Leaderboard */}
+                <div className="premium-card overflow-hidden">
+                    <div className="px-4 sm:px-5 py-4 border-b border-white/5 bg-gradient-to-r from-yellow-500/10 to-orange-500/10">
+                        <h4 className="text-sm font-semibold flex items-center gap-2">
+                            <span className="text-xl">🏆</span>
+                            <span className="gradient-text-premium">Leaderboard</span>
+                        </h4>
+                    </div>
+                    <div className="p-4 sm:p-5 space-y-3">
+                        {users
+                            .map((user, idx) => ({ user, score: overallScores[idx], idx }))
+                            .sort((a, b) => b.score - a.score)
+                            .map(({ user, score, idx }, position) => {
+                                const percentage = (score / (metrics.length * users.length)) * 100;
+                                const isTop = score === maxOverallScore;
+                                const medals = ['🥇', '🥈', '🥉'];
+                                return (
+                                    <div key={user.login} className={`flex items-center gap-3 sm:gap-4 p-4 rounded-xl backdrop-blur-sm transition-all hover:scale-[1.02] ${isTop ? 'bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 glow-orange' : 'bg-white/5 border border-white/10'}`}>
+                                        <span className="text-2xl w-8 text-center shrink-0">{medals[position] || `#${position + 1}`}</span>
+                                        <Image src={user.avatar_url} alt={user.login} width={40} height={40} className="rounded-full ring-2 ring-white/20 shrink-0 shadow-lg" />
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center justify-between gap-2 mb-1.5">
+                                                <span className="text-sm font-semibold text-white truncate">{user.name || user.login}</span>
+                                                <span className={`text-sm font-bold ${isTop ? 'text-yellow-400' : 'text-gray-400'}`}>{score} pts</span>
+                                            </div>
+                                            <div className="h-2 bg-black/40 rounded-full overflow-hidden border border-white/5">
+                                                <div className={`h-full rounded-full transition-all duration-700 ${isTop ? 'bg-gradient-to-r from-yellow-500 to-orange-500 shadow-lg' : 'bg-gradient-to-r from-blue-500 to-cyan-500'}`} style={{ width: `${percentage}%`, boxShadow: isTop ? '0 0 15px rgba(234, 179, 8, 0.5)' : 'none' }}></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                    </div>
+                </div>
+
+                {/* Quick Stats Grid - Mobile Friendly */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-4">
+                    {users.map((user, idx) => {
+                        const winsCount = metrics.filter((m) => rankings[m.key][idx].isTop).length;
+                        const followerRatio = user.following > 0 ? (user.followers / user.following).toFixed(1) : user.followers.toString();
+                        return (
+                            <div key={user.login} className="premium-card p-3 sm:p-4 hover:scale-105 transition-all group">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <Image src={user.avatar_url} alt={user.login} width={24} height={24} className="rounded-full ring-1 ring-white/20 group-hover:ring-white/40 transition-all" />
+                                    <span className="text-xs text-gray-300 truncate font-medium">{user.login}</span>
+                                </div>
+                                <div className="space-y-2 text-xs">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-400">Wins</span>
+                                        <span className="text-yellow-400 font-bold">{winsCount}/{metrics.length}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-400">Ratio</span>
+                                        <span className="text-white font-semibold">{followerRatio}x</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-400">Since</span>
+                                        <span className="text-white font-semibold">{new Date(user.created_at).getFullYear()}</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="space-y-1 text-[11px]">
-                                <div className="flex justify-between">
-                                    <span className="text-[#8b949e]">Wins</span>
-                                    <span className="text-[#d29922] font-medium">{winsCount}/{metrics.length}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-[#8b949e]">Ratio</span>
-                                    <span className="text-[#e6edf3]">{followerRatio}x</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-[#8b949e]">Since</span>
-                                    <span className="text-[#e6edf3]">{new Date(user.created_at).getFullYear()}</span>
-                                </div>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
+                        );
+                    })}
+                </div>
         </div>
     );
 };

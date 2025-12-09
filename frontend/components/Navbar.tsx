@@ -1,6 +1,7 @@
 "use client";
 
 import { ProfileButton } from "@/components/ProfileButton";
+import { NotificationBell } from "@/components/NotificationBell";
 import { useAuth } from "@/contexts/AuthContext";
 import Image from "next/image";
 import Link from "next/link";
@@ -40,33 +41,32 @@ export function Navbar() {
                             <span className="text-sm font-medium">Home</span>
                         </Link>
 
+                        <Link
+                            href="/rankings"
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${isActive("/rankings")
+                                ? "bg-[#21262d] text-[#e6edf3]"
+                                : "text-[#8b949e] hover:text-[#e6edf3] hover:bg-[#21262d]/50"
+                                }`}
+                        >
+                            <svg className="w-4 h-4 text-[#ffd700]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                            </svg>
+                            <span className="text-sm font-medium">Rankings</span>
+                        </Link>
+
                         {isAuthenticated && (
-                            <>
-                                <Link
-                                    href="/rankings"
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${isActive("/rankings")
-                                        ? "bg-[#21262d] text-[#e6edf3]"
-                                        : "text-[#8b949e] hover:text-[#e6edf3] hover:bg-[#21262d]/50"
-                                        }`}
-                                >
-                                    <svg className="w-4 h-4 text-[#ffd700]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                                    </svg>
-                                    <span className="text-sm font-medium">Rankings</span>
-                                </Link>
-                                <Link
-                                    href="/history"
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${isActive("/history")
-                                        ? "bg-[#21262d] text-[#e6edf3]"
-                                        : "text-[#8b949e] hover:text-[#e6edf3] hover:bg-[#21262d]/50"
-                                        }`}
-                                >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <span className="text-sm font-medium">History</span>
-                                </Link>
-                            </>
+                            <Link
+                                href="/history"
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${isActive("/history")
+                                    ? "bg-[#21262d] text-[#e6edf3]"
+                                    : "text-[#8b949e] hover:text-[#e6edf3] hover:bg-[#21262d]/50"
+                                    }`}
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span className="text-sm font-medium">History</span>
+                            </Link>
                         )}
                     </nav>
 
@@ -86,6 +86,9 @@ export function Navbar() {
                             </div>
                         </div>
 
+                        {/* Notification Bell */}
+                        <NotificationBell />
+
                         {/* Mobile Navigation */}
                         <div className="flex md:hidden items-center gap-2">
                             <Link
@@ -97,27 +100,25 @@ export function Navbar() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                                 </svg>
                             </Link>
+                            <Link
+                                href="/rankings"
+                                className={`p-2 rounded-lg transition-all ${isActive("/rankings") ? "bg-[#21262d]" : "hover:bg-[#21262d]/50"
+                                    }`}
+                            >
+                                <svg className="w-5 h-5 text-[#ffd700]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                                </svg>
+                            </Link>
                             {isAuthenticated && (
-                                <>
-                                    <Link
-                                        href="/rankings"
-                                        className={`p-2 rounded-lg transition-all ${isActive("/rankings") ? "bg-[#21262d]" : "hover:bg-[#21262d]/50"
-                                            }`}
-                                    >
-                                        <svg className="w-5 h-5 text-[#ffd700]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                                        </svg>
-                                    </Link>
-                                    <Link
-                                        href="/history"
-                                        className={`p-2 rounded-lg transition-all ${isActive("/history") ? "bg-[#21262d]" : "hover:bg-[#21262d]/50"
-                                            }`}
-                                    >
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    </Link>
-                                </>
+                                <Link
+                                    href="/history"
+                                    className={`p-2 rounded-lg transition-all ${isActive("/history") ? "bg-[#21262d]" : "hover:bg-[#21262d]/50"
+                                        }`}
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </Link>
                             )}
                         </div>
 

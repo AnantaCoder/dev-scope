@@ -29,7 +29,7 @@ type Config struct {
 func Default() *Config {
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = "8000"
 	}
 
 	frontendURL := os.Getenv("FRONTEND_URL")
@@ -39,7 +39,7 @@ func Default() *Config {
 
 	redirectURL := os.Getenv("GITHUB_REDIRECT_URL")
 	if redirectURL == "" {
-		redirectURL = "http://localhost:8080/api/auth/callback"
+		redirectURL = "http://localhost:8000/api/auth/callback"
 	}
 
 	return &Config{

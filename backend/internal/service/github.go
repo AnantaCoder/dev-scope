@@ -39,7 +39,8 @@ func NewGitHubService(cfg *config.Config, c *cache.Cache) *GitHubService {
 // setAuthHeaders adds authentication headers to request
 func (s *GitHubService) setAuthHeaders(req *http.Request) {
 	req.Header.Set("User-Agent", "DevScope-API")
-	if s.config.GitHubToken != "" {
+	// Only add authorization if token is valid (not empty or placeholder)
+	if s.config.GitHubToken != "" && s.config.GitHubToken != "YOUR_FINE_GRAINED_TOKEN_HERE" {
 		req.Header.Set("Authorization", "Bearer "+s.config.GitHubToken)
 	}
 }

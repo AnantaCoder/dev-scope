@@ -105,6 +105,10 @@ func main() {
 	// Search history endpoints (protected)
 	http.HandleFunc("/api/search/history", handlers.CORSMiddleware(authMiddleware.RequireAuth(searchHandler.GetSearchHistoryHandler)))
 
+	// Notification endpoints (protected)
+	http.HandleFunc("/api/notifications", handlers.CORSMiddleware(authMiddleware.RequireAuth(authHandler.NotificationsHandler)))
+	http.HandleFunc("/api/notifications/", handlers.CORSMiddleware(authMiddleware.RequireAuth(authHandler.MarkNotificationReadHandler)))
+
 	// Rankings endpoints (public)
 	http.HandleFunc("/api/rankings", handlers.CORSMiddleware(rankingHandler.GetRankingsHandler))
 	http.HandleFunc("/api/rankings/", handlers.CORSMiddleware(rankingHandler.GetUserRankHandler))

@@ -9,7 +9,7 @@ import type {
   ExtendedUserResponse,
 } from "@/types";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const axiosInstance = axios.create({
   baseURL: API_BASE,
@@ -54,10 +54,31 @@ export const api = {
   },
 
   async getExtendedUserInfo(username: string): Promise<ExtendedUserResponse> {
-    const { data } = await axiosInstance.get<ExtendedUserResponse>(
-      `/api/user/${username}/extended`
-    );
-    return data;
+    try {
+      const { data } = await axiosInstance.get<{
+        error: boolean;
+        message?: string;
+        data: ExtendedUserResponse;
+      }>(`/api/user/${username}/extended`);
+      if (data.error) {
+        return {
+          error: true,
+          message: data.message || "Failed to fetch user data",
+        } as any;
+      }
+      return data.data as ExtendedUserResponse;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        return { error: true, message: "User not found" } as any;
+      }
+      if (error.response?.data) {
+        return {
+          error: true,
+          message: error.response.data.message || "Failed to fetch user data",
+        } as any;
+      }
+      return { error: true, message: "Failed to fetch user data" } as any;
+    }
   },
 
   // Auth endpoints
@@ -85,21 +106,39 @@ export const api = {
 
   // Rankings endpoints
   async getRankings(page: number = 1, pageSize: number = 50): Promise<any> {
-    const { data } = await axiosInstance.get("/api/rankings", {
-      params: { page, page_size: pageSize },
-    });
-    return data;
+    try {
+      const { data } = await axiosInstance.get("/api/rankings", {
+        params: { page, page_size: pageSize },
+      });
+      return data;
+    } catch (error: any) {
+      console.error("Failed to fetch rankings:", error);
+      return {
+        error: true,
+        message: "Failed to fetch rankings",
+        rankings: [],
+        total: 0,
+      };
+    }
   },
 
   async getUserRanking(username: string): Promise<any> {
-    const { data } = await axiosInstance.get(`/api/rankings/${username}`);
-    return data;
+    try {
+      const { data } = await axiosInstance.get(`/api/rankings/${username}`);
+      return data;
+    } catch (error: any) {
+      return { error: true, message: "User not found in rankings" };
+    }
   },
 
   async updateUserRanking(username: string): Promise<any> {
-    const { data } = await axiosInstance.post("/api/rankings/update", {
-      username,
-    });
-    return data;
+    try {
+      const { data } = await axiosInstance.post("/api/rankings/update", {
+        username,
+      });
+      return data;
+    } catch (error: any) {
+      return { error: true, message: "Failed to update ranking" };
+    }
   },
 };

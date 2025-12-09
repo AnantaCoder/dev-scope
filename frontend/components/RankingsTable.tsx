@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { api } from "@/lib/api";
 import Image from "next/image";
 import Link from "next/link";
@@ -42,13 +43,42 @@ function calculateScoreBreakdown(ranking: UserRanking) {
   };
 }
 
-function ScoreTooltip({ ranking }: { ranking: UserRanking }) {
+function ScoreTooltip({ ranking, show, anchorRect }: { ranking: UserRanking; show: boolean; anchorRect: DOMRect | null }) {
   const breakdown = calculateScoreBreakdown(ranking);
+  const [mounted, setMounted] = useState(false);
 
-  return (
-    <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 p-4 bg-[#1c2128] border border-[#30363d] rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full">
-        <div className="border-8 border-transparent border-t-[#30363d]"></div>
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || !show || !anchorRect) return null;
+
+  // Calculate position - show below if near top of viewport, otherwise above
+  const tooltipHeight = 280;
+  const showBelow = anchorRect.top < tooltipHeight + 100;
+
+  const style: React.CSSProperties = {
+    position: 'fixed',
+    left: anchorRect.left + anchorRect.width / 2,
+    transform: 'translateX(-50%)',
+    ...(showBelow
+      ? { top: anchorRect.bottom + 1 }
+      : { top: anchorRect.top - tooltipHeight }
+    ),
+    zIndex: 9999,
+  };
+
+  return createPortal(
+    <div
+      style={style}
+      className="w-72 p-4 premium-card rounded-2xl shadow-2xl"
+    >
+      {/* Arrow */}
+      <div
+        className="absolute left-1/2 -translate-x-1/2"
+        style={showBelow ? { top: -8 } : { bottom: -8 }}
+      >
+        <div className={`border-8 border-transparent ${showBelow ? 'border-b-[#30363d]' : 'border-t-[#30363d]'}`}></div>
       </div>
       <h4 className="text-sm font-semibold text-[#e6edf3] mb-3 flex items-center gap-2">
         <svg className="w-4 h-4 text-[#a371f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -58,37 +88,69 @@ function ScoreTooltip({ ranking }: { ranking: UserRanking }) {
       </h4>
       <div className="space-y-2">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-[#8b949e]">Followers ({breakdown.followers.weight}%)</span>
-          <span className="text-[#e6edf3] font-mono">{breakdown.followers.raw.toLocaleString()} → {breakdown.followers.contribution.toFixed(1)}</span>
+          <span className="text-gray-400">Followers ({breakdown.followers.weight}%)</span>
+          <span className="text-white font-mono">{breakdown.followers.raw.toLocaleString()} → {breakdown.followers.contribution.toFixed(1)}</span>
         </div>
         <div className="flex items-center justify-between text-xs">
-          <span className="text-[#8b949e]">Stars ({breakdown.stars.weight}%)</span>
-          <span className="text-[#ffd700] font-mono">{breakdown.stars.raw.toLocaleString()} → {breakdown.stars.contribution.toFixed(1)}</span>
+          <span className="text-gray-400">Stars ({breakdown.stars.weight}%)</span>
+          <span className="text-yellow-500 font-mono">{breakdown.stars.raw.toLocaleString()} → {breakdown.stars.contribution.toFixed(1)}</span>
         </div>
         <div className="flex items-center justify-between text-xs">
-          <span className="text-[#8b949e]">Repos ({breakdown.repos.weight}%)</span>
-          <span className="text-[#58a6ff] font-mono">{breakdown.repos.raw.toLocaleString()} → {breakdown.repos.contribution.toFixed(1)}</span>
+          <span className="text-gray-400">Repos ({breakdown.repos.weight}%)</span>
+          <span className="text-blue-500 font-mono">{breakdown.repos.raw.toLocaleString()} → {breakdown.repos.contribution.toFixed(1)}</span>
         </div>
         <div className="flex items-center justify-between text-xs">
-          <span className="text-[#8b949e]">Forks ({breakdown.forks.weight}%)</span>
-          <span className="text-[#8b949e] font-mono">{breakdown.forks.raw.toLocaleString()} → {breakdown.forks.contribution.toFixed(1)}</span>
+          <span className="text-gray-400">Forks ({breakdown.forks.weight}%)</span>
+          <span className="text-gray-400 font-mono">{breakdown.forks.raw.toLocaleString()} → {breakdown.forks.contribution.toFixed(1)}</span>
         </div>
         <div className="flex items-center justify-between text-xs">
-          <span className="text-[#8b949e]">Activity ({breakdown.contributions.weight}%)</span>
-          <span className="text-[#238636] font-mono">{breakdown.contributions.raw.toLocaleString()} → {breakdown.contributions.contribution.toFixed(1)}</span>
+          <span className="text-gray-400">Activity ({breakdown.contributions.weight}%)</span>
+          <span className="text-green-500 font-mono">{breakdown.contributions.raw.toLocaleString()} → {breakdown.contributions.contribution.toFixed(1)}</span>
         </div>
-        <div className="border-t border-[#30363d] pt-2 mt-2">
+        <div className="border-t border-white/10 pt-2 mt-2">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-[#8b949e]">Raw Total</span>
-            <span className="text-[#e6edf3] font-mono">{breakdown.rawTotal.toFixed(1)}</span>
+            <span className="text-gray-400">Raw Total</span>
+            <span className="text-white font-mono">{breakdown.rawTotal.toFixed(1)}</span>
           </div>
           <div className="flex items-center justify-between text-xs mt-1">
-            <span className="text-[#8b949e]">Log Scale (×100)</span>
-            <span className="text-[#a371f7] font-bold font-mono">{breakdown.scaledScore.toFixed(2)}</span>
+            <span className="text-gray-400">Log Scale (×100)</span>
+            <span className="text-purple-400 font-bold font-mono">{breakdown.scaledScore.toFixed(2)}</span>
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
+  );
+}
+
+function ScoreCell({ ranking }: { ranking: UserRanking }) {
+  const [show, setShow] = useState(false);
+  const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  const handleMouseEnter = () => {
+    if (ref.current) {
+      setAnchorRect(ref.current.getBoundingClientRect());
+      setShow(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setShow(false);
+  };
+
+  return (
+    <>
+      <span
+        ref={ref}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-gradient-to-r from-[#a371f7]/20 to-[#58a6ff]/20 text-[#a371f7] cursor-help"
+      >
+        {ranking.score.toFixed(2)}
+      </span>
+      <ScoreTooltip ranking={ranking} show={show} anchorRect={anchorRect} />
+    </>
   );
 }
 
@@ -98,7 +160,7 @@ export function RankingsTable() {
   const [error, setError] = useState<string>("");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const pageSize = 50;
+  const pageSize = 20;
 
   useEffect(() => {
     fetchRankings();
@@ -138,7 +200,7 @@ export function RankingsTable() {
 
   if (error) {
     return (
-      <div className="bg-[#f85149]/10 border border-[#f85149]/30 rounded-xl p-6 text-center">
+      <div className="premium-card bg-red-500/10 border-red-500/30 rounded-2xl p-6 text-center">
         <svg className="w-12 h-12 text-[#f85149] mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
         </svg>
@@ -149,7 +211,7 @@ export function RankingsTable() {
 
   if (rankings.length === 0) {
     return (
-      <div className="bg-[#161b22] border border-[#30363d] rounded-xl p-12 text-center">
+      <div className="premium-card rounded-2xl p-12 text-center">
         <svg className="w-16 h-16 text-[#8b949e] mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
         </svg>
@@ -159,94 +221,194 @@ export function RankingsTable() {
     );
   }
 
+  // Separate top 3 from the rest
+  const top3 = rankings.filter(r => r.rank_position <= 3);
+  const restRankings = rankings.filter(r => r.rank_position > 3);
+
+  // Get individual positions
+  const firstPlace = top3.find(r => r.rank_position === 1);
+  const secondPlace = top3.find(r => r.rank_position === 2);
+  const thirdPlace = top3.find(r => r.rank_position === 3);
+
+  const formatScore = (score: number) => {
+    if (score >= 1000) {
+      return `${(score / 1000).toFixed(1)}K`;
+    }
+    return score.toFixed(0);
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Rankings Table */}
-      <div className="bg-[#161b22] border border-[#30363d] rounded-xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-[#0d1117] border-b border-[#30363d]">
-              <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-[#8b949e] uppercase tracking-wider">Rank</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-[#8b949e] uppercase tracking-wider">Developer</th>
-                <th className="px-6 py-4 text-center text-xs font-semibold text-[#8b949e] uppercase tracking-wider">
-                  <span className="inline-flex items-center gap-1">
-                    Score
-                    <svg className="w-3 h-3 text-[#6e7681]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </span>
-                </th>
-                <th className="px-6 py-4 text-center text-xs font-semibold text-[#8b949e] uppercase tracking-wider">Followers</th>
-                <th className="px-6 py-4 text-center text-xs font-semibold text-[#8b949e] uppercase tracking-wider">Repos</th>
-                <th className="px-6 py-4 text-center text-xs font-semibold text-[#8b949e] uppercase tracking-wider">Stars</th>
-                <th className="px-6 py-4 text-center text-xs font-semibold text-[#8b949e] uppercase tracking-wider">Forks</th>
-                <th className="px-6 py-4 text-center text-xs font-semibold text-[#8b949e] uppercase tracking-wider">Activity</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#30363d]">
-              {rankings.map((ranking) => (
-                <tr key={ranking.id} className="hover:bg-[#0d1117] transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      {ranking.rank_position <= 3 ? (
-                        <span className="text-2xl">
-                          {ranking.rank_position === 1 && "🥇"}
-                          {ranking.rank_position === 2 && "🥈"}
-                          {ranking.rank_position === 3 && "🥉"}
-                        </span>
-                      ) : (
-                        <span className="text-lg font-bold text-[#8b949e]">#{ranking.rank_position}</span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <Link
-                      href={`/profile/${ranking.username}`}
-                      className="flex items-center gap-3 hover:text-[#58a6ff] transition-colors"
-                    >
-                      <Image
-                        src={ranking.avatar_url}
-                        alt={ranking.username}
-                        width={40}
-                        height={40}
-                        className="rounded-full ring-2 ring-[#30363d]"
-                      />
-                      <div>
-                        <span className="font-medium text-[#e6edf3] block">{ranking.username}</span>
-                        <span className="text-xs text-[#6e7681]">View Profile →</span>
-                      </div>
-                    </Link>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <div className="relative group inline-block">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-gradient-to-r from-[#a371f7]/20 to-[#58a6ff]/20 text-[#a371f7] cursor-help">
-                        {ranking.score.toFixed(2)}
-                      </span>
-                      <ScoreTooltip ranking={ranking} />
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center text-[#e6edf3]">
-                    {ranking.followers.toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center text-[#e6edf3]">
-                    {ranking.public_repos}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <span className="text-[#ffd700]">{ranking.total_stars.toLocaleString()}</span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center text-[#8b949e]">
-                    {ranking.total_forks.toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <span className="text-[#238636]">{ranking.contribution_count}</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <div className="space-y-8">
+      {/* Top 3 Podium - Only show on first page */}
+      {page === 1 && top3.length > 0 && (
+        <div className="py-8">
+          {/* Crown Icon */}
+          <div className="flex justify-center mb-6">
+            <svg className="w-14 h-14 text-[#ffd700]" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z" />
+            </svg>
+          </div>
+
+          {/* Podium */}
+          <div className="flex items-end justify-center gap-6 mt-4">
+            {/* 2nd Place - Left */}
+            {secondPlace && (
+              <Link href={`/profile/${secondPlace.username}`} className="flex flex-col items-center group">
+                <div className="relative mb-2">
+                  <div className="w-20 h-20 rounded-full overflow-hidden ring-4 ring-gray-500 group-hover:ring-blue-500 transition-all">
+                    <Image
+                      src={secondPlace.avatar_url}
+                      alt={secondPlace.username}
+                      width={80}
+                      height={80}
+                      className="object-cover"
+                      unoptimized
+                    />
+                  </div>
+                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-[#21262d] border border-[#8b949e] text-[#8b949e] text-xs font-bold px-2 py-0.5 rounded-full">
+                    #2 Silver
+                  </div>
+                </div>
+                <p className="text-[#e6edf3] font-semibold text-sm mt-3 group-hover:text-[#58a6ff] transition-colors">{secondPlace.username}</p>
+                <p className="text-[#8b949e] text-xs font-bold">{formatScore(secondPlace.score)} pts</p>
+                {/* Silver Podium */}
+                <div className="w-28 h-32 mt-3 bg-gradient-to-b from-[#30363d] to-[#21262d] border border-[#484f58] rounded-t-lg flex items-end justify-center pb-4">
+                  <span className="text-4xl font-bold text-[#8b949e]/50">2</span>
+                </div>
+              </Link>
+            )}
+
+            {/* 1st Place - Center */}
+            {firstPlace && (
+              <Link href={`/profile/${firstPlace.username}`} className="flex flex-col items-center group -mt-8">
+                <div className="relative mb-2">
+                  <div className="w-24 h-24 rounded-full overflow-hidden ring-4 ring-yellow-500 group-hover:ring-blue-500 transition-all shadow-lg shadow-yellow-500/30">
+                    <Image
+                      src={firstPlace.avatar_url}
+                      alt={firstPlace.username}
+                      width={96}
+                      height={96}
+                      className="object-cover"
+                      unoptimized
+                    />
+                  </div>
+                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-[#21262d] border border-[#ffd700] text-[#ffd700] text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
+                    #1 Champion
+                  </div>
+                </div>
+                <p className="text-[#e6edf3] font-bold text-base mt-3 group-hover:text-[#58a6ff] transition-colors">{firstPlace.username}</p>
+                <p className="text-[#ffd700] text-sm font-bold">{formatScore(firstPlace.score)} pts</p>
+                {/* Gold Podium */}
+                <div className="w-32 h-44 mt-3 bg-gradient-to-b from-[#3d3d00] to-[#21262d] border border-[#ffd700]/50 rounded-t-lg flex items-end justify-center pb-4">
+                  <span className="text-5xl font-bold text-[#ffd700]/30">1</span>
+                </div>
+              </Link>
+            )}
+
+            {/* 3rd Place - Right */}
+            {thirdPlace && (
+              <Link href={`/profile/${thirdPlace.username}`} className="flex flex-col items-center group">
+                <div className="relative mb-2">
+                  <div className="w-20 h-20 rounded-full overflow-hidden ring-4 ring-orange-600 group-hover:ring-blue-500 transition-all">
+                    <Image
+                      src={thirdPlace.avatar_url}
+                      alt={thirdPlace.username}
+                      width={80}
+                      height={80}
+                      className="object-cover"
+                      unoptimized
+                    />
+                  </div>
+                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-[#21262d] border border-[#cd7f32] text-[#cd7f32] text-xs font-bold px-2 py-0.5 rounded-full">
+                    #3 Bronze
+                  </div>
+                </div>
+                <p className="text-[#e6edf3] font-semibold text-sm mt-3 group-hover:text-[#58a6ff] transition-colors">{thirdPlace.username}</p>
+                <p className="text-[#cd7f32] text-xs font-bold">{formatScore(thirdPlace.score)} pts</p>
+                {/* Bronze Podium */}
+                <div className="w-28 h-24 mt-3 bg-gradient-to-b from-[#3d2a1a] to-[#21262d] border border-[#cd7f32]/50 rounded-t-lg flex items-end justify-center pb-4">
+                  <span className="text-4xl font-bold text-[#cd7f32]/30">3</span>
+                </div>
+              </Link>
+            )}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Rankings Table - Starting from 4th place */}
+      {restRankings.length > 0 && (
+        <div className="premium-card rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-black/40 backdrop-blur-sm border-b border-white/10">
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-[#8b949e] uppercase tracking-wider">Rank</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-[#8b949e] uppercase tracking-wider">Developer</th>
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-[#8b949e] uppercase tracking-wider">
+                    <span className="inline-flex items-center gap-1">
+                      Score
+                      <svg className="w-3 h-3 text-[#6e7681]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </span>
+                  </th>
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-[#8b949e] uppercase tracking-wider">Followers</th>
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-[#8b949e] uppercase tracking-wider">Repos</th>
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-[#8b949e] uppercase tracking-wider">Stars</th>
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-[#8b949e] uppercase tracking-wider">Forks</th>
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-[#8b949e] uppercase tracking-wider">Activity</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {restRankings.map((ranking) => (
+                  <tr key={ranking.id} className="hover:bg-black/30 transition-all">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-lg font-bold text-[#8b949e]">#{ranking.rank_position}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Link
+                        href={`/profile/${ranking.username}`}
+                        className="flex items-center gap-3 hover:text-[#58a6ff] transition-colors"
+                      >
+                        <Image
+                          src={ranking.avatar_url}
+                          alt={ranking.username}
+                          width={40}
+                          height={40}
+                          className="rounded-full ring-2 ring-[#30363d]"
+                          unoptimized
+                        />
+                        <div>
+                          <span className="font-medium text-[#e6edf3] block">{ranking.username}</span>
+                          <span className="text-xs text-[#6e7681]">View Profile →</span>
+                        </div>
+                      </Link>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <ScoreCell ranking={ranking} />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center text-[#e6edf3]">
+                      {ranking.followers.toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center text-[#e6edf3]">
+                      {ranking.public_repos}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="text-[#ffd700]">{ranking.total_stars.toLocaleString()}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center text-[#8b949e]">
+                      {ranking.total_forks.toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className="text-[#238636]">{ranking.contribution_count}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Pagination */}
       {totalPages > 1 && (
@@ -258,17 +420,17 @@ export function RankingsTable() {
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="px-4 py-2 bg-[#21262d] border border-[#30363d] rounded-lg text-sm font-medium text-[#e6edf3] hover:bg-[#30363d] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-2 bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl text-sm font-medium text-white hover:border-blue-500/50 hover:glow-blue disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               Previous
             </button>
-            <span className="px-4 py-2 text-sm text-[#8b949e]">
+            <span className="px-4 py-2 text-sm text-gray-400">
               Page {page} of {totalPages}
             </span>
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="px-4 py-2 bg-[#21262d] border border-[#30363d] rounded-lg text-sm font-medium text-[#e6edf3] hover:bg-[#30363d] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-2 bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl text-sm font-medium text-white hover:border-blue-500/50 hover:glow-blue disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               Next
             </button>

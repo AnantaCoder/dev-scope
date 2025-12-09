@@ -3,10 +3,12 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github-api/backend/internal/auth"
@@ -347,6 +349,200 @@ func (h *AuthHandler) logUserActivity(ctx context.Context, userID int, action st
 		// Log but don't fail the request
 		fmt.Printf("⚠️ Failed to log activity: %v\n", err)
 	}
+}
+
+// NotificationsHandler fetches GitHub notifications for the authenticated user
+func (h *AuthHandler) NotificationsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeJSON(w, http.StatusMethodNotAllowed, map[string]interface{}{
+			"error":   true,
+			"message": "Method not allowed",
+		})
+		return
+	}
+
+	user, ok := r.Context().Value("user").(*models.User)
+	if !ok {
+		writeJSON(w, http.StatusUnauthorized, map[string]interface{}{
+			"error":   true,
+			"message": "Unauthorized",
+		})
+		return
+	}
+
+	// Get the user's access token from session
+	cookie, err := r.Cookie("session_token")
+	if err != nil {
+		writeJSON(w, http.StatusUnauthorized, map[string]interface{}{
+			"error":   true,
+			"message": "No session found",
+		})
+		return
+	}
+
+	ctx := r.Context()
+	session, err := h.authService.GetSession(ctx, cookie.Value)
+	if err != nil || session == nil {
+		writeJSON(w, http.StatusUnauthorized, map[string]interface{}{
+			"error":   true,
+			"message": "Invalid session",
+		})
+		return
+	}
+
+	// Fetch notifications from GitHub API
+	notifications, err := h.fetchGitHubNotifications(session.AccessToken)
+	if err != nil {
+		log.Printf("❌ [Notifications] Failed to fetch for user %s: %v", user.Username, err)
+		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"error":   true,
+			"message": "Failed to fetch notifications",
+		})
+		return
+	}
+
+	// Count unread notifications
+	unreadCount := 0
+	for _, n := range notifications {
+		if n.Unread {
+			unreadCount++
+		}
+	}
+
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"error":         false,
+		"notifications": notifications,
+		"unread_count":  unreadCount,
+	})
+}
+
+// GitHubNotification represents a GitHub notification
+type GitHubNotification struct {
+	ID        string `json:"id"`
+	Unread    bool   `json:"unread"`
+	Reason    string `json:"reason"`
+	UpdatedAt string `json:"updated_at"`
+	Subject   struct {
+		Title string `json:"title"`
+		URL   string `json:"url"`
+		Type  string `json:"type"`
+	} `json:"subject"`
+	Repository struct {
+		FullName string `json:"full_name"`
+		HTMLURL  string `json:"html_url"`
+	} `json:"repository"`
+}
+
+// fetchGitHubNotifications fetches notifications from GitHub API
+func (h *AuthHandler) fetchGitHubNotifications(accessToken string) ([]GitHubNotification, error) {
+	req, err := http.NewRequest("GET", "https://api.github.com/notifications?per_page=50", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Authorization", "Bearer "+accessToken)
+	req.Header.Set("Accept", "application/vnd.github.v3+json")
+	req.Header.Set("User-Agent", "DevScope-App")
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("GitHub API returned status %d", resp.StatusCode)
+	}
+
+	var notifications []GitHubNotification
+	if err := json.NewDecoder(resp.Body).Decode(&notifications); err != nil {
+		return nil, err
+	}
+
+	return notifications, nil
+}
+
+// MarkNotificationReadHandler marks a notification as read
+func (h *AuthHandler) MarkNotificationReadHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeJSON(w, http.StatusMethodNotAllowed, map[string]interface{}{
+			"error":   true,
+			"message": "Method not allowed",
+		})
+		return
+	}
+
+	// Extract notification ID from path
+	path := r.URL.Path
+	// Path format: /api/notifications/{id}/read
+	parts := strings.Split(strings.Trim(path, "/"), "/")
+	if len(parts) < 3 {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"error":   true,
+			"message": "Invalid notification ID",
+		})
+		return
+	}
+	notificationID := parts[2]
+
+	// Get user session
+	cookie, err := r.Cookie("session_token")
+	if err != nil {
+		writeJSON(w, http.StatusUnauthorized, map[string]interface{}{
+			"error":   true,
+			"message": "No session found",
+		})
+		return
+	}
+
+	ctx := r.Context()
+	session, err := h.authService.GetSession(ctx, cookie.Value)
+	if err != nil || session == nil {
+		writeJSON(w, http.StatusUnauthorized, map[string]interface{}{
+			"error":   true,
+			"message": "Invalid session",
+		})
+		return
+	}
+
+	// Mark notification as read on GitHub
+	req, err := http.NewRequest("PATCH", fmt.Sprintf("https://api.github.com/notifications/threads/%s", notificationID), nil)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"error":   true,
+			"message": "Failed to create request",
+		})
+		return
+	}
+
+	req.Header.Set("Authorization", "Bearer "+session.AccessToken)
+	req.Header.Set("Accept", "application/vnd.github.v3+json")
+	req.Header.Set("User-Agent", "DevScope-App")
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"error":   true,
+			"message": "Failed to mark notification as read",
+		})
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusResetContent && resp.StatusCode != http.StatusOK {
+		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"error":   true,
+			"message": fmt.Sprintf("GitHub API returned status %d", resp.StatusCode),
+		})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"error":   false,
+		"message": "Notification marked as read",
+	})
 }
 
 // isProduction checks if running in production environment

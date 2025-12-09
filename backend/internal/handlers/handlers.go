@@ -190,6 +190,16 @@ func (s *Server) BatchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Log search history for batch/compare if user is authenticated
+	if user, ok := r.Context().Value("user").(*models.User); ok && s.searchHandler != nil {
+		for _, username := range req.Usernames {
+			username = strings.TrimSpace(username)
+			if username != "" {
+				go s.searchHandler.LogSearchHistory(context.Background(), user.ID, username, "compare")
+			}
+		}
+	}
+
 	result := s.service.GetBatchStatus(req.Usernames)
 	writeJSON(w, http.StatusOK, result)
 }

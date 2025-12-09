@@ -53,9 +53,9 @@ func getAllowedOrigin(origin string) string {
 	allowedOrigins := []string{
 		frontendURL,
 		"http://localhost:3000",
-		"http://localhost:8080",
+		"http://localhost:8000",
 		"https://dev-scope-roan.vercel.app/", // Production Vercel frontend
-		"https://*.vercel.app",         // All Vercel preview deployments
+		"https://*.vercel.app",               // All Vercel preview deployments
 	}
 
 	// Check if origin is in allowed list

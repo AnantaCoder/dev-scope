@@ -323,7 +323,7 @@ npm run dev
 Open your browser and navigate to:
 
 - **Frontend**: [http://localhost:3000](http://localhost:3000)
-- **Backend Health**: [http://localhost:8080/api/health](http://localhost:8080/api/health)
+- **Backend Health**: [http://localhost:8000/api/health](http://localhost:8000/api/health)
 
 ---
 
