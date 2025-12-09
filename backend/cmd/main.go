@@ -98,6 +98,7 @@ func main() {
 	rankingHandler := handlers.NewRankingHandler(rankingService)
 	privateDataHandler := handlers.NewPrivateDataHandler(privateDataService, authService)
 	authMiddleware := handlers.NewAuthMiddleware(authService)
+	adminHandler := handlers.NewAdminHandler(db.DB)
 
 	// Setup routes - Public endpoints
 	http.HandleFunc("/", handlers.SecureCORSMiddleware(server.HomeHandler))
@@ -120,6 +121,10 @@ func main() {
 	// Private data endpoints (protected - users can ONLY access their own data)
 	http.HandleFunc("/api/me/private", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(privateDataHandler.GetMyPrivateDataHandler)))
 	http.HandleFunc("/api/me/private/refresh", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(privateDataHandler.RefreshPrivateDataHandler)))
+
+	// Admin endpoints (protected - only for admin users like anantacoder)
+	http.HandleFunc("/api/admin/update-all-private-data", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(adminHandler.TriggerPrivateDataUpdate)))
+	http.HandleFunc("/api/admin/update-status", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(adminHandler.GetUpdateStatus)))
 
 	// Notification endpoints (protected)
 	http.HandleFunc("/api/notifications", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(authHandler.NotificationsHandler)))

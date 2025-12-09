@@ -160,4 +160,29 @@ export const api = {
       return { error: true, message: "Failed to refresh private data" };
     }
   },
+
+  // Admin endpoints (only accessible for admin users like anantacoder)
+  async getAdminUpdateStatus(): Promise<{
+    total_users: number;
+    updated_users: number;
+    pending_users: number;
+    last_update: string | null;
+    is_admin: boolean;
+    admin_username: string;
+  }> {
+    const { data } = await axiosInstance.get("/api/admin/update-status");
+    return data;
+  },
+
+  async triggerPrivateDataUpdate(): Promise<{
+    success: boolean;
+    message: string;
+    total_users: number;
+    success_count: number;
+    fail_count: number;
+    duration: string;
+  }> {
+    const { data } = await axiosInstance.post("/api/admin/update-all-private-data");
+    return data;
+  },
 };
