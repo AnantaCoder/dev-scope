@@ -324,13 +324,9 @@ export default function Home() {
               <div className="bg-[#161b22] border border-[#30363d] rounded-xl p-4">
                 <h3 className="text-sm font-semibold mb-3">Built With</h3>
                 <div className="flex flex-wrap gap-2">
-                  {[{ name: 'Go', color: '#00ADD8' }, { name: 'Next.js', color: '#fff' }, { name: 'TypeScript', color: '#3178c6' }, { name: 'NVIDIA AI', color: '#76b900' }, { name: 'Tailwind', color: '#38bdf8' }, { name: 'Neon DB', color: '#00BFFF' }].map(tech => (
-                    <div key={tech.name} className="flex items-center">
-                      <span className="px-2.5 py-1 text-xs rounded-full border" style={{ borderColor: tech.color + '40', color: tech.color, backgroundColor: tech.color + '10' }}></span>
-                      <Image src={`/path/to/${tech.name.toLowerCase().replace(' ', '-')}-logo.png`} alt={`${tech.name} logo`} width={16} height={16} className="inline-block mr-1" />
-                      {tech.name}
-                    </div>
-                  ))}
+                    {[{ name: 'Go', color: '#00ADD8' }, { name: 'Next.js', color: '#fff' }, { name: 'TypeScript', color: '#3178c6' }, { name: 'NVIDIA AI', color: '#76b900' }, { name: 'Tailwind', color: '#38bdf8' }, { name: 'Neon DB', color: '#00e599' }].map(tech => (
+                    <span key={tech.name} className="px-2.5 py-1 text-xs rounded-full border" style={{ borderColor: tech.color + '40', color: tech.color, backgroundColor: tech.color + '10' }}>{tech.name}</span>
+                    ))}
                 </div>
               </div>
             </aside>
