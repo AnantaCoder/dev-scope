@@ -87,7 +87,7 @@ func main() {
 	// Initialize handlers
 	searchHandler := handlers.NewSearchHandler(userRepo)
 	server := handlers.NewServer(cfg, cacheInstance, githubService, rankingService, searchHandler)
-	authHandler := handlers.NewAuthHandler(authService, userRepo, cfg.FrontendURL)
+	authHandler := handlers.NewAuthHandler(authService, userRepo, cfg.FrontendURL, rankingService)
 	rankingHandler := handlers.NewRankingHandler(rankingService)
 	authMiddleware := handlers.NewAuthMiddleware(authService)
 

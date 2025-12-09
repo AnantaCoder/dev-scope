@@ -118,18 +118,19 @@ func (s *Server) GetStatusByPathHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// Update ranking in background (don't block response)
-	if s.rankingService != nil {
-		go func(user string) {
-			// Use background context so it doesn't get cancelled when request ends
-			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-			defer cancel()
+	// Only update ranking if the searched username matches an authenticated user
+	// This ensures only GitHub OAuth logged-in users appear in the leaderboard
+	if authUser, ok := r.Context().Value("user").(*models.User); ok && authUser.Username == username {
+		if s.rankingService != nil {
+			go func(user string) {
+				ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+				defer cancel()
 
-			if err := s.rankingService.UpdateUserRanking(ctx, user); err != nil {
-				// Log but don't fail the request
-				fmt.Printf("⚠️ [Ranking] Failed to update ranking for %s: %v\n", user, err)
-			}
-		}(username)
+				if err := s.rankingService.UpdateUserRanking(ctx, user); err != nil {
+					fmt.Printf("⚠️ [Ranking] Failed to update ranking for %s: %v\n", user, err)
+				}
+			}(username)
+		}
 	}
 
 	writeJSON(w, http.StatusOK, result)
@@ -220,18 +221,19 @@ func (s *Server) GetExtendedUserHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// Update ranking in background (don't block response)
-	if s.rankingService != nil {
-		go func(user string) {
-			// Use background context so it doesn't get cancelled when request ends
-			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-			defer cancel()
+	// Only update ranking if the searched username matches an authenticated user
+	// This ensures only GitHub OAuth logged-in users appear in the leaderboard
+	if authUser, ok := r.Context().Value("user").(*models.User); ok && authUser.Username == username {
+		if s.rankingService != nil {
+			go func(user string) {
+				ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+				defer cancel()
 
-			if err := s.rankingService.UpdateUserRanking(ctx, user); err != nil {
-				// Log but don't fail the request
-				fmt.Printf("⚠️ [Ranking] Failed to update ranking for %s: %v\n", user, err)
-			}
-		}(username)
+				if err := s.rankingService.UpdateUserRanking(ctx, user); err != nil {
+					fmt.Printf("⚠️ [Ranking] Failed to update ranking for %s: %v\n", user, err)
+				}
+			}(username)
+		}
 	}
 
 	writeJSON(w, http.StatusOK, map[string]interface{}{"error": false, "data": result})

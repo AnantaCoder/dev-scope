@@ -105,7 +105,7 @@ export default function SearchHistoryPage() {
     return (
         <div className="min-h-screen flex flex-col bg-[#0d1117] text-[#e6edf3]">
             <Navbar />
-            
+
             <main className="flex-1 max-w-[1400px] mx-auto px-4 lg:px-8 py-8 w-full">
                 {/* Page Header */}
                 <div className="mb-8">
@@ -124,7 +124,7 @@ export default function SearchHistoryPage() {
 
                 {error && (
                     <div className="bg-[#da3633]/10 border border-[#da3633]/30 text-[#ff7b72] px-4 py-3 rounded-xl mb-6 flex items-center gap-3">
-                        <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <span>{error}</span>
@@ -151,13 +151,17 @@ export default function SearchHistoryPage() {
                             >
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-4">
-                                        <div className="relative">
+                                        <div className="relative shrink-0">
                                             <Image
                                                 src={`https://github.com/${item.searched_username}.png`}
                                                 alt={item.searched_username}
                                                 width={48}
                                                 height={48}
                                                 className="rounded-full border-2 border-[#30363d] group-hover:border-[#58a6ff]/50 transition-all"
+                                                unoptimized
+                                                onError={(e) => {
+                                                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${item.searched_username}&background=238636&color=fff&size=48`;
+                                                }}
                                             />
                                             <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-[#238636] rounded-full border-2 border-[#161b22] flex items-center justify-center">
                                                 <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

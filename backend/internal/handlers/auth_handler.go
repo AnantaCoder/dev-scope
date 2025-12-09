@@ -16,19 +16,25 @@ import (
 
 // AuthHandler handles authentication routes
 type AuthHandler struct {
-	authService *auth.AuthService
-	userRepo    *repository.UserRepository
+	authService    *auth.AuthService
+	userRepo       *repository.UserRepository
+	rankingService interface {
+		UpdateUserRanking(ctx context.Context, username string) error
+	}
 	frontendURL string
 	stateTTL    map[string]time.Time
 }
 
 // NewAuthHandler creates a new auth handler
-func NewAuthHandler(authService *auth.AuthService, userRepo *repository.UserRepository, frontendURL string) *AuthHandler {
+func NewAuthHandler(authService *auth.AuthService, userRepo *repository.UserRepository, frontendURL string, rankingService interface {
+	UpdateUserRanking(ctx context.Context, username string) error
+}) *AuthHandler {
 	handler := &AuthHandler{
-		authService: authService,
-		userRepo:    userRepo,
-		frontendURL: frontendURL,
-		stateTTL:    make(map[string]time.Time),
+		authService:    authService,
+		userRepo:       userRepo,
+		rankingService: rankingService,
+		frontendURL:    frontendURL,
+		stateTTL:       make(map[string]time.Time),
 	}
 
 	// Clean up expired states periodically
@@ -152,6 +158,17 @@ func (h *AuthHandler) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("✅ [Auth] User %s logged in successfully", user.Username)
 
+	// Update user ranking (only OAuth authenticated users appear in leaderboard)
+	if h.rankingService != nil {
+		go func(username string) {
+			rankCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+			if err := h.rankingService.UpdateUserRanking(rankCtx, username); err != nil {
+				log.Printf("⚠️ [Ranking] Failed to update ranking for %s: %v", username, err)
+			}
+		}(user.Username)
+	}
+
 	// Set session cookie with production-ready settings
 	isProduction := h.isProduction()
 	cookie := &http.Cookie{
@@ -163,14 +180,14 @@ func (h *AuthHandler) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 		SameSite: getSameSiteMode(isProduction),
 		MaxAge:   30 * 24 * 60 * 60, // 30 days
 	}
-	
+
 	// In production, set Domain to allow cross-subdomain cookies if needed
 	if isProduction {
 		log.Printf("🔐 [Auth] Setting secure cookie for production (Secure=true, SameSite=None)")
 	}
-	
+
 	http.SetCookie(w, cookie)
-	
+
 	log.Printf("✅ [Auth] Cookie set for user %s (avatar: %s)", user.Username, user.AvatarURL)
 
 	// Redirect to frontend
