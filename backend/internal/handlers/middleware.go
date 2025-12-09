@@ -49,17 +49,26 @@ func getAllowedOrigin(origin string) string {
 		frontendURL = "http://localhost:3000"
 	}
 
+	// Normalize frontend URL (remove trailing slash)
+	frontendURL = strings.TrimSuffix(frontendURL, "/")
+	
 	// List of allowed origins
 	allowedOrigins := []string{
 		frontendURL,
 		"http://localhost:3000",
 		"http://localhost:8000",
-		"https://dev-scope-roan.vercel.app/", // Production Vercel frontend
-		"https://*.vercel.app",               // All Vercel preview deployments
+		"https://dev-scope-roan.vercel.app", // Production Vercel frontend
+		"https://*.vercel.app",              // All Vercel preview deployments
 	}
+
+	// Normalize origin (remove trailing slash)
+	origin = strings.TrimSuffix(origin, "/")
 
 	// Check if origin is in allowed list
 	for _, allowed := range allowedOrigins {
+		// Normalize allowed origin
+		allowed = strings.TrimSuffix(allowed, "/")
+		
 		if origin == allowed {
 			return origin
 		}
