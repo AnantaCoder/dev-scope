@@ -97,62 +97,62 @@ func main() {
 	authMiddleware := handlers.NewAuthMiddleware(authService)
 
 	// Setup routes - Public endpoints
-	http.HandleFunc("/", handlers.CORSMiddleware(server.HomeHandler))
+	http.HandleFunc("/", handlers.SecureCORSMiddleware(server.HomeHandler))
 
 	// Health check endpoints - NO CORS for Railway health checks
-	http.HandleFunc("/api/health", server.HealthHandler)
-	http.HandleFunc("/health", server.HealthHandler)  // Alternative endpoint
-	http.HandleFunc("/healthz", server.HealthHandler) // Kubernetes-style
+	http.HandleFunc("/api/health", handlers.SecurityMiddleware(server.HealthHandler))
+	http.HandleFunc("/health", handlers.SecurityMiddleware(server.HealthHandler))  // Alternative endpoint
+	http.HandleFunc("/healthz", handlers.SecurityMiddleware(server.HealthHandler)) // Kubernetes-style
 
 	// Auth endpoints
-	http.HandleFunc("/api/auth/login", handlers.CORSMiddleware(authHandler.LoginHandler))
-	http.HandleFunc("/api/auth/callback", authHandler.CallbackHandler) // No CORS for OAuth callback
-	http.HandleFunc("/api/auth/logout", handlers.CORSMiddleware(authHandler.LogoutHandler))
-	http.HandleFunc("/api/auth/me", handlers.CORSMiddleware(authMiddleware.RequireAuth(authHandler.MeHandler)))
-	http.HandleFunc("/api/auth/me/full", handlers.CORSMiddleware(authMiddleware.RequireAuth(authHandler.MeFullHandler)))
+	http.HandleFunc("/api/auth/login", handlers.SecureCORSMiddleware(authHandler.LoginHandler))
+	http.HandleFunc("/api/auth/callback", handlers.SecurityMiddleware(authHandler.CallbackHandler)) // No CORS for OAuth callback
+	http.HandleFunc("/api/auth/logout", handlers.SecureCORSMiddleware(authHandler.LogoutHandler))
+	http.HandleFunc("/api/auth/me", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(authHandler.MeHandler)))
+	http.HandleFunc("/api/auth/me/full", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(authHandler.MeFullHandler)))
 
 	// Search history endpoints (protected)
-	http.HandleFunc("/api/search/history", handlers.CORSMiddleware(authMiddleware.RequireAuth(searchHandler.GetSearchHistoryHandler)))
+	http.HandleFunc("/api/search/history", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(searchHandler.GetSearchHistoryHandler)))
 
 	// Notification endpoints (protected)
-	http.HandleFunc("/api/notifications", handlers.CORSMiddleware(authMiddleware.RequireAuth(authHandler.NotificationsHandler)))
-	http.HandleFunc("/api/notifications/", handlers.CORSMiddleware(authMiddleware.RequireAuth(authHandler.MarkNotificationReadHandler)))
+	http.HandleFunc("/api/notifications", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(authHandler.NotificationsHandler)))
+	http.HandleFunc("/api/notifications/", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(authHandler.MarkNotificationReadHandler)))
 
 	// Rankings endpoints (public)
-	http.HandleFunc("/api/rankings", handlers.CORSMiddleware(rankingHandler.GetRankingsHandler))
-	http.HandleFunc("/api/rankings/", handlers.CORSMiddleware(rankingHandler.GetUserRankHandler))
+	http.HandleFunc("/api/rankings", handlers.SecureCORSMiddleware(rankingHandler.GetRankingsHandler))
+	http.HandleFunc("/api/rankings/", handlers.SecureCORSMiddleware(rankingHandler.GetUserRankHandler))
 
 	// Protected endpoints (require authentication)
-	http.HandleFunc("/api/rankings/update", handlers.CORSMiddleware(authMiddleware.RequireAuth(rankingHandler.UpdateUserRankHandler)))
+	http.HandleFunc("/api/rankings/update", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(rankingHandler.UpdateUserRankHandler)))
 
 	// Cache endpoints (public for now, can be protected later)
-	http.HandleFunc("/api/cache/stats", handlers.CORSMiddleware(server.CacheStatsHandler))
-	http.HandleFunc("/api/cache/clear", handlers.CORSMiddleware(server.CacheClearHandler))
+	http.HandleFunc("/api/cache/stats", handlers.SecureCORSMiddleware(server.CacheStatsHandler))
+	http.HandleFunc("/api/cache/clear", handlers.SecureCORSMiddleware(server.CacheClearHandler))
 
 	// User lookup endpoints (optionally authenticated)
-	http.HandleFunc("/api/status/", handlers.CORSMiddleware(authMiddleware.OptionalAuth(server.GetStatusByPathHandler)))
-	http.HandleFunc("/api/status", handlers.CORSMiddleware(authMiddleware.OptionalAuth(func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/api/status/", handlers.SecureCORSMiddleware(authMiddleware.OptionalAuth(server.GetStatusByPathHandler)))
+	http.HandleFunc("/api/status", handlers.SecureCORSMiddleware(authMiddleware.OptionalAuth(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			server.GetStatusByBodyHandler(w, r)
 		} else {
 			http.NotFound(w, r)
 		}
 	})))
-	http.HandleFunc("/api/batch", handlers.CORSMiddleware(authMiddleware.OptionalAuth(func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/api/batch", handlers.SecureCORSMiddleware(authMiddleware.OptionalAuth(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			server.BatchHandler(w, r)
 		} else {
 			http.NotFound(w, r)
 		}
 	})))
-	http.HandleFunc("/api/ai/compare", handlers.CORSMiddleware(authMiddleware.OptionalAuth(func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/api/ai/compare", handlers.SecureCORSMiddleware(authMiddleware.OptionalAuth(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			server.AIComparisonHandler(w, r)
 		} else {
 			http.NotFound(w, r)
 		}
 	})))
-	http.HandleFunc("/api/user/", handlers.CORSMiddleware(authMiddleware.OptionalAuth(server.GetExtendedUserHandler)))
+	http.HandleFunc("/api/user/", handlers.SecureCORSMiddleware(authMiddleware.OptionalAuth(server.GetExtendedUserHandler)))
 
 	// Print startup info
 	fmt.Println("=" + strings.Repeat("=", 75))
