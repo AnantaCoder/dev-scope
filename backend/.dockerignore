@@ -1,0 +1,38 @@
+# Dependencies
+vendor/
+
+# Binary
+main
+main.exe
+*.exe
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.production.example
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+
+# Test files
+*_test.go
+coverage.out
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
