@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -33,6 +34,10 @@ func main() {
 
 	// Load configuration
 	cfg := config.Default()
+
+	// Log environment for debugging
+	log.Printf("🔍 PORT from environment: %s", os.Getenv("PORT"))
+	log.Printf("🔍 Final server port: %s", cfg.ServerPort)
 
 	// Validate required configuration
 	if cfg.DatabaseURL == "" {
@@ -93,7 +98,11 @@ func main() {
 
 	// Setup routes - Public endpoints
 	http.HandleFunc("/", handlers.CORSMiddleware(server.HomeHandler))
-	http.HandleFunc("/api/health", handlers.CORSMiddleware(server.HealthHandler))
+
+	// Health check endpoints - NO CORS for Railway health checks
+	http.HandleFunc("/api/health", server.HealthHandler)
+	http.HandleFunc("/health", server.HealthHandler)  // Alternative endpoint
+	http.HandleFunc("/healthz", server.HealthHandler) // Kubernetes-style
 
 	// Auth endpoints
 	http.HandleFunc("/api/auth/login", handlers.CORSMiddleware(authHandler.LoginHandler))
@@ -169,8 +178,13 @@ func main() {
 	fmt.Println("   Search:   GET  /api/search/history (authenticated)")
 	fmt.Println("   AI:       POST /api/ai/compare")
 	fmt.Println("   Cache:    GET  /api/cache/stats, POST /api/cache/clear")
-	fmt.Printf("\nStarting server on port %s...\n\n", cfg.ServerPort)
+	fmt.Printf("\n🌐 Binding to 0.0.0.0%s (accessible from Railway)\n", cfg.ServerPort)
+	fmt.Printf("📍 Health Check: http://0.0.0.0%s/api/health\n", cfg.ServerPort)
+	fmt.Printf("🔧 Environment: %s\n\n", os.Getenv("ENVIRONMENT"))
+	fmt.Println("✅ Server is ready to accept connections...")
 
-	// Start server
-	log.Fatal(http.ListenAndServe(cfg.ServerPort, nil))
+	// Start server - explicitly bind to 0.0.0.0 for Railway
+	addr := fmt.Sprintf("0.0.0.0%s", cfg.ServerPort)
+	log.Printf("Starting HTTP server on %s\n", addr)
+	log.Fatal(http.ListenAndServe(addr, nil))
 }

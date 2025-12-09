@@ -1,0 +1,16 @@
+# Ignore frontend files
+frontend/
+node_modules/
+.next/
+
+# Ignore development files
+*.exe
+*.test
+*.out
+.env
+.env.local
+.vscode/
+.git/
+
+# Keep only backend
+!backend/

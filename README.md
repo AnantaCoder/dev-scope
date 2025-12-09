@@ -255,7 +255,7 @@ NVIDIA_API_KEY=your_nvidia_api_key_here
 GITHUB_TOKEN=your_github_personal_access_token
 
 # Optional - custom configuration
-PORT=8080
+PORT=8000
 CACHE_TTL=5m
 MAX_CACHE_SIZE=1000
 ```
@@ -293,7 +293,7 @@ go build -o github-api.exe ./cmd/main.go
 =======================================================================
 🚀 GitHub Status API - Pure Go with Clean Architecture
 =======================================================================
-✅ Server: http://localhost:8080
+✅ Server: http://localhost:8000
 💾 Cache: Enabled (TTL: 5m0s, Max: 1000)
 📦 Architecture: Clean package-based structure
 ⚡ Concurrency: Batch processing with goroutines
@@ -418,7 +418,7 @@ dev-scope/
 ### Base URL
 
 ```
-http://localhost:8080/api
+http://localhost:8000/api
 ```
 
 ### Endpoints

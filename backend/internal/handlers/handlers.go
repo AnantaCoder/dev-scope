@@ -69,6 +69,10 @@ func (s *Server) HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 // HealthHandler handles health check endpoint
 func (s *Server) HealthHandler(w http.ResponseWriter, r *http.Request) {
+	// Set headers immediately for Railway health checks
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
 	uptime := time.Since(s.startTime).Seconds()
 	response := models.HealthResponse{
 		Status:        "healthy",
@@ -78,7 +82,9 @@ func (s *Server) HealthHandler(w http.ResponseWriter, r *http.Request) {
 		CacheSize:     s.cache.Size(),
 		UptimeSeconds: fmt.Sprintf("%.2f", uptime),
 	}
-	writeJSON(w, http.StatusOK, response)
+
+	// Write response immediately
+	json.NewEncoder(w).Encode(response)
 }
 
 // CacheStatsHandler returns cache statistics
