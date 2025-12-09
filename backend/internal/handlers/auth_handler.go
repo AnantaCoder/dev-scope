@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github-api/backend/internal/auth"
@@ -151,14 +152,15 @@ func (h *AuthHandler) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("✅ [Auth] User %s logged in successfully", user.Username)
 
-	// Set session cookie
+	// Set session cookie with production-ready settings
+	isProduction := h.isProduction()
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_token",
 		Value:    session.ID,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   false, // Set to true in production with HTTPS
-		SameSite: http.SameSiteLaxMode,
+		Secure:   isProduction, // true in production (HTTPS required)
+		SameSite: getSameSiteMode(isProduction),
 		MaxAge:   30 * 24 * 60 * 60, // 30 days
 	})
 
@@ -317,4 +319,20 @@ func (h *AuthHandler) logUserActivity(ctx context.Context, userID int, action st
 		// Log but don't fail the request
 		fmt.Printf("⚠️ Failed to log activity: %v\n", err)
 	}
+}
+
+// isProduction checks if running in production environment
+func (h *AuthHandler) isProduction() bool {
+	env := os.Getenv("ENVIRONMENT")
+	return env == "production" || env == "prod"
+}
+
+// getSameSiteMode returns appropriate SameSite mode based on environment
+func getSameSiteMode(isProduction bool) http.SameSite {
+	if isProduction {
+		// In production with cross-origin setup, use None with Secure
+		return http.SameSiteNoneMode
+	}
+	// In development, use Lax
+	return http.SameSiteLaxMode
 }
