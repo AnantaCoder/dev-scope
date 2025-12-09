@@ -85,7 +85,8 @@ func main() {
 	authService := auth.NewAuthService(authConfig, userRepo)
 
 	// Initialize handlers
-	server := handlers.NewServer(cfg, cacheInstance, githubService, rankingService)
+	searchHandler := handlers.NewSearchHandler(userRepo)
+	server := handlers.NewServer(cfg, cacheInstance, githubService, rankingService, searchHandler)
 	authHandler := handlers.NewAuthHandler(authService, userRepo, cfg.FrontendURL)
 	rankingHandler := handlers.NewRankingHandler(rankingService)
 	authMiddleware := handlers.NewAuthMiddleware(authService)
@@ -100,6 +101,9 @@ func main() {
 	http.HandleFunc("/api/auth/logout", handlers.CORSMiddleware(authHandler.LogoutHandler))
 	http.HandleFunc("/api/auth/me", handlers.CORSMiddleware(authMiddleware.RequireAuth(authHandler.MeHandler)))
 	http.HandleFunc("/api/auth/me/full", handlers.CORSMiddleware(authMiddleware.RequireAuth(authHandler.MeFullHandler)))
+
+	// Search history endpoints (protected)
+	http.HandleFunc("/api/search/history", handlers.CORSMiddleware(authMiddleware.RequireAuth(searchHandler.GetSearchHistoryHandler)))
 
 	// Rankings endpoints (public)
 	http.HandleFunc("/api/rankings", handlers.CORSMiddleware(rankingHandler.GetRankingsHandler))
@@ -158,6 +162,7 @@ func main() {
 	fmt.Println("   Auth:     POST /api/auth/login, /api/auth/logout, GET /api/auth/me")
 	fmt.Println("   Rankings: GET  /api/rankings, /api/rankings/{username}")
 	fmt.Println("   Users:    GET  /api/user/{username}, POST /api/batch")
+	fmt.Println("   Search:   GET  /api/search/history (authenticated)")
 	fmt.Println("   AI:       POST /api/ai/compare")
 	fmt.Println("   Cache:    GET  /api/cache/stats, POST /api/cache/clear")
 	fmt.Printf("\nStarting server on port %s...\n\n", cfg.ServerPort)

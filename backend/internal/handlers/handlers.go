@@ -23,10 +23,11 @@ type Server struct {
 	config         *config.Config
 	startTime      time.Time
 	aiLimiter      *RateLimiter
+	searchHandler  *SearchHandler
 }
 
 // NewServer creates a new server instance
-func NewServer(cfg *config.Config, c *cache.Cache, svc *service.GitHubService, rankingSvc *service.RankingService) *Server {
+func NewServer(cfg *config.Config, c *cache.Cache, svc *service.GitHubService, rankingSvc *service.RankingService, searchHandler *SearchHandler) *Server {
 	return &Server{
 		service:        svc,
 		rankingService: rankingSvc,
@@ -34,7 +35,8 @@ func NewServer(cfg *config.Config, c *cache.Cache, svc *service.GitHubService, r
 		config:         cfg,
 		startTime:      time.Now(),
 		// AI rate limit: 10 requests per minute per IP
-		aiLimiter: NewRateLimiter(10, time.Minute),
+		aiLimiter:     NewRateLimiter(10, time.Minute),
+		searchHandler: searchHandler,
 	}
 }
 
@@ -56,6 +58,7 @@ func (s *Server) HomeHandler(w http.ResponseWriter, r *http.Request) {
 			"POST /api/status":                  "Fetch GitHub status (JSON body)",
 			"POST /api/batch":                   "Fetch status for multiple users",
 			"POST /api/ai/compare":              "AI-powered user comparison",
+			"GET /api/search/history":           "Get user's search history (authenticated)",
 			"GET /api/health":                   "Health check with cache stats",
 			"GET /api/cache/stats":              "Cache statistics",
 			"POST /api/cache/clear":             "Clear cache",
@@ -99,6 +102,11 @@ func (s *Server) GetStatusByPathHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	// Log search history if user is authenticated
+	if user, ok := r.Context().Value("user").(*models.User); ok && s.searchHandler != nil {
+		go s.searchHandler.LogSearchHistory(context.Background(), user.ID, username, "status")
+	}
+
 	useCache := r.URL.Query().Get("no_cache") != "true"
 	result, err := s.service.GetUserStatus(username, useCache)
 	if err != nil {
@@ -139,6 +147,11 @@ func (s *Server) GetStatusByBodyHandler(w http.ResponseWriter, r *http.Request) 
 	if username == "" {
 		writeJSON(w, http.StatusBadRequest, models.APIResponse{Error: true, Message: "Username cannot be empty"})
 		return
+	}
+
+	// Log search history if user is authenticated
+	if user, ok := r.Context().Value("user").(*models.User); ok && s.searchHandler != nil {
+		go s.searchHandler.LogSearchHistory(context.Background(), user.ID, username, "status")
 	}
 
 	useCache := r.URL.Query().Get("no_cache") != "true"
@@ -189,6 +202,11 @@ func (s *Server) GetExtendedUserHandler(w http.ResponseWriter, r *http.Request) 
 	if username == "" {
 		writeJSON(w, http.StatusBadRequest, models.APIResponse{Error: true, Message: "Username cannot be empty"})
 		return
+	}
+
+	// Log search history if user is authenticated
+	if user, ok := r.Context().Value("user").(*models.User); ok && s.searchHandler != nil {
+		go s.searchHandler.LogSearchHistory(context.Background(), user.ID, username, "extended")
 	}
 
 	useCache := r.URL.Query().Get("no_cache") != "true"
