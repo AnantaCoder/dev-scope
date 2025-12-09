@@ -22,17 +22,17 @@ export default function RankingsPage() {
             {/* Main Content */}
             <main className="flex-1 max-w-[1400px] mx-auto px-4 lg:px-8 py-8 w-full relative z-10">
                 {/* Page Header */}
-                <div className="mb-12">
-                    <div className="flex flex-col items-center text-center mb-8">
-                        <div className="inline-flex items-center gap-3 mb-4">
-                            <div className="p-3 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-xl backdrop-blur-sm">
-                                <svg className="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="mb-8 md:mb-12">
+                    <div className="flex flex-col items-center text-center mb-6 md:mb-8">
+                        <div className="inline-flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
+                            <div className="p-2 md:p-3 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-xl backdrop-blur-sm">
+                                <svg className="w-6 h-6 md:w-8 md:h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                                 </svg>
                             </div>
-                            <h1 className="text-4xl md:text-5xl font-bold tracking-tight gradient-text-premium">Global Rankings</h1>
+                            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight gradient-text-premium">Global Rankings</h1>
                         </div>
-                        <p className="text-gray-400 text-lg max-w-2xl">Top GitHub developers ranked by comprehensive performance metrics</p>
+                        <p className="text-gray-400 text-sm sm:text-base md:text-lg max-w-2xl px-4">Top GitHub developers ranked by comprehensive performance metrics</p>
                     </div>
 
                     {/* Info Cards */}

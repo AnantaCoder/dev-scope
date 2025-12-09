@@ -236,24 +236,24 @@ export function RankingsTable() {
     <div className="space-y-8">
       {/* Top 3 Podium - Only show on first page */}
       {page === 1 && top3.length > 0 && (
-        <div className="py-12">
+        <div className="py-6 md:py-12">
           {/* Crown Icon */}
-          <div className="flex justify-center mb-8">
+          <div className="flex justify-center mb-6 md:mb-8">
             <div className="relative">
               <div className="absolute inset-0 blur-xl bg-[#ffd700] opacity-50 animate-pulse-glow"></div>
-              <svg className="w-16 h-16 text-[#ffd700] relative z-10 drop-shadow-[0_0_15px_rgba(255,215,0,0.5)]" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-12 h-12 md:w-16 md:h-16 text-[#ffd700] relative z-10 drop-shadow-[0_0_15px_rgba(255,215,0,0.5)]" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z" />
               </svg>
             </div>
           </div>
 
           {/* Podium */}
-          <div className="flex items-end justify-center gap-8 mt-8">
+          <div className="flex items-end justify-center gap-3 sm:gap-4 md:gap-8 mt-6 md:mt-8 px-2">
             {/* 2nd Place - Left */}
             {secondPlace && (
               <Link href={`/profile/${secondPlace.username}`} className="flex flex-col items-center group">
-                <div className="relative mb-6">
-                  <div className="w-24 h-24 rounded-full overflow-hidden ring-4 ring-[#C0C0C0] group-hover:ring-blue-500 transition-all shadow-xl shadow-gray-500/20">
+                <div className="relative mb-3 md:mb-6">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full overflow-hidden ring-2 md:ring-4 ring-[#C0C0C0] group-hover:ring-blue-500 transition-all shadow-xl shadow-gray-500/20">
                     <Image
                       src={secondPlace.avatar_url}
                       alt={secondPlace.username}
@@ -263,24 +263,24 @@ export function RankingsTable() {
                       unoptimized
                     />
                   </div>
-                  <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#C0C0C0] to-[#A8A8A8] text-black text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap shadow-lg">
+                  <div className="absolute -bottom-2 md:-bottom-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#C0C0C0] to-[#A8A8A8] text-black text-[10px] md:text-xs font-bold px-2 md:px-3 py-0.5 md:py-1 rounded-full whitespace-nowrap shadow-lg">
                     🥈 Silver
                   </div>
                 </div>
-                <p className="text-[#e6edf3] font-bold text-base mt-2 group-hover:text-[#58a6ff] transition-colors">{secondPlace.username}</p>
-                <p className="text-[#C0C0C0] text-sm font-bold">{formatScore(secondPlace.score)} pts</p>
+                <p className="text-[#e6edf3] font-bold text-xs sm:text-sm md:text-base mt-1 md:mt-2 group-hover:text-[#58a6ff] transition-colors truncate max-w-[80px] sm:max-w-none">{secondPlace.username}</p>
+                <p className="text-[#C0C0C0] text-xs md:text-sm font-bold">{formatScore(secondPlace.score)} pts</p>
                 {/* Silver Podium */}
-                <div className="w-32 h-36 mt-4 bg-gradient-to-b from-[#C0C0C0]/10 to-[#21262d] border-2 border-[#C0C0C0]/50 rounded-t-2xl flex items-end justify-center pb-6 shadow-2xl shadow-gray-500/20">
-                  <span className="text-5xl font-bold text-[#C0C0C0]/40">2</span>
+                <div className="w-20 h-24 sm:w-24 sm:h-28 md:w-32 md:h-36 mt-2 md:mt-4 bg-gradient-to-b from-[#C0C0C0]/10 to-[#21262d] border md:border-2 border-[#C0C0C0]/50 rounded-t-xl md:rounded-t-2xl flex items-end justify-center pb-3 md:pb-6 shadow-2xl shadow-gray-500/20">
+                  <span className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#C0C0C0]/40">2</span>
                 </div>
               </Link>
             )}
 
             {/* 1st Place - Center */}
             {firstPlace && (
-              <Link href={`/profile/${firstPlace.username}`} className="flex flex-col items-center group -mt-12">
-                <div className="relative mb-6">
-                  <div className="w-28 h-28 rounded-full overflow-hidden ring-4 ring-[#FFD700] group-hover:ring-blue-500 transition-all shadow-2xl shadow-yellow-500/40 animate-pulse-slow">
+              <Link href={`/profile/${firstPlace.username}`} className="flex flex-col items-center group -mt-6 sm:-mt-8 md:-mt-12">
+                <div className="relative mb-3 md:mb-6">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full overflow-hidden ring-2 md:ring-4 ring-[#FFD700] group-hover:ring-blue-500 transition-all shadow-2xl shadow-yellow-500/40 animate-pulse-slow">
                     <Image
                       src={firstPlace.avatar_url}
                       alt={firstPlace.username}
@@ -290,15 +290,15 @@ export function RankingsTable() {
                       unoptimized
                     />
                   </div>
-                  <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#FFD700] to-[#FFA500] text-black text-sm font-bold px-4 py-1.5 rounded-full whitespace-nowrap shadow-xl animate-pulse-slow">
+                  <div className="absolute -bottom-2 md:-bottom-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#FFD700] to-[#FFA500] text-black text-[10px] sm:text-xs md:text-sm font-bold px-2 sm:px-3 md:px-4 py-0.5 md:py-1.5 rounded-full whitespace-nowrap shadow-xl animate-pulse-slow">
                     👑 Champion
                   </div>
                 </div>
-                <p className="text-[#e6edf3] font-bold text-lg mt-2 group-hover:text-[#58a6ff] transition-colors">{firstPlace.username}</p>
-                <p className="text-[#FFD700] text-base font-bold">{formatScore(firstPlace.score)} pts</p>
+                <p className="text-[#e6edf3] font-bold text-sm sm:text-base md:text-lg mt-1 md:mt-2 group-hover:text-[#58a6ff] transition-colors truncate max-w-[90px] sm:max-w-none">{firstPlace.username}</p>
+                <p className="text-[#FFD700] text-xs sm:text-sm md:text-base font-bold">{formatScore(firstPlace.score)} pts</p>
                 {/* Gold Podium */}
-                <div className="w-36 h-52 mt-4 bg-gradient-to-b from-[#FFD700]/15 to-[#21262d] border-2 border-[#FFD700]/60 rounded-t-2xl flex items-end justify-center pb-8 shadow-2xl shadow-yellow-500/30">
-                  <span className="text-6xl font-bold text-[#FFD700]/40">1</span>
+                <div className="w-24 h-32 sm:w-28 sm:h-40 md:w-36 md:h-52 mt-2 md:mt-4 bg-gradient-to-b from-[#FFD700]/15 to-[#21262d] border md:border-2 border-[#FFD700]/60 rounded-t-xl md:rounded-t-2xl flex items-end justify-center pb-4 sm:pb-6 md:pb-8 shadow-2xl shadow-yellow-500/30">
+                  <span className="text-4xl sm:text-5xl md:text-6xl font-bold text-[#FFD700]/40">1</span>
                 </div>
               </Link>
             )}
@@ -306,8 +306,8 @@ export function RankingsTable() {
             {/* 3rd Place - Right */}
             {thirdPlace && (
               <Link href={`/profile/${thirdPlace.username}`} className="flex flex-col items-center group">
-                <div className="relative mb-6">
-                  <div className="w-24 h-24 rounded-full overflow-hidden ring-4 ring-[#CD7F32] group-hover:ring-blue-500 transition-all shadow-xl shadow-orange-800/20">
+                <div className="relative mb-3 md:mb-6">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full overflow-hidden ring-2 md:ring-4 ring-[#CD7F32] group-hover:ring-blue-500 transition-all shadow-xl shadow-orange-800/20">
                     <Image
                       src={thirdPlace.avatar_url}
                       alt={thirdPlace.username}
@@ -317,15 +317,15 @@ export function RankingsTable() {
                       unoptimized
                     />
                   </div>
-                  <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#CD7F32] to-[#B87333] text-black text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap shadow-lg">
+                  <div className="absolute -bottom-2 md:-bottom-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#CD7F32] to-[#B87333] text-black text-[10px] md:text-xs font-bold px-2 md:px-3 py-0.5 md:py-1 rounded-full whitespace-nowrap shadow-lg">
                     🥉 Bronze
                   </div>
                 </div>
-                <p className="text-[#e6edf3] font-bold text-base mt-2 group-hover:text-[#58a6ff] transition-colors">{thirdPlace.username}</p>
-                <p className="text-[#CD7F32] text-sm font-bold">{formatScore(thirdPlace.score)} pts</p>
+                <p className="text-[#e6edf3] font-bold text-xs sm:text-sm md:text-base mt-1 md:mt-2 group-hover:text-[#58a6ff] transition-colors truncate max-w-[80px] sm:max-w-none">{thirdPlace.username}</p>
+                <p className="text-[#CD7F32] text-xs md:text-sm font-bold">{formatScore(thirdPlace.score)} pts</p>
                 {/* Bronze Podium */}
-                <div className="w-32 h-28 mt-4 bg-gradient-to-b from-[#CD7F32]/10 to-[#21262d] border-2 border-[#CD7F32]/50 rounded-t-2xl flex items-end justify-center pb-6 shadow-2xl shadow-orange-800/20">
-                  <span className="text-5xl font-bold text-[#CD7F32]/40">3</span>
+                <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-28 mt-2 md:mt-4 bg-gradient-to-b from-[#CD7F32]/10 to-[#21262d] border md:border-2 border-[#CD7F32]/50 rounded-t-xl md:rounded-t-2xl flex items-end justify-center pb-3 md:pb-6 shadow-2xl shadow-orange-800/20">
+                  <span className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#CD7F32]/40">3</span>
                 </div>
               </Link>
             )}
