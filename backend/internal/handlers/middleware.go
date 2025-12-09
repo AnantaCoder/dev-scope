@@ -51,7 +51,7 @@ func getAllowedOrigin(origin string) string {
 
 	// Normalize frontend URL (remove trailing slash)
 	frontendURL = strings.TrimSuffix(frontendURL, "/")
-	
+
 	// List of allowed origins
 	allowedOrigins := []string{
 		frontendURL,
@@ -68,7 +68,7 @@ func getAllowedOrigin(origin string) string {
 	for _, allowed := range allowedOrigins {
 		// Normalize allowed origin
 		allowed = strings.TrimSuffix(allowed, "/")
-		
+
 		if origin == allowed {
 			return origin
 		}
