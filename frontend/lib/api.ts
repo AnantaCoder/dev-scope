@@ -182,7 +182,9 @@ export const api = {
     fail_count: number;
     duration: string;
   }> {
-    const { data } = await axiosInstance.post("/api/admin/update-all-private-data");
+    const { data } = await axiosInstance.post(
+      "/api/admin/update-all-private-data"
+    );
     return data;
   },
 };
