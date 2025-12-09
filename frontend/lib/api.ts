@@ -9,7 +9,7 @@ import type {
   ExtendedUserResponse,
 } from "@/types";
 
-const API_BASE = process.env.NEXT_PUBLIC_GO_API_URL || "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 const axiosInstance = axios.create({
   baseURL: API_BASE,
@@ -17,6 +17,7 @@ const axiosInstance = axios.create({
     "Content-Type": "application/json",
   },
   timeout: 30000, // 30 seconds
+  withCredentials: true, // Include cookies for authentication
 });
 
 export const api = {
@@ -56,6 +57,49 @@ export const api = {
     const { data } = await axiosInstance.get<ExtendedUserResponse>(
       `/api/user/${username}/extended`
     );
+    return data;
+  },
+
+  // Auth endpoints
+  async getCurrentUser(): Promise<any> {
+    try {
+      const { data } = await axiosInstance.get("/api/auth/me");
+      return data;
+    } catch (error) {
+      return { error: true, message: "Not authenticated" };
+    }
+  },
+
+  async getFullUserData(): Promise<any> {
+    try {
+      const { data } = await axiosInstance.get("/api/auth/me/full");
+      return data;
+    } catch (error) {
+      return { error: true, message: "Failed to fetch full user data" };
+    }
+  },
+
+  async logout(): Promise<void> {
+    await axiosInstance.post("/api/auth/logout");
+  },
+
+  // Rankings endpoints
+  async getRankings(page: number = 1, pageSize: number = 50): Promise<any> {
+    const { data } = await axiosInstance.get("/api/rankings", {
+      params: { page, page_size: pageSize },
+    });
+    return data;
+  },
+
+  async getUserRanking(username: string): Promise<any> {
+    const { data } = await axiosInstance.get(`/api/rankings/${username}`);
+    return data;
+  },
+
+  async updateUserRanking(username: string): Promise<any> {
+    const { data } = await axiosInstance.post("/api/rankings/update", {
+      username,
+    });
     return data;
   },
 };

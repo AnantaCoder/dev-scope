@@ -2,6 +2,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -16,20 +17,22 @@ import (
 
 // Server holds the application state
 type Server struct {
-	service     *service.GitHubService
-	cache       *cache.Cache
-	config      *config.Config
-	startTime   time.Time
-	aiLimiter   *RateLimiter
+	service        *service.GitHubService
+	rankingService *service.RankingService
+	cache          *cache.Cache
+	config         *config.Config
+	startTime      time.Time
+	aiLimiter      *RateLimiter
 }
 
 // NewServer creates a new server instance
-func NewServer(cfg *config.Config, c *cache.Cache, svc *service.GitHubService) *Server {
+func NewServer(cfg *config.Config, c *cache.Cache, svc *service.GitHubService, rankingSvc *service.RankingService) *Server {
 	return &Server{
-		service:   svc,
-		cache:     c,
-		config:    cfg,
-		startTime: time.Now(),
+		service:        svc,
+		rankingService: rankingSvc,
+		cache:          c,
+		config:         cfg,
+		startTime:      time.Now(),
 		// AI rate limit: 10 requests per minute per IP
 		aiLimiter: NewRateLimiter(10, time.Minute),
 	}
@@ -48,14 +51,14 @@ func (s *Server) HomeHandler(w http.ResponseWriter, r *http.Request) {
 			"Native Go performance",
 		},
 		"endpoints": map[string]string{
-			"GET /api/status/{username}":      "Fetch GitHub status for a username",
+			"GET /api/status/{username}":        "Fetch GitHub status for a username",
 			"GET /api/user/{username}/extended": "Fetch extended user info with tech stack & streak",
-			"POST /api/status":                "Fetch GitHub status (JSON body)",
-			"POST /api/batch":                 "Fetch status for multiple users",
-			"POST /api/ai/compare":            "AI-powered user comparison",
-			"GET /api/health":                 "Health check with cache stats",
-			"GET /api/cache/stats":            "Cache statistics",
-			"POST /api/cache/clear":           "Clear cache",
+			"POST /api/status":                  "Fetch GitHub status (JSON body)",
+			"POST /api/batch":                   "Fetch status for multiple users",
+			"POST /api/ai/compare":              "AI-powered user comparison",
+			"GET /api/health":                   "Health check with cache stats",
+			"GET /api/cache/stats":              "Cache statistics",
+			"POST /api/cache/clear":             "Clear cache",
 		},
 	}
 	writeJSON(w, http.StatusOK, response)
@@ -105,6 +108,20 @@ func (s *Server) GetStatusByPathHandler(w http.ResponseWriter, r *http.Request) 
 		}
 		writeJSON(w, status, result)
 		return
+	}
+
+	// Update ranking in background (don't block response)
+	if s.rankingService != nil {
+		go func(user string) {
+			// Use background context so it doesn't get cancelled when request ends
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+
+			if err := s.rankingService.UpdateUserRanking(ctx, user); err != nil {
+				// Log but don't fail the request
+				fmt.Printf("⚠️ [Ranking] Failed to update ranking for %s: %v\n", user, err)
+			}
+		}(username)
 	}
 
 	writeJSON(w, http.StatusOK, result)
@@ -183,6 +200,20 @@ func (s *Server) GetExtendedUserHandler(w http.ResponseWriter, r *http.Request) 
 		}
 		writeJSON(w, status, models.APIResponse{Error: true, Message: err.Error()})
 		return
+	}
+
+	// Update ranking in background (don't block response)
+	if s.rankingService != nil {
+		go func(user string) {
+			// Use background context so it doesn't get cancelled when request ends
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+
+			if err := s.rankingService.UpdateUserRanking(ctx, user); err != nil {
+				// Log but don't fail the request
+				fmt.Printf("⚠️ [Ranking] Failed to update ranking for %s: %v\n", user, err)
+			}
+		}(username)
 	}
 
 	writeJSON(w, http.StatusOK, map[string]interface{}{"error": false, "data": result})

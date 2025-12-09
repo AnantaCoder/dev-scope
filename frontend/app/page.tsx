@@ -7,6 +7,7 @@ import { BackendErrorBanner } from "@/components/BackendErrorBanner";
 import { UserProfileCard } from "@/components/UserProfileCard";
 import { UserComparisonCard } from "@/components/UserComparisonCard";
 import { Footer } from "@/components/Footer";
+import { Navbar } from "@/components/Navbar";
 import Image from "next/image";
 
 export default function Home() {
@@ -22,7 +23,6 @@ export default function Home() {
   const [cacheStats, setCacheStats] = useState<CacheStats | null>(null);
   const [aiComparison, setAiComparison] = useState<string>("");
   const [loadingAI, setLoadingAI] = useState<boolean>(false);
-  const [showStatsDropdown, setShowStatsDropdown] = useState(false);
   const [totalSearches, setTotalSearches] = useState(0);
   const [clearing, setClearing] = useState(false);
 
@@ -85,137 +85,9 @@ export default function Home() {
     setTimeout(() => setClearing(false), 1000);
   };
 
-  const hitRate = cacheStats ? parseFloat(cacheStats.hit_rate) : 0;
-
   return (
     <div className="min-h-screen flex flex-col bg-[#0d1117] text-[#e6edf3]">
-      {/* Premium Header with Stats */}
-      <header className="bg-[#161b22]/95 backdrop-blur-md border-b border-[#30363d] sticky top-0 z-50">
-        <div className="max-w-[1400px] mx-auto px-4 lg:px-8">
-          <div className="h-16 flex items-center justify-between">
-            {/* Logo */}
-            <div className="flex items-center gap-3">
-              <Image src="/logo.svg" alt="DevScope" width={36} height={36} className="rounded-lg" />
-              <div className="hidden sm:block">
-                <h1 className="text-lg font-semibold tracking-tight">DevScope</h1>
-                <p className="text-[10px] text-[#8b949e] -mt-0.5">GitHub Analytics</p>
-              </div>
-            </div>
-
-            {/* Center Stats Pills */}
-            <div className="hidden md:flex items-center gap-2">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0d1117] border border-[#30363d] rounded-full">
-                <div className="w-2 h-2 rounded-full bg-[#238636] animate-pulse"></div>
-                <span className="text-xs text-[#8b949e]">Live</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-[#238636]/10 to-[#238636]/5 border border-[#238636]/30 rounded-full">
-                <svg className="w-3.5 h-3.5 text-[#238636]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                <span className="text-xs font-medium text-[#238636]">{hitRate.toFixed(0)}% Fast</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-[#a371f7]/10 to-[#a371f7]/5 border border-[#a371f7]/30 rounded-full">
-                <svg className="w-3.5 h-3.5 text-[#a371f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <span className="text-xs font-medium text-[#a371f7]">AI Powered</span>
-              </div>
-            </div>
-
-            {/* Right Side - Analytics Button */}
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <button
-                  onClick={() => setShowStatsDropdown(!showStatsDropdown)}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] rounded-lg transition-all group"
-                >
-                  <svg className="w-4 h-4 text-[#58a6ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                  <span className="text-sm font-medium hidden sm:inline">Insights</span>
-                  <span className="flex items-center justify-center w-5 h-5 text-[10px] font-bold bg-[#58a6ff] text-white rounded-full">{cacheStats?.size || 0}</span>
-                  <svg className={`w-3 h-3 text-[#8b949e] transition-transform ${showStatsDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-
-                {/* Dropdown */}
-                {showStatsDropdown && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setShowStatsDropdown(false)}></div>
-                    <div className="absolute right-0 top-full mt-2 w-72 bg-[#161b22] border border-[#30363d] rounded-xl shadow-2xl z-50 overflow-hidden">
-                      <div className="p-4 border-b border-[#30363d] bg-gradient-to-r from-[#58a6ff]/10 to-transparent">
-                        <div className="flex items-center justify-between">
-                          <h3 className="font-semibold text-sm">Performance Insights</h3>
-                          <span className="px-2 py-0.5 text-[10px] font-medium bg-[#238636] text-white rounded-full">Live</span>
-                        </div>
-                      </div>
-                      <div className="p-4 space-y-3">
-                        <div className="grid grid-cols-2 gap-2">
-                          <div className="p-3 bg-[#0d1117] rounded-lg border border-[#30363d]">
-                            <div className="flex items-center gap-2 mb-1">
-                              <svg className="w-4 h-4 text-[#58a6ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
-                              </svg>
-                              <span className="text-[10px] text-[#8b949e] uppercase">Cached</span>
-                            </div>
-                            <p className="text-xl font-bold text-[#e6edf3]">{cacheStats?.size || 0}</p>
-                          </div>
-                          <div className="p-3 bg-[#0d1117] rounded-lg border border-[#30363d]">
-                            <div className="flex items-center gap-2 mb-1">
-                              <svg className="w-4 h-4 text-[#238636]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                              </svg>
-                              <span className="text-[10px] text-[#8b949e] uppercase">Speed</span>
-                            </div>
-                            <p className="text-xl font-bold text-[#238636]">{cacheStats?.hit_rate || 0}%</p>
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between p-2 bg-[#0d1117] rounded-lg">
-                            <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 rounded-full bg-[#238636]"></div>
-                              <span className="text-xs text-[#8b949e]">Cache Hits</span>
-                            </div>
-                            <span className="text-sm font-semibold text-[#238636]">{cacheStats?.hits || 0}</span>
-                          </div>
-                          <div className="flex items-center justify-between p-2 bg-[#0d1117] rounded-lg">
-                            <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 rounded-full bg-[#f85149]"></div>
-                              <span className="text-xs text-[#8b949e]">Cache Misses</span>
-                            </div>
-                            <span className="text-sm font-semibold text-[#f85149]">{cacheStats?.misses || 0}</span>
-                          </div>
-                          <div className="flex items-center justify-between p-2 bg-[#0d1117] rounded-lg">
-                            <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 rounded-full bg-[#a371f7]"></div>
-                              <span className="text-xs text-[#8b949e]">Session Searches</span>
-                            </div>
-                            <span className="text-sm font-semibold text-[#a371f7]">{totalSearches}</span>
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={clearCache}
-                          disabled={clearing}
-                          className={`w-full py-2 text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-2 ${clearing ? 'bg-[#238636]/20 border border-[#238636] text-[#238636]' : 'bg-[#21262d] hover:bg-[#f85149]/20 border border-[#30363d] hover:border-[#f85149] text-[#8b949e] hover:text-[#f85149]'}`}
-                        >
-                          {clearing ? (
-                            <><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>Cleared!</>
-                          ) : (
-                            <><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>Clear Cache</>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="flex-1">
         <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-6 lg:py-8">
@@ -390,13 +262,20 @@ export default function Home() {
             <aside className="xl:col-span-4 space-y-4">
               {/* Quick Stats Card */}
               <div className="bg-[#161b22] border border-[#30363d] rounded-xl overflow-hidden">
-                <div className="px-4 py-3 border-b border-[#30363d]">
+                <div className="px-4 py-3 border-b border-[#30363d] flex items-center justify-between">
                   <h3 className="text-sm font-semibold flex items-center gap-2">
                     <svg className="w-4 h-4 text-[#f0883e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                     Quick Stats
                   </h3>
+                  <button
+                    onClick={clearCache}
+                    disabled={clearing || !cacheStats?.size}
+                    className="px-2 py-1 text-xs font-medium text-[#f85149] hover:bg-[#f8514926] disabled:opacity-50 disabled:cursor-not-allowed rounded transition-all"
+                  >
+                    {clearing ? "Clearing..." : "Clear Cache"}
+                  </button>
                 </div>
                 <div className="p-4 grid grid-cols-2 gap-3">
                   <div className="p-3 bg-[#0d1117] rounded-lg text-center">

@@ -1,16 +1,21 @@
-// GitHub Status API - Pure Go Implementation
-// Clean Architecture with Package Structure
+// GitHub Analytics API - Full-Stack with Authentication
+// Clean Architecture with PostgreSQL Integration
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
+	"github-api/backend/internal/auth"
 	"github-api/backend/internal/cache"
 	"github-api/backend/internal/config"
+	"github-api/backend/internal/database"
 	"github-api/backend/internal/handlers"
+	"github-api/backend/internal/repository"
 	"github-api/backend/internal/service"
 
 	"github.com/joho/godotenv"
@@ -29,60 +34,133 @@ func main() {
 	// Load configuration
 	cfg := config.Default()
 
+	// Validate required configuration
+	if cfg.DatabaseURL == "" {
+		log.Fatal("❌ DATABASE_URL is required")
+	}
+	if cfg.GitHubClientID == "" || cfg.GitHubClientSecret == "" {
+		log.Fatal("❌ GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET are required")
+	}
+
+	// Initialize database
+	dbCfg := database.Config{
+		ConnectionString: cfg.DatabaseURL,
+		MaxOpenConns:     cfg.MaxDBConnections,
+		MaxIdleConns:     5,
+		ConnMaxLifetime:  cfg.DBConnMaxLifetime,
+	}
+
+	db, err := database.New(dbCfg)
+	if err != nil {
+		log.Fatalf("❌ Failed to connect to database: %v", err)
+	}
+	defer db.Close()
+
+	// Initialize database schema
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	if err := db.InitSchema(ctx); err != nil {
+		cancel()
+		log.Fatalf("❌ Failed to initialize schema: %v", err)
+	}
+	cancel()
+
 	// Initialize cache
 	cacheInstance := cache.New(cfg.MaxCacheSize, cfg.CacheTTL)
 
-	// Initialize service
+	// Initialize repositories
+	userRepo := repository.NewUserRepository(db)
+	rankingRepo := repository.NewRankingRepository(db)
+
+	// Initialize services
 	githubService := service.NewGitHubService(cfg, cacheInstance)
+	rankingService := service.NewRankingService(rankingRepo, githubService)
 
-	// Initialize server/handlers
-	server := handlers.NewServer(cfg, cacheInstance, githubService)
+	// Initialize auth service
+	authConfig := auth.GitHubOAuthConfig{
+		ClientID:     cfg.GitHubClientID,
+		ClientSecret: cfg.GitHubClientSecret,
+		RedirectURL:  cfg.GitHubRedirectURL,
+		Scopes:       []string{"read:user", "user:email", "repo"},
+	}
+	authService := auth.NewAuthService(authConfig, userRepo)
 
-	// Setup routes
+	// Initialize handlers
+	server := handlers.NewServer(cfg, cacheInstance, githubService, rankingService)
+	authHandler := handlers.NewAuthHandler(authService, userRepo, cfg.FrontendURL)
+	rankingHandler := handlers.NewRankingHandler(rankingService)
+	authMiddleware := handlers.NewAuthMiddleware(authService)
+
+	// Setup routes - Public endpoints
 	http.HandleFunc("/", handlers.CORSMiddleware(server.HomeHandler))
 	http.HandleFunc("/api/health", handlers.CORSMiddleware(server.HealthHandler))
+
+	// Auth endpoints
+	http.HandleFunc("/api/auth/login", handlers.CORSMiddleware(authHandler.LoginHandler))
+	http.HandleFunc("/api/auth/callback", authHandler.CallbackHandler) // No CORS for OAuth callback
+	http.HandleFunc("/api/auth/logout", handlers.CORSMiddleware(authHandler.LogoutHandler))
+	http.HandleFunc("/api/auth/me", handlers.CORSMiddleware(authMiddleware.RequireAuth(authHandler.MeHandler)))
+	http.HandleFunc("/api/auth/me/full", handlers.CORSMiddleware(authMiddleware.RequireAuth(authHandler.MeFullHandler)))
+
+	// Rankings endpoints (public)
+	http.HandleFunc("/api/rankings", handlers.CORSMiddleware(rankingHandler.GetRankingsHandler))
+	http.HandleFunc("/api/rankings/", handlers.CORSMiddleware(rankingHandler.GetUserRankHandler))
+
+	// Protected endpoints (require authentication)
+	http.HandleFunc("/api/rankings/update", handlers.CORSMiddleware(authMiddleware.RequireAuth(rankingHandler.UpdateUserRankHandler)))
+
+	// Cache endpoints (public for now, can be protected later)
 	http.HandleFunc("/api/cache/stats", handlers.CORSMiddleware(server.CacheStatsHandler))
 	http.HandleFunc("/api/cache/clear", handlers.CORSMiddleware(server.CacheClearHandler))
-	http.HandleFunc("/api/status/", handlers.CORSMiddleware(server.GetStatusByPathHandler))
-	http.HandleFunc("/api/status", handlers.CORSMiddleware(func(w http.ResponseWriter, r *http.Request) {
+
+	// User lookup endpoints (optionally authenticated)
+	http.HandleFunc("/api/status/", handlers.CORSMiddleware(authMiddleware.OptionalAuth(server.GetStatusByPathHandler)))
+	http.HandleFunc("/api/status", handlers.CORSMiddleware(authMiddleware.OptionalAuth(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			server.GetStatusByBodyHandler(w, r)
-		} else if r.Method == "GET" {
+		} else {
 			http.NotFound(w, r)
 		}
-	}))
-	http.HandleFunc("/api/batch", handlers.CORSMiddleware(func(w http.ResponseWriter, r *http.Request) {
+	})))
+	http.HandleFunc("/api/batch", handlers.CORSMiddleware(authMiddleware.OptionalAuth(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			server.BatchHandler(w, r)
 		} else {
 			http.NotFound(w, r)
 		}
-	}))
-	http.HandleFunc("/api/ai/compare", handlers.CORSMiddleware(func(w http.ResponseWriter, r *http.Request) {
+	})))
+	http.HandleFunc("/api/ai/compare", handlers.CORSMiddleware(authMiddleware.OptionalAuth(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			server.AIComparisonHandler(w, r)
 		} else {
 			http.NotFound(w, r)
 		}
-	}))
-	http.HandleFunc("/api/user/", handlers.CORSMiddleware(server.GetExtendedUserHandler))
+	})))
+	http.HandleFunc("/api/user/", handlers.CORSMiddleware(authMiddleware.OptionalAuth(server.GetExtendedUserHandler)))
 
 	// Print startup info
-	fmt.Println("=" + strings.Repeat("=", 69))
-	fmt.Println("🚀 GitHub Status API - Pure Go with Clean Architecture")
-	fmt.Println("=" + strings.Repeat("=", 69))
+	fmt.Println("=" + strings.Repeat("=", 75))
+	fmt.Println("🚀 DevScope API - Full-Stack GitHub Analytics with Authentication")
+	fmt.Println("=" + strings.Repeat("=", 75))
 	fmt.Printf("✅ Server: http://localhost%s\n", cfg.ServerPort)
+	fmt.Printf("🗄️  Database: PostgreSQL (Neon) Connected\n")
 	fmt.Printf("💾 Cache: Enabled (TTL: %v, Max: %d)\n", cfg.CacheTTL, cfg.MaxCacheSize)
-	fmt.Printf("📦 Architecture: Clean package-based structure\n")
+	fmt.Printf("🔐 Auth: GitHub OAuth Enabled\n")
+	fmt.Printf("📊 Rankings: Enabled with scoring system\n")
+	fmt.Printf("📦 Architecture: Clean MVC with repository pattern\n")
 	fmt.Printf("⚡ Concurrency: Batch processing with goroutines\n")
-	fmt.Printf("🔥 Performance: Native Go - Zero dependencies\n")
 	if cfg.NvidiaAPIKey != "" {
 		fmt.Printf("🤖 AI: NVIDIA API Enabled\n")
 	} else {
 		fmt.Printf("⚠️  AI: NVIDIA API key not configured\n")
 	}
-	fmt.Println("=" + strings.Repeat("=", 69))
-	fmt.Printf("\nStarting server on port %s...\n", cfg.ServerPort)
+	fmt.Println("=" + strings.Repeat("=", 75))
+	fmt.Println("\n📌 Endpoints:")
+	fmt.Println("   Auth:     POST /api/auth/login, /api/auth/logout, GET /api/auth/me")
+	fmt.Println("   Rankings: GET  /api/rankings, /api/rankings/{username}")
+	fmt.Println("   Users:    GET  /api/user/{username}, POST /api/batch")
+	fmt.Println("   AI:       POST /api/ai/compare")
+	fmt.Println("   Cache:    GET  /api/cache/stats, POST /api/cache/clear")
+	fmt.Printf("\nStarting server on port %s...\n\n", cfg.ServerPort)
 
 	// Start server
 	log.Fatal(http.ListenAndServe(cfg.ServerPort, nil))

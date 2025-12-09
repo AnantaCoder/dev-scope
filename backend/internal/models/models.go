@@ -3,31 +3,46 @@ package models
 
 // GitHubUser represents the GitHub user data structure
 type GitHubUser struct {
-	Login           string `json:"login"`
-	Name            string `json:"name"`
-	Bio             string `json:"bio"`
-	PublicRepos     int    `json:"public_repos"`
-	Followers       int    `json:"followers"`
-	Following       int    `json:"following"`
-	CreatedAt       string `json:"created_at"`
-	UpdatedAt       string `json:"updated_at"`
-	AvatarURL       string `json:"avatar_url"`
-	HTMLURL         string `json:"html_url"`
-	Location        string `json:"location"`
-	Company         string `json:"company"`
-	Blog            string `json:"blog"`
-	TwitterUsername string `json:"twitter_username"`
-	PublicGists     int    `json:"public_gists"`
+	ID                int64  `json:"id"`
+	Login             string `json:"login"`
+	Name              string `json:"name"`
+	Bio               string `json:"bio"`
+	PublicRepos       int    `json:"public_repos"`
+	TotalPrivateRepos int    `json:"total_private_repos,omitempty"`
+	OwnedPrivateRepos int    `json:"owned_private_repos,omitempty"`
+	Followers         int    `json:"followers"`
+	Following         int    `json:"following"`
+	CreatedAt         string `json:"created_at"`
+	UpdatedAt         string `json:"updated_at"`
+	AvatarURL         string `json:"avatar_url"`
+	HTMLURL           string `json:"html_url"`
+	Location          string `json:"location"`
+	Company           string `json:"company"`
+	Blog              string `json:"blog"`
+	TwitterUsername   string `json:"twitter_username"`
+	PublicGists       int    `json:"public_gists"`
+	PrivateGists      int    `json:"private_gists,omitempty"`
+	DiskUsage         int    `json:"disk_usage,omitempty"`
+	Collaborators     int    `json:"collaborators,omitempty"`
+	Plan              *Plan  `json:"plan,omitempty"`
+}
+
+// Plan represents GitHub plan info (only available for authenticated user)
+type Plan struct {
+	Name          string `json:"name"`
+	Space         int    `json:"space"`
+	PrivateRepos  int    `json:"private_repos"`
+	Collaborators int    `json:"collaborators"`
 }
 
 // GitHubRepo represents a GitHub repository
 type GitHubRepo struct {
-	Name        string `json:"name"`
-	Language    string `json:"language"`
-	Stars       int    `json:"stargazers_count"`
-	Forks       int    `json:"forks_count"`
-	Description string `json:"description"`
-	UpdatedAt   string `json:"updated_at"`
+	Name            string `json:"name"`
+	Language        string `json:"language"`
+	StargazersCount int    `json:"stargazers_count"`
+	ForksCount      int    `json:"forks_count"`
+	Description     string `json:"description"`
+	UpdatedAt       string `json:"updated_at"`
 }
 
 // GitHubEvent represents a GitHub event for streak calculation
