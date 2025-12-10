@@ -244,18 +244,11 @@ export default function ProfilePage() {
                 <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-8">
                     {/* Profile Header */}
                     <div className="premium-card rounded-2xl overflow-hidden mb-6 relative">
-                        {/* Optimized video background - WebM with MP4 fallback */}
-                        <video
-                            autoPlay
-                            loop
-                            muted
-                            playsInline
-                            preload="metadata"
-                            className="absolute inset-0 w-full h-full object-cover opacity-30"
-                        >
-                            <source src="/glitch.webm" type="video/webm" />
-                            <source src="/glitch.mp4" type="video/mp4" />
-                        </video>
+                        {/* Glitch background image */}
+                        <div 
+                            className="absolute inset-0 w-full h-full bg-cover bg-center opacity-30"
+                            style={{ backgroundImage: "url('/glitch.png')" }}
+                        />
                         <div className="h-32 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-green-500/20 relative z-10"></div>
                         <div className="px-6 pb-6 relative z-10">
                             <div className="flex flex-col md:flex-row md:items-end gap-4 -mt-16">
