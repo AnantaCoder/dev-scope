@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/Navbar';
@@ -22,32 +22,27 @@ export default function SearchHistoryPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
-    const pageSize = 20;
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalEntries, setTotalEntries] = useState(0);
+    const pageSize = 50;
+    const abortControllerRef = useRef<AbortController | null>(null);
 
-    // Calculate paginated data
-    const totalPages = Math.ceil(history.length / pageSize);
-    const paginatedHistory = history.slice(
-        (currentPage - 1) * pageSize,
-        currentPage * pageSize
-    );
-
-    useEffect(() => {
-        if (!loading && !user) {
-            router.push('/');
-            return;
+    const fetchSearchHistory = useCallback(async () => {
+        // Cancel previous request if still pending
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
         }
 
-        if (user) {
-            fetchSearchHistory();
-        }
-    }, [user, loading, router]);
+        const abortController = new AbortController();
+        abortControllerRef.current = abortController;
 
-    const fetchSearchHistory = async () => {
         try {
             setIsLoading(true);
+            setError(null); // Clear any previous errors
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-            const response = await fetch(`${apiUrl}/api/search/history`, {
+            const response = await fetch(`${apiUrl}/api/search/history?page=${currentPage}&limit=${pageSize}`, {
                 credentials: 'include',
+                signal: abortController.signal,
             });
 
             if (!response.ok) {
@@ -61,17 +56,46 @@ export default function SearchHistoryPage() {
                     (item: SearchHistoryItem) => item.searched_username.toLowerCase() !== user?.username?.toLowerCase()
                 );
                 setHistory(filteredHistory);
+                setTotalPages(data.total_pages || 1);
+                setTotalEntries(data.total_entries || 0);
+                setError(null); // Clear error on success
             } else {
                 setError(data.message || 'Failed to load search history');
+                setHistory([]); // Clear history on error
             }
         } catch (err) {
+            // Ignore abort errors
+            if (err instanceof Error && err.name === 'AbortError') {
+                return;
+            }
+            console.error('Search history fetch error:', err);
             setError(err instanceof Error ? err.message : 'An error occurred');
+            setHistory([]); // Clear history on error
         } finally {
             setIsLoading(false);
+            abortControllerRef.current = null;
         }
-    };
+    }, [currentPage, pageSize, user?.username]);
 
-    const formatDate = (dateString: string) => {
+    useEffect(() => {
+        if (!loading && !user) {
+            router.push('/');
+            return;
+        }
+
+        if (user) {
+            fetchSearchHistory();
+        }
+
+        // Cleanup function to abort pending requests
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+        };
+    }, [user, loading, router, fetchSearchHistory]);
+
+    const formatDate = useCallback((dateString: string) => {
         const date = new Date(dateString);
         const now = new Date();
         const diffMs = now.getTime() - date.getTime();
@@ -84,9 +108,9 @@ export default function SearchHistoryPage() {
         if (diffHours < 24) return `${diffHours}h ago`;
         if (diffDays < 7) return `${diffDays}d ago`;
         return date.toLocaleDateString();
-    };
+    }, []);
 
-    const getSearchTypeLabel = (type: string) => {
+    const getSearchTypeLabel = useCallback((type: string) => {
         switch (type) {
             case 'status':
                 return 'Status';
@@ -97,24 +121,38 @@ export default function SearchHistoryPage() {
             default:
                 return type;
         }
-    };
+    }, []);
 
-    const handleUsernameClick = (username: string) => {
+    const handleUsernameClick = useCallback((username: string) => {
         router.push(`/profile/${username}`);
-    };
+    }, [router]);
 
-    if (loading || isLoading) {
-        return (
-            <div className="min-h-screen flex flex-col premium-bg">
-                <Navbar />
-                <div className="flex-1 flex items-center justify-center">
-                    <div className="text-center">
-                        <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-500/20 border-t-blue-500"></div>
-                        <p className="mt-4 text-gray-400">Loading your search history...</p>
+    // Memoize loading component to prevent re-renders
+    const loadingComponent = useMemo(() => (
+        <div className="min-h-screen flex flex-col premium-bg">
+            <Navbar />
+            <div className="flex-1 flex items-center justify-center">
+                <div className="text-center">
+                    {/* Musical Bars Loader */}
+                    <div className="flex items-end justify-center gap-1.5 h-12 mb-4">
+                        <div className="w-1.5 bg-gradient-to-t from-blue-500 to-cyan-400 rounded-full animate-[bounce_0.6s_ease-in-out_infinite]" style={{ height: '20%' }}></div>
+                        <div className="w-1.5 bg-gradient-to-t from-blue-500 to-cyan-400 rounded-full animate-[bounce_0.6s_ease-in-out_0.1s_infinite]" style={{ height: '40%' }}></div>
+                        <div className="w-1.5 bg-gradient-to-t from-blue-500 to-cyan-400 rounded-full animate-[bounce_0.6s_ease-in-out_0.2s_infinite]" style={{ height: '60%' }}></div>
+                        <div className="w-1.5 bg-gradient-to-t from-blue-500 to-cyan-400 rounded-full animate-[bounce_0.6s_ease-in-out_0.3s_infinite]" style={{ height: '80%' }}></div>
+                        <div className="w-1.5 bg-gradient-to-t from-blue-500 to-cyan-400 rounded-full animate-[bounce_0.6s_ease-in-out_0.4s_infinite]" style={{ height: '100%' }}></div>
+                        <div className="w-1.5 bg-gradient-to-t from-blue-500 to-cyan-400 rounded-full animate-[bounce_0.6s_ease-in-out_0.5s_infinite]" style={{ height: '80%' }}></div>
+                        <div className="w-1.5 bg-gradient-to-t from-blue-500 to-cyan-400 rounded-full animate-[bounce_0.6s_ease-in-out_0.6s_infinite]" style={{ height: '60%' }}></div>
+                        <div className="w-1.5 bg-gradient-to-t from-blue-500 to-cyan-400 rounded-full animate-[bounce_0.6s_ease-in-out_0.7s_infinite]" style={{ height: '40%' }}></div>
+                        <div className="w-1.5 bg-gradient-to-t from-blue-500 to-cyan-400 rounded-full animate-[bounce_0.6s_ease-in-out_0.8s_infinite]" style={{ height: '20%' }}></div>
                     </div>
+                    <p className="text-gray-400 text-sm">Loading your search history...</p>
                 </div>
             </div>
-        );
+        </div>
+    ), []);
+
+    if (loading || isLoading) {
+        return loadingComponent;
     }
 
     return (
@@ -130,18 +168,9 @@ export default function SearchHistoryPage() {
 
             <main className="flex-1 max-w-[1400px] mx-auto px-4 lg:px-8 py-8 w-full relative z-10">
                 {/* Page Header */}
-                <div className="mb-8">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="p-3 bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-xl backdrop-blur-sm">
-                            <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 className="text-3xl font-bold tracking-tight gradient-text">Search History</h1>
-                            <p className="text-gray-400 mt-1">Your recent GitHub profile searches</p>
-                        </div>
-                    </div>
+                <div className="mb-8 text-center">
+                    <h1 className="text-3xl font-bold tracking-tight gradient-text">Search History</h1>
+                    <p className="text-gray-400 mt-1">Your recent GitHub profile searches</p>
                 </div>
 
                 {error && (
@@ -165,21 +194,21 @@ export default function SearchHistoryPage() {
                     </div>
                 ) : (
                     <>
-                        <div className="space-y-3">
-                            {paginatedHistory.map((item) => (
+                        <div className="space-y-2">
+                            {history.map((item) => (
                                 <div
                                     key={item.id}
-                                    className="premium-card p-4 hover:scale-[1.01] hover:glow-blue transition-all cursor-pointer group"
+                                    className="premium-card p-3 hover:scale-[1.01] hover:glow-blue transition-all cursor-pointer group"
                                     onClick={() => handleUsernameClick(item.searched_username)}
                                 >
                                     <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-3">
                                             <div className="relative shrink-0">
                                                 <Image
                                                     src={`https://github.com/${item.searched_username}.png`}
                                                     alt={item.searched_username}
-                                                    width={48}
-                                                    height={48}
+                                                    width={40}
+                                                    height={40}
                                                     className="rounded-full border-2 border-white/20 group-hover:border-blue-500/50 group-hover:ring-2 group-hover:ring-blue-500/20 transition-all shadow-lg"
                                                     unoptimized
                                                     onError={(e) => {
@@ -193,10 +222,10 @@ export default function SearchHistoryPage() {
                                                 </div>
                                             </div>
                                             <div>
-                                                <h3 className="text-white font-semibold text-lg group-hover:gradient-text transition-all">
+                                                <h3 className="text-white font-semibold text-base group-hover:gradient-text transition-all">
                                                     {item.searched_username}
                                                 </h3>
-                                                <div className="flex items-center gap-2 mt-1">
+                                                <div className="flex items-center gap-2">
                                                     <span className="px-2 py-0.5 text-xs font-mono bg-white/5 border border-white/10 rounded text-gray-400 backdrop-blur-sm">
                                                         {getSearchTypeLabel(item.search_type)}
                                                     </span>
@@ -214,17 +243,17 @@ export default function SearchHistoryPage() {
                             ))}
                         </div>
 
-                        {/* Pagination */}
+                        {/* Pagination - Centered */}
                         {totalPages > 1 && (
-                            <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
+                            <div className="mt-8 flex flex-col items-center gap-4">
                                 <p className="text-sm text-gray-400">
-                                    Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, history.length)} of {history.length} searches
+                                    Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, totalEntries)} of {totalEntries} searches
                                 </p>
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                                         disabled={currentPage === 1}
-                                        className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-medium text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all backdrop-blur-sm"
+                                        className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-medium text-white hover:bg-white/10 hover:border-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all backdrop-blur-sm"
                                     >
                                         Previous
                                     </button>
@@ -234,7 +263,7 @@ export default function SearchHistoryPage() {
                                     <button
                                         onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                                         disabled={currentPage === totalPages}
-                                        className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-medium text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all backdrop-blur-sm"
+                                        className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-medium text-white hover:bg-white/10 hover:border-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all backdrop-blur-sm"
                                     >
                                         Next
                                     </button>

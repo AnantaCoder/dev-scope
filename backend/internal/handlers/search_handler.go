@@ -42,6 +42,16 @@ func (h *SearchHandler) GetSearchHistoryHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
+	// Get page from query params (default: 1)
+	page := 1
+	if pageStr := r.URL.Query().Get("page"); pageStr != "" {
+		if parsedPage, err := strconv.Atoi(pageStr); err == nil {
+			if parsedPage > 0 {
+				page = parsedPage
+			}
+		}
+	}
+
 	// Get limit from query params (default: 50, max: 100)
 	limit := 50
 	if limitStr := r.URL.Query().Get("limit"); limitStr != "" {
@@ -52,10 +62,52 @@ func (h *SearchHandler) GetSearchHistoryHandler(w http.ResponseWriter, r *http.R
 		}
 	}
 
+	// Calculate offset
+	offset := (page - 1) * limit
+
 	ctx := r.Context()
-	history, err := h.userRepo.GetUserSearchHistory(ctx, user.ID, limit)
-	if err != nil {
-		log.Printf("❌ [Search] Failed to get search history for user %d: %v", user.ID, err)
+
+	// Fetch count and history in parallel for better performance
+	type countResult struct {
+		count int
+		err   error
+	}
+	type historyResult struct {
+		history []models.SearchHistory
+		err     error
+	}
+
+	countChan := make(chan countResult, 1)
+	historyChan := make(chan historyResult, 1)
+
+	// Fetch count in goroutine
+	go func() {
+		count, err := h.userRepo.GetSearchHistoryCount(ctx, user.ID)
+		countChan <- countResult{count: count, err: err}
+	}()
+
+	// Fetch history in goroutine
+	go func() {
+		history, err := h.userRepo.GetUserSearchHistory(ctx, user.ID, limit, offset)
+		historyChan <- historyResult{history: history, err: err}
+	}()
+
+	// Wait for both results
+	countRes := <-countChan
+	historyRes := <-historyChan
+
+	// Check for errors
+	if countRes.err != nil {
+		log.Printf("❌ [Search] Failed to get search history count for user %d: %v", user.ID, countRes.err)
+		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"error":   true,
+			"message": "Failed to retrieve search history count",
+		})
+		return
+	}
+
+	if historyRes.err != nil {
+		log.Printf("❌ [Search] Failed to get search history for user %d: %v", user.ID, historyRes.err)
 		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
 			"error":   true,
 			"message": "Failed to retrieve search history",
@@ -63,10 +115,28 @@ func (h *SearchHandler) GetSearchHistoryHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
+	totalCount := countRes.count
+	history := historyRes.history
+
+	// Calculate total pages
+	totalPages := (totalCount + limit - 1) / limit
+	if totalPages < 1 {
+		totalPages = 1
+	}
+
+	// Add cache control headers (cache for 30 seconds)
+	w.Header().Set("Cache-Control", "private, max-age=30")
+
 	writeJSON(w, http.StatusOK, map[string]interface{}{
-		"error":   false,
-		"history": history,
-		"count":   len(history),
+		"error":         false,
+		"history":       history,
+		"total_pages":   totalPages,
+		"total_entries": totalCount,
+		"pagination": map[string]interface{}{
+			"page":  page,
+			"limit": limit,
+			"count": len(history),
+		},
 	})
 }
 

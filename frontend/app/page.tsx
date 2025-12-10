@@ -50,8 +50,11 @@ export default function Home() {
         setStreak(result.streak || null);
         fetchCacheStats();
       }
-    } catch (err: any) {
-      setError(err?.response?.data?.message || "Failed to fetch user. Make sure the Go server is running.");
+    } catch (err: unknown) {
+      const errorMessage = err && typeof err === 'object' && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : undefined;
+      setError(errorMessage || "Failed to fetch user. Make sure the Go server is running.");
     }
     finally { setLoading(false); }
   };

@@ -243,9 +243,19 @@ export default function ProfilePage() {
             <main className="flex-1 relative z-10">
                 <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-8">
                     {/* Profile Header */}
-                    <div className="premium-card rounded-2xl overflow-hidden mb-6">
-                        <div className="h-32 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-green-500/20"></div>
-                        <div className="px-6 pb-6">
+                    <div className="premium-card rounded-2xl overflow-hidden mb-6 relative">
+                        {/* Video background in the header box - for all users */}
+                        <video
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className="absolute inset-0 w-full h-full object-cover opacity-30"
+                        >
+                            <source src="/glitch.mp4" type="video/mp4" />
+                        </video>
+                        <div className="h-32 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-green-500/20 relative z-10"></div>
+                        <div className="px-6 pb-6 relative z-10">
                             <div className="flex flex-col md:flex-row md:items-end gap-4 -mt-16">
                                 <Image
                                     src={user.avatar_url}
@@ -259,6 +269,14 @@ export default function ProfilePage() {
                                         <h1 className="text-2xl font-bold">{user.name || user.login}</h1>
                                         {isOwnProfile && (
                                             <span className="px-2 py-0.5 text-xs font-medium bg-[#238636]/20 text-[#238636] border border-[#238636]/30 rounded-full">You</span>
+                                        )}
+                                        {user.login.toLowerCase() === 'anantacoder' && (
+                                            <span className="px-3 py-1 text-xs font-bold bg-gradient-to-r from-red-600 via-purple-600 to-blue-600 text-white border-2 border-yellow-400 rounded-full shadow-lg shadow-yellow-400/50 animate-pulse flex items-center gap-1">
+                                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                </svg>
+                                                ADMIN
+                                            </span>
                                         )}
                                         {ranking && ranking.rank_position <= 10 && (
                                             <span className="px-2 py-0.5 text-xs font-medium bg-[#ffd700]/20 text-[#ffd700] border border-[#ffd700]/30 rounded-full">Top 10</span>

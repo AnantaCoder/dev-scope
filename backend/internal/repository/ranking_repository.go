@@ -97,8 +97,8 @@ func (r *RankingRepository) GetTopRankings(ctx context.Context, limit, offset in
 }
 
 // GetTotalRankingsCount returns total number of ranked users
-func (r *RankingRepository) GetTotalRankingsCount(ctx context.Context) (int, error) {
-	var count int
+func (r *RankingRepository) GetTotalRankingsCount(ctx context.Context) (int64, error) {
+	var count int64
 	query := `SELECT COUNT(*) FROM user_rankings`
 	err := r.db.QueryRowContext(ctx, query).Scan(&count)
 	return count, err

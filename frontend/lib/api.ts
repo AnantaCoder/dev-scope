@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import type {
   GitHubUser,
   APIResponse,
@@ -19,6 +19,101 @@ const axiosInstance = axios.create({
   timeout: 30000, // 30 seconds
   withCredentials: true, // Include cookies for authentication
 });
+
+// Type guard for Axios errors
+function isAxiosError(
+  error: unknown
+): error is AxiosError<{ message?: string }> {
+  return axios.isAxiosError(error);
+}
+
+// Auth response types
+interface AuthUser {
+  id: number;
+  username: string;
+  name: string;
+  email?: string;
+  avatar_url: string;
+  bio?: string;
+  location?: string;
+  company?: string;
+  followers: number;
+  following: number;
+  public_repos: number;
+  has_private_access: boolean;
+}
+
+interface AuthResponse {
+  error: boolean;
+  message?: string;
+  user?: AuthUser;
+}
+
+// User ranking type
+interface UserRanking {
+  id: number;
+  username: string;
+  github_id: number;
+  avatar_url: string;
+  score: number;
+  followers: number;
+  public_repos: number;
+  total_stars: number;
+  total_forks: number;
+  contribution_count: number;
+  rank_position: number;
+  updated_at: string;
+}
+
+interface RankingsResponse {
+  error: boolean;
+  message?: string;
+  rankings: UserRanking[];
+  total: number;
+}
+
+interface RankingResponse {
+  error: boolean;
+  message?: string;
+  ranking?: {
+    id: number;
+    username: string;
+    github_id: number;
+    avatar_url: string;
+    score: number;
+    followers: number;
+    public_repos: number;
+    total_stars: number;
+    total_forks: number;
+    contribution_count: number;
+    rank_position: number;
+    updated_at: string;
+  };
+}
+
+interface PrivateDataResponse {
+  error: boolean;
+  message?: string;
+  data?: {
+    private_repos: number;
+    total_private_repos: number;
+    owned_private_repos: number;
+    private_gists: number;
+    disk_usage: number;
+    collaborators: number;
+    two_factor_enabled: boolean;
+    plan_name: string;
+    plan_space: number;
+    primary_email: string;
+    emails_count: number;
+    verified_emails_count: number;
+    organizations_count: number;
+    starred_repos_count: number;
+    watching_repos_count: number;
+    ssh_keys_count: number;
+    gpg_keys_count: number;
+  };
+}
 
 export const api = {
   async getHealth(): Promise<HealthResponse> {
@@ -64,38 +159,40 @@ export const api = {
         return {
           error: true,
           message: data.message || "Failed to fetch user data",
-        } as any;
+        };
       }
       return data.data as ExtendedUserResponse;
-    } catch (error: any) {
-      if (error.response?.status === 404) {
-        return { error: true, message: "User not found" } as any;
+    } catch (error: unknown) {
+      if (isAxiosError(error)) {
+        if (error.response?.status === 404) {
+          return { error: true, message: "User not found" };
+        }
+        if (error.response?.data) {
+          return {
+            error: true,
+            message: error.response.data.message || "Failed to fetch user data",
+          };
+        }
       }
-      if (error.response?.data) {
-        return {
-          error: true,
-          message: error.response.data.message || "Failed to fetch user data",
-        } as any;
-      }
-      return { error: true, message: "Failed to fetch user data" } as any;
+      return { error: true, message: "Failed to fetch user data" };
     }
   },
 
   // Auth endpoints
-  async getCurrentUser(): Promise<any> {
+  async getCurrentUser(): Promise<AuthResponse> {
     try {
       const { data } = await axiosInstance.get("/api/auth/me");
       return data;
-    } catch (error) {
+    } catch {
       return { error: true, message: "Not authenticated" };
     }
   },
 
-  async getFullUserData(): Promise<any> {
+  async getFullUserData(): Promise<AuthResponse> {
     try {
       const { data } = await axiosInstance.get("/api/auth/me/full");
       return data;
-    } catch (error) {
+    } catch {
       return { error: true, message: "Failed to fetch full user data" };
     }
   },
@@ -105,14 +202,17 @@ export const api = {
   },
 
   // Rankings endpoints
-  async getRankings(page: number = 1, pageSize: number = 50): Promise<any> {
+  async getRankings(
+    page: number = 1,
+    pageSize: number = 50
+  ): Promise<RankingsResponse> {
     try {
       const { data } = await axiosInstance.get("/api/rankings", {
         params: { page, page_size: pageSize },
       });
       return data;
-    } catch (error: any) {
-      console.error("Failed to fetch rankings:", error);
+    } catch {
+      console.error("Failed to fetch rankings");
       return {
         error: true,
         message: "Failed to fetch rankings",
@@ -122,41 +222,41 @@ export const api = {
     }
   },
 
-  async getUserRanking(username: string): Promise<any> {
+  async getUserRanking(username: string): Promise<RankingResponse> {
     try {
       const { data } = await axiosInstance.get(`/api/rankings/${username}`);
       return data;
-    } catch (error: any) {
+    } catch {
       return { error: true, message: "User not found in rankings" };
     }
   },
 
-  async updateUserRanking(username: string): Promise<any> {
+  async updateUserRanking(username: string): Promise<RankingResponse> {
     try {
       const { data } = await axiosInstance.post("/api/rankings/update", {
         username,
       });
       return data;
-    } catch (error: any) {
+    } catch {
       return { error: true, message: "Failed to update ranking" };
     }
   },
 
   // Private data endpoints (only accessible for own profile)
-  async getMyPrivateData(): Promise<any> {
+  async getMyPrivateData(): Promise<PrivateDataResponse> {
     try {
       const { data } = await axiosInstance.get("/api/me/private");
       return data;
-    } catch (error: any) {
+    } catch {
       return { error: true, message: "Failed to fetch private data" };
     }
   },
 
-  async refreshMyPrivateData(): Promise<any> {
+  async refreshMyPrivateData(): Promise<PrivateDataResponse> {
     try {
       const { data } = await axiosInstance.post("/api/me/private/refresh");
       return data;
-    } catch (error: any) {
+    } catch {
       return { error: true, message: "Failed to refresh private data" };
     }
   },

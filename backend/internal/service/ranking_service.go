@@ -139,7 +139,7 @@ func (s *RankingService) GetTopRankings(ctx context.Context, page, pageSize int)
 	return &models.RankingsResponse{
 		Error:    false,
 		Rankings: rankings,
-		Total:    total,
+		Total:    int(total),
 		Page:     page,
 		PageSize: pageSize,
 	}, nil

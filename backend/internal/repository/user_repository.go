@@ -195,17 +195,17 @@ func (r *UserRepository) AddSearchHistory(ctx context.Context, history *models.S
 	).Scan(&history.ID, &history.CreatedAt)
 }
 
-// GetUserSearchHistory retrieves user's search history
-func (r *UserRepository) GetUserSearchHistory(ctx context.Context, userID int, limit int) ([]models.SearchHistory, error) {
+// GetUserSearchHistory retrieves user's search history with pagination
+func (r *UserRepository) GetUserSearchHistory(ctx context.Context, userID int, limit int, offset int) ([]models.SearchHistory, error) {
 	query := `
 		SELECT id, user_id, searched_username, search_type, created_at
 		FROM search_history
 		WHERE user_id = $1
 		ORDER BY created_at DESC
-		LIMIT $2
+		LIMIT $2 OFFSET $3
 	`
 
-	rows, err := r.db.QueryContext(ctx, query, userID, limit)
+	rows, err := r.db.QueryContext(ctx, query, userID, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -221,6 +221,17 @@ func (r *UserRepository) GetUserSearchHistory(ctx context.Context, userID int, l
 	}
 
 	return history, rows.Err()
+}
+
+// GetSearchHistoryCount returns the total count of search history entries for a user
+func (r *UserRepository) GetSearchHistoryCount(ctx context.Context, userID int) (int, error) {
+	var count int64
+	query := `SELECT COUNT(*) FROM search_history WHERE user_id = $1`
+	err := r.db.QueryRowContext(ctx, query, userID).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return int(count), nil
 }
 
 // LogActivity logs user activity
