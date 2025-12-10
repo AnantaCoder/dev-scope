@@ -245,7 +245,7 @@ export default function ProfilePage() {
                     {/* Profile Header */}
                     <div className="premium-card rounded-2xl overflow-hidden mb-6 relative">
                         {/* Glitch background image */}
-                        <div 
+                        <div
                             className="absolute inset-0 w-full h-full bg-cover bg-center opacity-30"
                             style={{ backgroundImage: "url('/glitch.png')" }}
                         />
