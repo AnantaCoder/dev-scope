@@ -62,12 +62,14 @@ func main() {
 	defer db.Close()
 
 	// Initialize database schema
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	log.Println("🔄 Initializing database schema...")
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	if err := db.InitSchema(ctx); err != nil {
 		cancel()
 		log.Fatalf("❌ Failed to initialize schema: %v", err)
 	}
 	cancel()
+	log.Println("✅ Database schema initialized successfully")
 
 	// Initialize cache
 	cacheInstance := cache.New(cfg.MaxCacheSize, cfg.CacheTTL)

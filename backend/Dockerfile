@@ -48,9 +48,6 @@ USER appuser
 # Expose port (Railway uses PORT env variable)
 EXPOSE 8000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT:-8000}/health || exit 1
-
 # Run the application
+# Note: Railway will automatically detect when the app is ready by checking the PORT
 CMD ["./main"]
