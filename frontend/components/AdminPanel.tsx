@@ -155,8 +155,8 @@ export function AdminPanel() {
             {result && (
                 <div
                     className={`mt-4 p-3 rounded-lg text-sm ${result.success
-                            ? "bg-green-500/10 text-green-500 border border-green-500/30"
-                            : "bg-red-500/10 text-red-500 border border-red-500/30"
+                        ? "bg-green-500/10 text-green-500 border border-green-500/30"
+                        : "bg-red-500/10 text-red-500 border border-red-500/30"
                         }`}
                 >
                     <div className="flex items-center gap-2 font-medium">
@@ -175,6 +175,11 @@ export function AdminPanel() {
                         <div className="mt-2 text-xs opacity-80">
                             Success: {result.success_count} | Failed: {result.fail_count} |
                             Duration: {result.duration}
+                        </div>
+                    )}
+                    {result.fail_count > 0 && result.failed_users && result.failed_users.length > 0 && (
+                        <div className="mt-2 text-xs text-red-500">
+                            <b>Failed Users:</b> {result.failed_users.join(", ")}
                         </div>
                     )}
                 </div>

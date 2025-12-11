@@ -392,8 +392,8 @@ export default function ProfilePage() {
                                 </div>
                             </div>
 
-                            {/* Private Stats (only for own profile) */}
-                            {isOwnProfile && privateData && (
+                            {/* Private Stats (only for own profile WITH private access) */}
+                            {isOwnProfile && authUser && authUser.has_private_access && privateData && (
                                 <div className="premium-card bg-gradient-to-br from-purple-500/10 to-purple-500/5 border-purple-500/30 rounded-2xl p-5">
                                     <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
                                         <svg className="w-4 h-4 text-[#a371f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -721,6 +721,34 @@ export default function ProfilePage() {
                                     </a>
                                 </div>
                             </div>
+
+                            {/* Upgrade Banner - Compact version at bottom */}
+                            {isOwnProfile && authUser && !authUser.has_private_access && (
+                                <div className="premium-card bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-purple-500/30 rounded-xl p-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-purple-500/20 rounded-lg">
+                                            <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                            </svg>
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <h3 className="text-sm font-bold text-[#e6edf3]">Unlock Private Stats</h3>
+                                                <span className="px-1.5 py-0.5 text-[10px] bg-purple-500/20 text-purple-300 rounded font-bold">PREMIUM</span>
+                                            </div>
+                                            <p className="text-xs text-[#8b949e]">Access private repos, analytics & more</p>
+                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/auth/login`;
+                                            }}
+                                            className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-lg transition-all font-semibold text-xs shadow-lg shadow-purple-500/20 whitespace-nowrap"
+                                        >
+                                            Upgrade
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

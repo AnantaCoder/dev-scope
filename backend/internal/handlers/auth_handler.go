@@ -58,7 +58,7 @@ func (h *AuthHandler) cleanupExpiredStates() {
 	}
 }
 
-// LoginHandler initiates GitHub OAuth flow
+// LoginHandler initiates GitHub OAuth flow with full access (repo scope)
 func (h *AuthHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		writeJSON(w, http.StatusMethodNotAllowed, models.AuthResponse{
@@ -82,10 +82,43 @@ func (h *AuthHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Store state with expiry (5 minutes)
 	h.stateTTL[state] = time.Now().Add(5 * time.Minute)
 
-	// Get authorization URL
+	// Get authorization URL with full access
 	authURL := h.authService.GetAuthorizationURL(state)
 
-	log.Printf("🔐 [Auth] Login initiated from %s - Redirecting to GitHub", getClientIP(r))
+	log.Printf("🔐 [Auth] Full login initiated from %s - Redirecting to GitHub", getClientIP(r))
+
+	// Redirect to GitHub OAuth
+	http.Redirect(w, r, authURL, http.StatusTemporaryRedirect)
+}
+
+// LoginBasicHandler initiates GitHub OAuth flow with basic access (no repo scope)
+func (h *AuthHandler) LoginBasicHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeJSON(w, http.StatusMethodNotAllowed, models.AuthResponse{
+			Error:   true,
+			Message: "Method not allowed",
+		})
+		return
+	}
+
+	// Generate state token
+	state, err := auth.GenerateStateToken()
+	if err != nil {
+		log.Printf("❌ [Auth] Failed to generate state: %v", err)
+		writeJSON(w, http.StatusInternalServerError, models.AuthResponse{
+			Error:   true,
+			Message: "Failed to initiate login",
+		})
+		return
+	}
+
+	// Store state with expiry (5 minutes)
+	h.stateTTL[state] = time.Now().Add(5 * time.Minute)
+
+	// Get authorization URL with basic access
+	authURL := h.authService.GetAuthorizationURLBasic(state)
+
+	log.Printf("🔐 [Auth] Basic login initiated from %s - Redirecting to GitHub", getClientIP(r))
 
 	// Redirect to GitHub OAuth
 	http.Redirect(w, r, authURL, http.StatusTemporaryRedirect)
@@ -123,8 +156,8 @@ func (h *AuthHandler) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 
-	// Exchange code for access token
-	accessToken, err := h.authService.ExchangeCodeForToken(ctx, code)
+	// Exchange code for access token with scope information
+	tokenWithScope, err := h.authService.ExchangeCodeForTokenWithScope(ctx, code)
 	if err != nil {
 		log.Printf("❌ [Auth] Failed to exchange code: %v", err)
 		http.Redirect(w, r, fmt.Sprintf("%s?error=token_exchange_failed", h.frontendURL), http.StatusTemporaryRedirect)
@@ -132,20 +165,27 @@ func (h *AuthHandler) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get user information from GitHub
-	ghUser, err := h.authService.GetGitHubUser(ctx, accessToken)
+	ghUser, err := h.authService.GetGitHubUser(ctx, tokenWithScope.AccessToken)
 	if err != nil {
 		log.Printf("❌ [Auth] Failed to get GitHub user: %v", err)
 		http.Redirect(w, r, fmt.Sprintf("%s?error=user_fetch_failed", h.frontendURL), http.StatusTemporaryRedirect)
 		return
 	}
 
-	// Create or update user in database
-	user, err := h.authService.CreateOrUpdateUser(ctx, ghUser, accessToken)
+	// Create or update user in database with scope detection
+	user, err := h.authService.CreateOrUpdateUserWithScope(ctx, ghUser, tokenWithScope.AccessToken, tokenWithScope.Scope)
 	if err != nil {
 		log.Printf("❌ [Auth] Failed to create/update user: %v", err)
 		http.Redirect(w, r, fmt.Sprintf("%s?error=database_error", h.frontendURL), http.StatusTemporaryRedirect)
 		return
 	}
+
+	// Log the access level
+	accessLevel := "basic"
+	if user.HasPrivateAccess {
+		accessLevel = "full"
+	}
+	log.Printf("✅ [Auth] User %s authenticated with %s access (scopes: %s)", user.Username, accessLevel, tokenWithScope.Scope)
 
 	// Create session
 	session, err := h.authService.CreateSession(ctx, user.ID)

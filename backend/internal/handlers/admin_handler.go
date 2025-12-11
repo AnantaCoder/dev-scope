@@ -31,12 +31,13 @@ func NewAdminHandler(db *sql.DB) *AdminHandler {
 
 // UpdateAllPrivateDataResponse is the response for the update endpoint
 type UpdateAllPrivateDataResponse struct {
-	Success      bool   `json:"success"`
-	Message      string `json:"message"`
-	TotalUsers   int    `json:"total_users"`
-	SuccessCount int    `json:"success_count"`
-	FailCount    int    `json:"fail_count"`
-	Duration     string `json:"duration"`
+	Success      bool     `json:"success"`
+	Message      string   `json:"message"`
+	TotalUsers   int      `json:"total_users"`
+	SuccessCount int      `json:"success_count"`
+	FailCount    int      `json:"fail_count"`
+	Duration     string   `json:"duration"`
+	FailedUsers  []string `json:"failed_users"`
 }
 
 // TriggerPrivateDataUpdate handles POST /api/admin/update-all-private-data
@@ -161,10 +162,10 @@ type userRow struct {
 func (h *AdminHandler) updateAllUsersPrivateData(ctx context.Context) (*UpdateAllPrivateDataResponse, error) {
 	// Query all users with tokens
 	query := `
-		SELECT id, COALESCE(github_id, 0), access_token, COALESCE(username, '') 
-		FROM users 
-		WHERE access_token IS NOT NULL AND access_token != ''
-	`
+		   SELECT id, COALESCE(github_id, 0), access_token, COALESCE(username, '') 
+		   FROM users 
+		   WHERE access_token IS NOT NULL AND access_token != '' AND has_private_access = true
+	   `
 
 	rows, err := h.db.QueryContext(ctx, query)
 	if err != nil {
@@ -184,7 +185,8 @@ func (h *AdminHandler) updateAllUsersPrivateData(ctx context.Context) (*UpdateAl
 	}
 
 	result := &UpdateAllPrivateDataResponse{
-		TotalUsers: len(users),
+		TotalUsers:  len(users),
+		FailedUsers: []string{},
 	}
 
 	if len(users) == 0 {
@@ -207,6 +209,7 @@ func (h *AdminHandler) updateAllUsersPrivateData(ctx context.Context) (*UpdateAl
 				log.Printf("[ADMIN] Failed to update user %d (%s): %v", u.ID, u.Username, err)
 				mu.Lock()
 				result.FailCount++
+				result.FailedUsers = append(result.FailedUsers, u.Username)
 				mu.Unlock()
 			} else {
 				log.Printf("[ADMIN] Updated user %d (%s)", u.ID, u.Username)

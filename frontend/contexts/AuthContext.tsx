@@ -23,6 +23,8 @@ interface AuthContextType {
   loading: boolean;
   error: string | null;
   login: () => void;
+  loginBasic: () => void;
+  loginFull: () => void;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   isAuthenticated: boolean;
@@ -59,7 +61,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = () => {
-    // Redirect to backend OAuth endpoint
+    // Redirect to backend OAuth endpoint (full access - maintains backward compatibility)
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/auth/login`;
+  };
+
+  const loginBasic = () => {
+    // Redirect to backend OAuth endpoint (basic access - no repo scope)
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/auth/login/basic`;
+  };
+
+  const loginFull = () => {
+    // Redirect to backend OAuth endpoint (full access - includes repo scope)
     window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/auth/login`;
   };
 
@@ -83,6 +95,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         error,
         login,
+        loginBasic,
+        loginFull,
         logout,
         refreshUser,
         isAuthenticated: !!user,

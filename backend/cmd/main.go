@@ -110,6 +110,7 @@ func main() {
 
 	// Auth endpoints
 	http.HandleFunc("/api/auth/login", handlers.SecureCORSMiddleware(authHandler.LoginHandler))
+	http.HandleFunc("/api/auth/login/basic", handlers.SecureCORSMiddleware(authHandler.LoginBasicHandler))
 	http.HandleFunc("/api/auth/callback", handlers.SecurityMiddleware(authHandler.CallbackHandler)) // No CORS for OAuth callback
 	http.HandleFunc("/api/auth/logout", handlers.SecureCORSMiddleware(authHandler.LogoutHandler))
 	http.HandleFunc("/api/auth/me", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(authHandler.MeHandler)))
@@ -184,7 +185,8 @@ func main() {
 	}
 	fmt.Println("=" + strings.Repeat("=", 75))
 	fmt.Println("\n📌 Endpoints:")
-	fmt.Println("   Auth:     POST /api/auth/login, /api/auth/logout, GET /api/auth/me")
+	fmt.Println("   Auth:     GET  /api/auth/login (full access), /api/auth/login/basic")
+	fmt.Println("             POST /api/auth/logout, GET /api/auth/me")
 	fmt.Println("   Rankings: GET  /api/rankings, /api/rankings/{username}")
 	fmt.Println("   Users:    GET  /api/user/{username}, POST /api/batch")
 	fmt.Println("   Search:   GET  /api/search/history (authenticated)")

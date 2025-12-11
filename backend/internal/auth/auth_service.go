@@ -10,6 +10,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github-api/backend/internal/models"
@@ -47,7 +48,7 @@ func GenerateStateToken() (string, error) {
 	return base64.URLEncoding.EncodeToString(b), nil
 }
 
-// GetAuthorizationURL returns the GitHub OAuth authorization URL
+// GetAuthorizationURL returns the GitHub OAuth authorization URL with full access (including repo scope)
 func (s *AuthService) GetAuthorizationURL(state string) string {
 	baseURL := "https://github.com/login/oauth/authorize"
 	params := url.Values{}
@@ -59,11 +60,29 @@ func (s *AuthService) GetAuthorizationURL(state string) string {
 	return fmt.Sprintf("%s?%s", baseURL, params.Encode())
 }
 
+// GetAuthorizationURLBasic returns the GitHub OAuth authorization URL with basic access (no repo scope)
+func (s *AuthService) GetAuthorizationURLBasic(state string) string {
+	baseURL := "https://github.com/login/oauth/authorize"
+	params := url.Values{}
+	params.Add("client_id", s.config.ClientID)
+	params.Add("redirect_uri", s.config.RedirectURL)
+	params.Add("state", state)
+	params.Add("scope", "read:user user:email")
+
+	return fmt.Sprintf("%s?%s", baseURL, params.Encode())
+}
+
 // GitHubAccessTokenResponse represents GitHub's access token response
 type GitHubAccessTokenResponse struct {
 	AccessToken string `json:"access_token"`
 	TokenType   string `json:"token_type"`
 	Scope       string `json:"scope"`
+}
+
+// TokenWithScope contains both access token and granted scopes
+type TokenWithScope struct {
+	AccessToken string
+	Scope       string
 }
 
 // ExchangeCodeForToken exchanges authorization code for access token
@@ -102,6 +121,47 @@ func (s *AuthService) ExchangeCodeForToken(ctx context.Context, code string) (st
 	}
 
 	return tokenResp.AccessToken, nil
+}
+
+// ExchangeCodeForTokenWithScope exchanges authorization code for access token and returns scope info
+func (s *AuthService) ExchangeCodeForTokenWithScope(ctx context.Context, code string) (*TokenWithScope, error) {
+	tokenURL := "https://github.com/login/oauth/access_token"
+
+	data := url.Values{}
+	data.Set("client_id", s.config.ClientID)
+	data.Set("client_secret", s.config.ClientSecret)
+	data.Set("code", code)
+	data.Set("redirect_uri", s.config.RedirectURL)
+
+	req, err := http.NewRequestWithContext(ctx, "POST", tokenURL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.URL.RawQuery = data.Encode()
+	req.Header.Set("Accept", "application/json")
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to exchange code: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("GitHub returned status %d: %s", resp.StatusCode, body)
+	}
+
+	var tokenResp GitHubAccessTokenResponse
+	if err := json.NewDecoder(resp.Body).Decode(&tokenResp); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	return &TokenWithScope{
+		AccessToken: tokenResp.AccessToken,
+		Scope:       tokenResp.Scope,
+	}, nil
 }
 
 // GitHubUserResponse represents GitHub user API response
@@ -183,6 +243,54 @@ func (s *AuthService) CreateOrUpdateUser(ctx context.Context, ghUser *GitHubUser
 	}
 
 	hasPrivateAccess := s.CheckPrivateRepoAccess(ctx, accessToken)
+
+	user := &models.UserWithToken{
+		User: models.User{
+			GitHubID:         ghUser.ID,
+			Username:         ghUser.Login,
+			Name:             ghUser.Name,
+			Email:            ghUser.Email,
+			AvatarURL:        ghUser.AvatarURL,
+			Bio:              ghUser.Bio,
+			Location:         ghUser.Location,
+			Company:          ghUser.Company,
+			Blog:             ghUser.Blog,
+			TwitterUsername:  ghUser.TwitterUsername,
+			PublicRepos:      ghUser.PublicRepos,
+			PublicGists:      ghUser.PublicGists,
+			Followers:        ghUser.Followers,
+			Following:        ghUser.Following,
+			HasPrivateAccess: hasPrivateAccess,
+		},
+		AccessToken: accessToken,
+	}
+
+	if existingUser != nil {
+		// Update existing user
+		user.ID = existingUser.ID
+		if err := s.userRepo.UpdateUser(ctx, user); err != nil {
+			return nil, fmt.Errorf("failed to update user: %w", err)
+		}
+	} else {
+		// Create new user
+		if err := s.userRepo.CreateUser(ctx, user); err != nil {
+			return nil, fmt.Errorf("failed to create user: %w", err)
+		}
+	}
+
+	return user, nil
+}
+
+// CreateOrUpdateUserWithScope creates or updates user in database with scope detection
+func (s *AuthService) CreateOrUpdateUserWithScope(ctx context.Context, ghUser *GitHubUserResponse, accessToken string, scope string) (*models.UserWithToken, error) {
+	// Check for existing user
+	existingUser, err := s.userRepo.GetUserByGitHubID(ctx, ghUser.ID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to check existing user: %w", err)
+	}
+
+	// Detect private access from OAuth scope instead of API call
+	hasPrivateAccess := strings.Contains(scope, "repo")
 
 	user := &models.UserWithToken{
 		User: models.User{
