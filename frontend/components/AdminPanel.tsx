@@ -7,6 +7,7 @@ interface AdminStatus {
     total_users: number;
     updated_users: number;
     pending_users: number;
+    disabled_users?: number;
     last_update: string | null;
     is_admin: boolean;
     admin_username: string;
@@ -19,6 +20,9 @@ interface UpdateResult {
     success_count: number;
     fail_count: number;
     duration: string;
+    failed_users?: string[];
+    disabled_count?: number;
+    disabled_users?: string[];
 }
 
 export function AdminPanel() {
@@ -95,7 +99,7 @@ export function AdminPanel() {
 
             {/* Status */}
             {status && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
                     <div className="flex items-center gap-2 text-sm">
                         <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
@@ -123,6 +127,12 @@ export function AdminPanel() {
                                 ? new Date(status.last_update).toLocaleString()
                                 : "Never"}
                         </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                        <svg className="h-4 w-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m-6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="text-red-500">Disabled: {status.disabled_users ?? 0}</span>
                     </div>
                 </div>
             )}
@@ -173,13 +183,48 @@ export function AdminPanel() {
                     </div>
                     {result.success && (
                         <div className="mt-2 text-xs opacity-80">
-                            Success: {result.success_count} | Failed: {result.fail_count} |
+                            Success: {result.success_count} | Failed: {result.fail_count} | Disabled: {result.disabled_count ?? 0} |
                             Duration: {result.duration}
                         </div>
                     )}
                     {result.fail_count > 0 && result.failed_users && result.failed_users.length > 0 && (
                         <div className="mt-2 text-xs text-red-500">
-                            <b>Failed Users:</b> {result.failed_users.join(", ")}
+                            <b>Failed Users:</b>
+                            <div className="mt-1 flex flex-wrap gap-2">
+                                {result.failed_users.map((u) => (
+                                    (/^\d+$/.test(u) ? (
+                                        <span key={u} className="text-xs text-red-400">#{u}</span>
+                                    ) : (
+                                        <a
+                                            key={u}
+                                            href={`/profile/${u}`}
+                                            className="text-xs text-red-400 hover:underline"
+                                        >
+                                            @{u}
+                                        </a>
+                                    ))
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    {result.disabled_count && result.disabled_count > 0 && result.disabled_users && result.disabled_users.length > 0 && (
+                        <div className="mt-2 text-xs text-red-400">
+                            <b>Disabled Users:</b>
+                            <div className="mt-1 flex flex-wrap gap-2">
+                                {result.disabled_users.map((u) => (
+                                    (/^\d+$/.test(u) ? (
+                                        <span key={u} className="text-xs text-red-400">#{u}</span>
+                                    ) : (
+                                        <a
+                                            key={u}
+                                            href={`/profile/${u}`}
+                                            className="text-xs text-red-400 hover:underline"
+                                        >
+                                            @{u}
+                                        </a>
+                                    ))
+                                ))}
+                            </div>
                         </div>
                     )}
                 </div>

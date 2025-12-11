@@ -266,6 +266,7 @@ export const api = {
     total_users: number;
     updated_users: number;
     pending_users: number;
+    disabled_users?: number;
     last_update: string | null;
     is_admin: boolean;
     admin_username: string;
@@ -281,6 +282,9 @@ export const api = {
     success_count: number;
     fail_count: number;
     duration: string;
+    failed_users?: string[];
+    disabled_count?: number;
+    disabled_users?: string[];
   }> {
     const { data } = await axiosInstance.post(
       "/api/admin/update-all-private-data"

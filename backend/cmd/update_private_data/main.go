@@ -209,11 +209,11 @@ func updateAllUsers(ctx context.Context, db *pgxpool.Pool, workers int) error {
 	}
 	log.Printf("Using token column: %s", tokenCol)
 
-	// Query all users with tokens (username column exists in schema)
+	// Query all users with tokens and who have granted private access
 	query := fmt.Sprintf(`
 		SELECT id, COALESCE(github_id, 0), %s, COALESCE(username, '') 
 		FROM users 
-		WHERE %s IS NOT NULL AND %s != ''
+		WHERE %s IS NOT NULL AND %s != '' AND has_private_access = true
 	`, tokenCol, tokenCol, tokenCol)
 
 	rows, err := db.Query(ctx, query)
@@ -258,6 +258,14 @@ func updateAllUsers(ctx context.Context, db *pgxpool.Pool, workers int) error {
 				mu.Lock()
 				failCount++
 				mu.Unlock()
+				// If the failure is due to bad credentials (401), disable private access for the user
+				if strings.Contains(err.Error(), "API error 401") || strings.Contains(strings.ToLower(err.Error()), "bad credentials") {
+					if _, execErr := db.Exec(ctx, "UPDATE users SET has_private_access = FALSE WHERE id = $1", u.ID); execErr != nil {
+						log.Printf("[FAIL] Could not disable has_private_access for user %d (%s): %v", u.ID, u.Username, execErr)
+					} else {
+						log.Printf("[INFO] Disabled has_private_access for user %d (%s) due to credentials error", u.ID, u.Username)
+					}
+				}
 			} else {
 				log.Printf("[OK] User %d (%s) updated", u.ID, u.Username)
 				mu.Lock()

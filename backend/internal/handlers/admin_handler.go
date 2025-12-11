@@ -38,6 +38,8 @@ type UpdateAllPrivateDataResponse struct {
 	FailCount    int      `json:"fail_count"`
 	Duration     string   `json:"duration"`
 	FailedUsers  []string `json:"failed_users"`
+	DisabledCount int      `json:"disabled_count"`
+	DisabledUsers []string `json:"disabled_users"`
 }
 
 // TriggerPrivateDataUpdate handles POST /api/admin/update-all-private-data
@@ -112,7 +114,8 @@ func (h *AdminHandler) GetUpdateStatus(w http.ResponseWriter, r *http.Request) {
 	var totalUsers, updatedUsers int
 	var lastUpdate sql.NullTime
 
-	err := h.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM users WHERE access_token IS NOT NULL AND access_token != ''").Scan(&totalUsers)
+	// Only count users that have tokens and granted private access
+	err := h.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM users WHERE access_token IS NOT NULL AND access_token != '' AND has_private_access = true").Scan(&totalUsers)
 	if err != nil {
 		totalUsers = 0
 	}
@@ -130,10 +133,18 @@ func (h *AdminHandler) GetUpdateStatus(w http.ResponseWriter, r *http.Request) {
 		lastUpdateStr = &t
 	}
 
+	// Get disabled users count specific to users that had access tokens but now disabled
+	var disabledCount int
+	err = h.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM users WHERE access_token IS NOT NULL AND access_token != '' AND has_private_access = false").Scan(&disabledCount)
+	if err != nil {
+		disabledCount = 0
+	}
+
 	response := map[string]interface{}{
 		"total_users":    totalUsers,
 		"updated_users":  updatedUsers,
 		"pending_users":  totalUsers - updatedUsers,
+		"disabled_users": disabledCount,
 		"last_update":    lastUpdateStr,
 		"is_admin":       true,
 		"admin_username": user.Username,
@@ -185,8 +196,10 @@ func (h *AdminHandler) updateAllUsersPrivateData(ctx context.Context) (*UpdateAl
 	}
 
 	result := &UpdateAllPrivateDataResponse{
-		TotalUsers:  len(users),
-		FailedUsers: []string{},
+		TotalUsers:    len(users),
+		FailedUsers:   []string{},
+		DisabledCount: 0,
+		DisabledUsers: []string{},
 	}
 
 	if len(users) == 0 {
@@ -209,7 +222,27 @@ func (h *AdminHandler) updateAllUsersPrivateData(ctx context.Context) (*UpdateAl
 				log.Printf("[ADMIN] Failed to update user %d (%s): %v", u.ID, u.Username, err)
 				mu.Lock()
 				result.FailCount++
-				result.FailedUsers = append(result.FailedUsers, u.Username)
+				if strings.TrimSpace(u.Username) != "" {
+					result.FailedUsers = append(result.FailedUsers, u.Username)
+				} else {
+					result.FailedUsers = append(result.FailedUsers, fmt.Sprintf("%d", u.ID))
+				}
+				// If the failure is due to bad credentials (401), disable private access for the user
+				if strings.Contains(err.Error(), "API error 401") || strings.Contains(strings.ToLower(err.Error()), "bad credentials") {
+					// Attempt to mark user has_private_access = false
+					if _, dbErr := h.db.ExecContext(ctx, "UPDATE users SET has_private_access = FALSE WHERE id = $1", u.ID); dbErr != nil {
+						log.Printf("[ADMIN] Error disabling private access for user %d (%s): %v", u.ID, u.Username, dbErr)
+					} else {
+						log.Printf("[ADMIN] Disabled private access for user %d (%s) due to authentication failure", u.ID, u.Username)
+						// Update counters and lists for response
+						if strings.TrimSpace(u.Username) != "" {
+							result.DisabledUsers = append(result.DisabledUsers, u.Username)
+						} else {
+							result.DisabledUsers = append(result.DisabledUsers, fmt.Sprintf("%d", u.ID))
+						}
+						result.DisabledCount++
+					}
+				}
 				mu.Unlock()
 			} else {
 				log.Printf("[ADMIN] Updated user %d (%s)", u.ID, u.Username)
