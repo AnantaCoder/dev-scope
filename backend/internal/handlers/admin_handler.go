@@ -31,13 +31,13 @@ func NewAdminHandler(db *sql.DB) *AdminHandler {
 
 // UpdateAllPrivateDataResponse is the response for the update endpoint
 type UpdateAllPrivateDataResponse struct {
-	Success      bool     `json:"success"`
-	Message      string   `json:"message"`
-	TotalUsers   int      `json:"total_users"`
-	SuccessCount int      `json:"success_count"`
-	FailCount    int      `json:"fail_count"`
-	Duration     string   `json:"duration"`
-	FailedUsers  []string `json:"failed_users"`
+	Success       bool     `json:"success"`
+	Message       string   `json:"message"`
+	TotalUsers    int      `json:"total_users"`
+	SuccessCount  int      `json:"success_count"`
+	FailCount     int      `json:"fail_count"`
+	Duration      string   `json:"duration"`
+	FailedUsers   []string `json:"failed_users"`
 	DisabledCount int      `json:"disabled_count"`
 	DisabledUsers []string `json:"disabled_users"`
 }
