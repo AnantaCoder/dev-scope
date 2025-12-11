@@ -290,7 +290,11 @@ func (s *AuthService) CreateOrUpdateUserWithScope(ctx context.Context, ghUser *G
 	}
 
 	// Detect private access from OAuth scope instead of API call
+	// Only upgrade access level, never downgrade - preserve existing private access
 	hasPrivateAccess := strings.Contains(scope, "repo")
+	if existingUser != nil && existingUser.HasPrivateAccess {
+		hasPrivateAccess = true
+	}
 
 	user := &models.UserWithToken{
 		User: models.User{
