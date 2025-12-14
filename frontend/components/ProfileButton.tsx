@@ -10,7 +10,7 @@ export function ProfileButton() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showLoginMenu, setShowLoginMenu] = useState(false);
   const router = useRouter();
-  const dropdownRef = useRef<HTMLDivElement>(null); // Ref for dropdown
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -28,14 +28,13 @@ export function ProfileButton() {
   }, []);
 
   const redirectToLogin = () => {
-    router.push("/choose-signin?pref=basic")
-  }
+    router.push("/choose-signin?pref=basic");
+  };
 
   if (!isAuthenticated) {
     return (
-      <div className="relative">
+      <div className="relative" ref={dropdownRef}>
         <button
-          // onClick={() => setShowLoginMenu(!showLoginMenu)}
           onClick={redirectToLogin}
           className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-[#238636] hover:bg-[#2ea043] text-white rounded-lg transition-all font-medium text-sm"
         >
@@ -43,16 +42,13 @@ export function ProfileButton() {
             <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
           </svg>
           <span>Sign in with GitHub</span>
-          {/* <svg className={`w-3 h-3 transition-transform `} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg> */}
         </button>
 
         {/* Login Options Dropdown */}
         {showLoginMenu && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setShowLoginMenu(false)}></div>
-            <div ref={dropdownRef} className="absolute right-0 top-full mt-2 w-full sm:w-80 bg-[#161b22] border border-[#30363d] rounded-xl sm:rounded-xl shadow-2xl z-50 overflow-hidden left-0 sm:right-0 sm:left-auto px-2 sm:px-0">
+            <div className="absolute right-0 top-full mt-2 w-80 max-w-[90vw] bg-[#161b22] border border-[#30363d] rounded-xl shadow-2xl z-50 overflow-hidden">
               <div className="p-4">
                 <h3 className="text-sm font-semibold text-[#e6edf3] mb-3">Choose Sign-in Option</h3>
 
@@ -121,10 +117,10 @@ export function ProfileButton() {
   }
 
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setShowDropdown(!showDropdown)}
-        className="flex items-center gap-2 px-3 py-1.5 bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] rounded-lg transition-all"
+        className="cursor-pointer flex items-center gap-2 px-3 py-1.5 bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] rounded-lg transition-all"
       >
         {user?.avatar_url ? (
           <Image
@@ -154,7 +150,8 @@ export function ProfileButton() {
       {showDropdown && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)}></div>
-          <div ref={dropdownRef} className="absolute right-0 top-full mt-2 w-full sm:w-64 bg-[#161b22] border border-[#30363d] rounded-xl sm:rounded-xl shadow-2xl z-50 overflow-hidden left-0 sm:right-0 sm:left-auto px-2 sm:px-0">
+          {/* UPDATED: Fixed width with right alignment for clear visibility */}
+          <div className="absolute right-0 top-full mt-2 w-72 max-w-[90vw] bg-[#161b22] border border-[#30363d] rounded-xl shadow-2xl z-50 overflow-hidden origin-top-right">
             {/* User Info */}
             <div className="p-4 border-b border-[#30363d]">
               <div className="flex items-center gap-3 mb-2">
@@ -234,7 +231,7 @@ export function ProfileButton() {
                   logout();
                   setShowDropdown(false);
                 }}
-                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[#f85149] hover:bg-[#21262d] rounded-lg transition-colors"
+                className=" cursor-pointer w-full flex items-center gap-2 px-3 py-2 text-sm text-[#f85149] hover:bg-[#21262d] rounded-lg transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

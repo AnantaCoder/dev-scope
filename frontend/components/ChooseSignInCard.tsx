@@ -30,7 +30,7 @@ export default function ChooseSignInCard() {
             {/* Back to Home Button */}
             <button
                 onClick={() => router.push("/")}
-                className="absolute left-4 top-4 flex items-center gap-2 text-sm text-[#9aa6b2] hover:text-white transition-colors"
+                className="cursor-pointer absolute left-4 top-4 flex items-center gap-2 text-sm text-[#9aa6b2] hover:text-white transition-colors"
             >
                 <ArrowLeft className="w-4 h-4" />
                 <span>Home</span>
