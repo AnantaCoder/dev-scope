@@ -740,7 +740,8 @@ export default function ProfilePage() {
                                         </div>
                                         <button
                                             onClick={() => {
-                                                window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/auth/login`;
+                                                // send user to chooser with pref for full access
+                                                window.location.href = `/choose-signin?pref=full`;
                                             }}
                                             className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-lg transition-all font-semibold text-xs shadow-lg shadow-purple-500/20 whitespace-nowrap"
                                         >

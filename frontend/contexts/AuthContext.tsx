@@ -61,18 +61,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = () => {
-    // Redirect to backend OAuth endpoint (full access - maintains backward compatibility)
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/auth/login`;
+    // Redirect to chooser page so user picks Quick vs Full
+    window.location.href = `/choose-signin?pref=full`;
   };
 
   const loginBasic = () => {
-    // Redirect to backend OAuth endpoint (basic access - no repo scope)
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/auth/login/basic`;
+    // Redirect to chooser with basic pref selected
+    window.location.href = `/choose-signin?pref=basic`;
   };
 
   const loginFull = () => {
-    // Redirect to backend OAuth endpoint (full access - includes repo scope)
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/auth/login`;
+    // Redirect to chooser with full pref selected
+    window.location.href = `/choose-signin?pref=full`;
   };
 
   const logout = async () => {
