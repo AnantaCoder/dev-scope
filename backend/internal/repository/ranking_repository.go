@@ -72,6 +72,7 @@ func (r *RankingRepository) GetTopRankings(ctx context.Context, limit, offset in
 		ORDER BY rank_position ASC, score DESC
 		LIMIT $1 OFFSET $2
 	`
+    fmt.Printf("Executing GetTopRankings query: %s, with params: limit=%d, offset=%d\n", query, limit, offset)
 
 	rows, err := r.db.QueryContext(ctx, query, limit, offset)
 	if err != nil {

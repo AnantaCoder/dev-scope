@@ -80,7 +80,9 @@ func (db *DB) InitSchema(ctx context.Context) error {
 		has_private_access BOOLEAN DEFAULT FALSE,
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-		last_login_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		last_login_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		preferred_language VARCHAR(50),
+		theme VARCHAR(20) DEFAULT 'system'
 	);
 
 	-- User search history

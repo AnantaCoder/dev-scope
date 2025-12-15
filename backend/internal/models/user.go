@@ -7,25 +7,27 @@ import (
 
 // User represents a registered user in the system
 type User struct {
-	ID               int       `json:"id" db:"id"`
-	GitHubID         int64     `json:"github_id" db:"github_id"`
-	Username         string    `json:"username" db:"username"`
-	Name             string    `json:"name" db:"name"`
-	Email            string    `json:"email,omitempty" db:"email"`
-	AvatarURL        string    `json:"avatar_url" db:"avatar_url"`
-	Bio              string    `json:"bio" db:"bio"`
-	Location         string    `json:"location" db:"location"`
-	Company          string    `json:"company" db:"company"`
-	Blog             string    `json:"blog" db:"blog"`
-	TwitterUsername  string    `json:"twitter_username" db:"twitter_username"`
-	PublicRepos      int       `json:"public_repos" db:"public_repos"`
-	PublicGists      int       `json:"public_gists" db:"public_gists"`
-	Followers        int       `json:"followers" db:"followers"`
-	Following        int       `json:"following" db:"following"`
-	HasPrivateAccess bool      `json:"has_private_access" db:"has_private_access"`
-	CreatedAt        time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt        time.Time `json:"updated_at" db:"updated_at"`
-	LastLoginAt      time.Time `json:"last_login_at" db:"last_login_at"`
+	ID                int       `json:"id" db:"id"`
+	GitHubID          int64     `json:"github_id" db:"github_id"`
+	Username          string    `json:"username" db:"username"`
+	Name              string    `json:"name" db:"name"`
+	Email             string    `json:"email,omitempty" db:"email"`
+	AvatarURL         string    `json:"avatar_url" db:"avatar_url"`
+	Bio               string    `json:"bio" db:"bio"`
+	Location          string    `json:"location" db:"location"`
+	Company           string    `json:"company" db:"company"`
+	Blog              string    `json:"blog" db:"blog"`
+	TwitterUsername   string    `json:"twitter_username" db:"twitter_username"`
+	PublicRepos       int       `json:"public_repos" db:"public_repos"`
+	PublicGists       int       `json:"public_gists" db:"public_gists"`
+	Followers         int       `json:"followers" db:"followers"`
+	Following         int       `json:"following" db:"following"`
+	HasPrivateAccess  bool      `json:"has_private_access" db:"has_private_access"`
+	CreatedAt         time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt         time.Time `json:"updated_at" db:"updated_at"`
+	LastLoginAt       time.Time `json:"last_login_at" db:"last_login_at"`
+	PreferredLanguage string    `json:"preferred_language" db:"preferred_language"`
+	Theme             string    `json:"theme" db:"theme"`
 }
 
 // UserWithToken includes sensitive token information (not for API responses)
