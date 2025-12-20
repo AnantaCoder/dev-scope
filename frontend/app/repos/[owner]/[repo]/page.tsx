@@ -135,15 +135,21 @@ export default function RepoDetailPage() {
         setAiLoading(true);
         setAiAnalysis("");
         try {
-            const result = await api.getAIComparison([{
-                login: repoData.owner.login, name: repoData.name, avatar_url: repoData.owner.avatar_url,
-                bio: repoData.description || "", public_repos: 1, followers: repoData.stargazers_count,
-                following: repoData.forks_count, html_url: repoData.html_url,
-                repos_url: "", starred_url: "", subscriptions_url: "", organizations_url: "",
-                events_url: "", received_events_url: "", created_at: repoData.created_at,
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            }] as any);
-            setAiAnalysis(result.comparison || `Analysis complete for ${repoData.full_name}`);
+            const result = await api.getAIAnalysis({
+                type: "repo",
+                repo_owner: repoData.owner.login,
+                repo_name: repoData.name,
+                description: repoData.description || "",
+                language: repoData.language || "Unknown",
+                stars: repoData.stargazers_count,
+                forks: repoData.forks_count,
+            });
+
+            if (result.error) {
+                throw new Error(result.message || "API error");
+            }
+
+            setAiAnalysis(result.analysis || `Analysis complete for ${repoData.full_name}`);
         } catch {
             setAiAnalysis(`**${repoData.name}** is a ${repoData.language || "code"} repository with ${repoData.stargazers_count} stars and ${repoData.forks_count} forks.\n\n${repoData.description || ""}`);
         } finally {

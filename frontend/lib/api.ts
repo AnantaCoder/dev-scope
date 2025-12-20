@@ -6,6 +6,8 @@ import type {
   HealthResponse,
   CacheStats,
   AIComparisonResponse,
+  AIAnalyzeRequest,
+  AIAnalyzeResponse,
   ExtendedUserResponse,
 } from "@/types";
 
@@ -144,6 +146,14 @@ export const api = {
     const { data } = await axiosInstance.post<AIComparisonResponse>(
       "/api/ai/compare",
       { users }
+    );
+    return data;
+  },
+
+  async getAIAnalysis(request: AIAnalyzeRequest): Promise<AIAnalyzeResponse> {
+    const { data } = await axiosInstance.post<AIAnalyzeResponse>(
+      "/api/ai/analyze",
+      request
     );
     return data;
   },

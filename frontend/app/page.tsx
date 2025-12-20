@@ -244,9 +244,21 @@ export default function Home() {
                     <button
                       onClick={fetchBatchUsers}
                       disabled={loading || batchUsers.split(',').filter(u => u.trim()).length > 10}
-                      className="flex-1 py-3 text-sm font-medium bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-all backdrop-blur-sm"
+                      className="flex-1 py-3 text-sm font-medium bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 disabled:from-gray-700 disabled:to-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-all shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2"
                     >
-                      Compare
+                      {loading ? (
+                        <>
+                          <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                          <span>Comparing...</span>
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          <span>Compare Users</span>
+                        </>
+                      )}
                     </button>
                     {batchResults && Object.keys(batchResults).length > 1 && (
                       <AIAnalysisButton

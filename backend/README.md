@@ -32,7 +32,8 @@
 | `GET` | `/api/status/{username}` | Get basic user status | Public |
 | `POST` | `/api/status` | Get status (body payload) | Public |
 | `POST` | `/api/batch` | Batch fetch multiple users | Public |
-| `POST` | `/api/ai/compare` | Compare users using AI | Public |
+| `POST` | `/api/ai/compare` | Compare multiple users using AI | Public |
+| `POST` | `/api/ai/analyze` | Analyze single user or repo using AI | Public |
 | `GET` | `/api/search/history` | Get search history | **Auth (User)** |
 
 ### 🔒 Private Data (Self)

@@ -75,3 +75,22 @@ export interface AIComparisonResponse {
   comparison: string;
   message?: string;
 }
+
+export interface AIAnalyzeRequest {
+  type: "user" | "repo";
+  username?: string;
+  repo_owner?: string;
+  repo_name?: string;
+  description?: string;
+  language?: string;
+  stars?: number;
+  forks?: number;
+  followers?: number;
+  public_repos?: number;
+}
+
+export interface AIAnalyzeResponse {
+  error: boolean;
+  analysis: string;
+  message?: string;
+}

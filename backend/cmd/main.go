@@ -167,6 +167,13 @@ func main() {
 			http.NotFound(w, r)
 		}
 	})))
+	http.HandleFunc("/api/ai/analyze", handlers.SecureCORSMiddleware(authMiddleware.OptionalAuth(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			server.AIAnalyzeHandler(w, r)
+		} else {
+			http.NotFound(w, r)
+		}
+	})))
 	http.HandleFunc("/api/user/", handlers.SecureCORSMiddleware(authMiddleware.OptionalAuth(server.GetExtendedUserHandler)))
 
 	// Print startup info

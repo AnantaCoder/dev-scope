@@ -8,6 +8,7 @@ export function HomeAnalysisAnimation() {
     const [progress, setProgress] = useState(0);
     const [terminalLines, setTerminalLines] = useState<string[]>([]);
     const [codeMetrics, setCodeMetrics] = useState({ commits: 0, lines: 0, files: 0 });
+    const [binaryMatrix, setBinaryMatrix] = useState<{ char: string; lit: boolean }[][]>([]);
 
     // Terminal output simulation
     const terminalCommands = [
@@ -74,6 +75,86 @@ export function HomeAnalysisAnimation() {
         return () => clearInterval(interval);
     }, [addTerminalLine]);
 
+    // Binary matrix animation with ANANTACODER sliding text
+    const [textOffset, setTextOffset] = useState(50);
+
+    useEffect(() => {
+        // Simple 5x3 pixel font for letters
+        const font: Record<string, number[][]> = {
+            'A': [[0, 1, 0], [1, 0, 1], [1, 1, 1], [1, 0, 1], [1, 0, 1]],
+            'N': [[1, 0, 1], [1, 1, 1], [1, 1, 1], [1, 0, 1], [1, 0, 1]],
+            'T': [[1, 1, 1], [0, 1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0]],
+            'C': [[1, 1, 1], [1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 1, 1]],
+            'O': [[1, 1, 1], [1, 0, 1], [1, 0, 1], [1, 0, 1], [1, 1, 1]],
+            'D': [[1, 1, 0], [1, 0, 1], [1, 0, 1], [1, 0, 1], [1, 1, 0]],
+            'E': [[1, 1, 1], [1, 0, 0], [1, 1, 0], [1, 0, 0], [1, 1, 1]],
+            'R': [[1, 1, 0], [1, 0, 1], [1, 1, 0], [1, 0, 1], [1, 0, 1]],
+            ' ': [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        };
+
+        const text = "ANANTACODER";
+        const letterWidth = 4; // 3 pixels + 1 space
+        const textWidth = text.length * letterWidth;
+
+        const generateMatrix = (offset: number) => {
+            const rows = 8;
+            const cols = 50;
+            const matrix: { char: string; lit: boolean }[][] = [];
+
+            for (let i = 0; i < rows; i++) {
+                const row: { char: string; lit: boolean }[] = [];
+                for (let j = 0; j < cols; j++) {
+                    const char = Math.random() > 0.5 ? '1' : '0';
+                    let lit = false;
+
+                    // Check if this position should be lit for the text
+                    // Text is vertically centered (rows 1-5 for 5-pixel high font)
+                    if (i >= 1 && i <= 5) {
+                        const textRow = i - 1;
+                        const textCol = j - offset;
+
+                        if (textCol >= 0 && textCol < textWidth) {
+                            const letterIndex = Math.floor(textCol / letterWidth);
+                            const pixelInLetter = textCol % letterWidth;
+
+                            if (letterIndex < text.length && pixelInLetter < 3) {
+                                const letter = text[letterIndex];
+                                const pattern = font[letter] || font[' '];
+                                if (pattern[textRow] && pattern[textRow][pixelInLetter] === 1) {
+                                    lit = true;
+                                }
+                            }
+                        }
+                    }
+
+                    row.push({ char, lit });
+                }
+                matrix.push(row);
+            }
+            return matrix;
+        };
+
+        // Animation loop for sliding
+        const slideInterval = setInterval(() => {
+            setTextOffset(prev => {
+                const newOffset = prev - 1;
+                return newOffset < -text.length * letterWidth ? 50 : newOffset;
+            });
+        }, 80);
+
+        const matrixInterval = setInterval(() => {
+            setTextOffset(prev => {
+                setBinaryMatrix(generateMatrix(prev));
+                return prev;
+            });
+        }, 100);
+
+        return () => {
+            clearInterval(slideInterval);
+            clearInterval(matrixInterval);
+        };
+    }, []);
+
     const stages = [
         { icon: "git", label: "Fetching Commits", color: "text-orange-400", code: "git fetch --all" },
         { icon: "chart", label: "Analyzing Stats", color: "text-blue-400", code: "npm run metrics" },
@@ -124,10 +205,10 @@ export function HomeAnalysisAnimation() {
                                 <div
                                     key={i}
                                     className={`${line.startsWith("$")
-                                            ? "text-green-400"
-                                            : line.startsWith(">")
-                                                ? "text-cyan-400"
-                                                : "text-gray-400"
+                                        ? "text-green-400"
+                                        : line.startsWith(">")
+                                            ? "text-cyan-400"
+                                            : "text-gray-400"
                                         } animate-fade-in`}
                                 >
                                     {line}
@@ -143,8 +224,8 @@ export function HomeAnalysisAnimation() {
                             <div
                                 key={stage.label}
                                 className={`flex items-center gap-2 px-2 py-1.5 rounded-lg border transition-all duration-300 ${activeIndex === i
-                                        ? "bg-white/5 border-white/20 scale-[1.02]"
-                                        : "border-transparent opacity-50"
+                                    ? "bg-white/5 border-white/20 scale-[1.02]"
+                                    : "border-transparent opacity-50"
                                     }`}
                             >
                                 <div className={`w-4 h-4 ${stage.color}`}>
@@ -198,19 +279,31 @@ export function HomeAnalysisAnimation() {
                         ))}
                     </div>
 
-                    {/* Metrics Row */}
-                    <div className="mt-3 grid grid-cols-3 gap-2">
-                        <div className="bg-black/40 rounded-lg p-2 text-center border border-white/5">
-                            <p className="text-lg font-bold text-orange-400 font-mono">{codeMetrics.commits}</p>
-                            <p className="text-[9px] text-gray-500">COMMITS</p>
+                    {/* Metrics Row with Binary Background */}
+                    <div className="mt-3 relative">
+                        {/* Binary background for stats */}
+                        <div className="absolute inset-0 overflow-hidden rounded-lg opacity-30 font-mono text-[8px] leading-tight">
+                            {binaryMatrix.slice(0, 4).map((row, i) => (
+                                <div key={i} className="whitespace-nowrap overflow-hidden">
+                                    {row.map((bit, j) => (
+                                        <span key={j} className={bit.lit ? 'text-green-400 font-bold' : 'text-green-600/30'}>{bit.char}</span>
+                                    ))}
+                                </div>
+                            ))}
                         </div>
-                        <div className="bg-black/40 rounded-lg p-2 text-center border border-white/5">
-                            <p className="text-lg font-bold text-blue-400 font-mono">{codeMetrics.lines.toLocaleString()}</p>
-                            <p className="text-[9px] text-gray-500">LINES</p>
-                        </div>
-                        <div className="bg-black/40 rounded-lg p-2 text-center border border-white/5">
-                            <p className="text-lg font-bold text-green-400 font-mono">{codeMetrics.files}</p>
-                            <p className="text-[9px] text-gray-500">FILES</p>
+                        <div className="grid grid-cols-3 gap-2 relative z-10">
+                            <div className="bg-black/60 rounded-lg p-2 text-center border border-white/5 backdrop-blur-sm">
+                                <p className="text-lg font-bold text-orange-400 font-mono">{codeMetrics.commits}</p>
+                                <p className="text-[9px] text-gray-500">COMMITS</p>
+                            </div>
+                            <div className="bg-black/60 rounded-lg p-2 text-center border border-white/5 backdrop-blur-sm">
+                                <p className="text-lg font-bold text-blue-400 font-mono">{codeMetrics.lines.toLocaleString()}</p>
+                                <p className="text-[9px] text-gray-500">LINES</p>
+                            </div>
+                            <div className="bg-black/60 rounded-lg p-2 text-center border border-white/5 backdrop-blur-sm">
+                                <p className="text-lg font-bold text-green-400 font-mono">{codeMetrics.files}</p>
+                                <p className="text-[9px] text-gray-500">FILES</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -264,15 +357,26 @@ export function HomeAnalysisAnimation() {
                         </div>
                     </div>
 
-                    {/* Binary Data Effect */}
-                    <div className="mt-3 text-[8px] font-mono text-gray-600 overflow-hidden h-8 opacity-40">
-                        {Array(3).fill(0).map((_, i) => (
-                            <div key={i} className="animate-scroll-left whitespace-nowrap">
-                                {Array(40).fill(0).map((_, j) => (
-                                    <span key={j}>{Math.random() > 0.5 ? '1' : '0'}</span>
-                                ))}
-                            </div>
-                        ))}
+                    {/* Binary Data Fill - ANANTACODER sliding text */}
+                    <div className="mt-3 bg-black/40 rounded-lg p-2 border border-white/5">
+                        <div className="text-[10px] text-gray-500 font-mono mb-1">DATA_STREAM</div>
+                        <div className="font-mono text-[9px] leading-tight overflow-hidden">
+                            {binaryMatrix.map((row, i) => (
+                                <div key={i} className="flex">
+                                    {row.map((bit, j) => (
+                                        <span
+                                            key={j}
+                                            className={`w-2 text-center transition-all duration-75 ${bit.lit
+                                                    ? 'text-cyan-400 font-bold scale-110'
+                                                    : 'text-gray-700'
+                                                }`}
+                                        >
+                                            {bit.char}
+                                        </span>
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>

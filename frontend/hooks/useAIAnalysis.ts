@@ -87,7 +87,18 @@ export function useAIAnalysis(config: AIAnalysisConfig = {}) {
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const response = await api.getAIComparison(formattedUsers as any);
+        
+        // Check if API returned an error or unavailable message
+        if (response.error) {
+          throw new Error(response.message || "API error");
+        }
+        
         const result = response.comparison || "Analysis complete";
+        
+        // Check for "unavailable" in the response (API key not configured)
+        if (result.toLowerCase().includes("unavailable") || result.toLowerCase().includes("not configured")) {
+          throw new Error("AI service not configured on backend");
+        }
 
         setState((prev) => ({
           ...prev,
@@ -123,7 +134,7 @@ export function useAIAnalysis(config: AIAnalysisConfig = {}) {
     [state.loading, state.cooldown, cooldownSeconds, onSuccess, onError]
   );
 
-  // Analyze a repository
+  // Analyze a repository using dedicated /api/ai/analyze endpoint
   const analyzeRepo = useCallback(
     async (repo: {
       owner: string;
@@ -133,20 +144,66 @@ export function useAIAnalysis(config: AIAnalysisConfig = {}) {
       stars?: number;
       forks?: number;
     }) => {
-      return analyzeUsers([
-        {
-          login: repo.owner,
-          name: repo.name,
-          avatar_url: `https://github.com/${repo.owner}.png`,
-          bio: repo.description || "",
-          public_repos: 1,
-          followers: repo.stars || 0,
-          following: repo.forks || 0,
-          html_url: `https://github.com/${repo.owner}/${repo.name}`,
-        },
-      ]);
+      if (state.loading || state.cooldown > 0) return;
+
+      setState((prev) => ({ ...prev, loading: true, error: null, result: "" }));
+
+      try {
+        const response = await api.getAIAnalysis({
+          type: "repo",
+          repo_owner: repo.owner,
+          repo_name: repo.name,
+          description: repo.description || "",
+          language: repo.language || "Unknown",
+          stars: repo.stars || 0,
+          forks: repo.forks || 0,
+        });
+
+        // Check if API returned an error
+        if (response.error) {
+          throw new Error(response.message || "API error");
+        }
+
+        const result = response.analysis || "Analysis complete";
+
+        // Check for "unavailable" in the response (API key not configured)
+        if (result.toLowerCase().includes("unavailable") || result.toLowerCase().includes("not configured")) {
+          throw new Error("AI service not configured on backend");
+        }
+
+        setState((prev) => ({
+          ...prev,
+          result,
+          loading: false,
+          cooldown: cooldownSeconds,
+          canAnalyze: false,
+        }));
+
+        onSuccess?.(result);
+        return result;
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Analysis failed";
+
+        // Provide fallback analysis on error
+        const fallback = `**${repo.owner}/${repo.name}** - ${repo.description || "No description"}\n\n` +
+          `• Language: ${repo.language || "Unknown"}\n` +
+          `• Stars: ${repo.stars || 0} | Forks: ${repo.forks || 0}\n\n` +
+          `_AI analysis temporarily unavailable._`;
+
+        setState((prev) => ({
+          ...prev,
+          result: fallback,
+          error: errorMessage,
+          loading: false,
+          cooldown: cooldownSeconds,
+          canAnalyze: false,
+        }));
+
+        onError?.(errorMessage);
+        return fallback;
+      }
     },
-    [analyzeUsers]
+    [state.loading, state.cooldown, cooldownSeconds, onSuccess, onError]
   );
 
   // Clear results

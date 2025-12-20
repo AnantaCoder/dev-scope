@@ -58,6 +58,7 @@ func (s *Server) HomeHandler(w http.ResponseWriter, r *http.Request) {
 			"POST /api/status":                  "Fetch GitHub status (JSON body)",
 			"POST /api/batch":                   "Fetch status for multiple users",
 			"POST /api/ai/compare":              "AI-powered user comparison",
+			"POST /api/ai/analyze":              "AI-powered single user/repo analysis",
 			"GET /api/search/history":           "Get user's search history (authenticated)",
 			"GET /api/health":                   "Health check with cache stats",
 			"GET /api/cache/stats":              "Cache statistics",
