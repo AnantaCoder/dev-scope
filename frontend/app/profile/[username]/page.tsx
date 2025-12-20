@@ -6,7 +6,6 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
-import { AdminPanel } from "@/components/AdminPanel";
 import Image from "next/image";
 import Link from "next/link";
 import type { GitHubUser, TechStack, StreakInfo } from "@/types";
@@ -312,8 +311,6 @@ export default function ProfilePage() {
                         </div>
                     </div>
 
-                    {/* Admin Panel - Only visible to admin users (anantacoder) */}
-                    {isOwnProfile && <AdminPanel />}
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Left Column - User Info */}

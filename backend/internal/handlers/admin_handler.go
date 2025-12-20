@@ -114,8 +114,8 @@ func (h *AdminHandler) GetUpdateStatus(w http.ResponseWriter, r *http.Request) {
 	var totalUsers, updatedUsers int
 	var lastUpdate sql.NullTime
 
-	// Only count users that have tokens and granted private access
-	err := h.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM users WHERE access_token IS NOT NULL AND access_token != '' AND has_private_access = true").Scan(&totalUsers)
+	// Count ALL users for the total
+	err := h.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM users").Scan(&totalUsers)
 	if err != nil {
 		totalUsers = 0
 	}

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github-api/backend/internal/models"
 	"github-api/backend/internal/service"
 )
 
@@ -107,6 +108,25 @@ func (h *RankingHandler) UpdateUserRankHandler(w http.ResponseWriter, r *http.Re
 		writeJSON(w, http.StatusMethodNotAllowed, map[string]interface{}{
 			"error":   true,
 			"message": "Method not allowed",
+		})
+		return
+	}
+
+	// Get current user from context
+	user, ok := r.Context().Value("user").(*models.User)
+	if !ok {
+		writeJSON(w, http.StatusUnauthorized, map[string]interface{}{
+			"error":   true,
+			"message": "Unauthorized",
+		})
+		return
+	}
+
+	// Verify user is admin (only admins can manually trigger updates)
+	if !IsAdminUser(user) {
+		writeJSON(w, http.StatusForbidden, map[string]interface{}{
+			"error":   true,
+			"message": "Forbidden: Admin access required",
 		})
 		return
 	}

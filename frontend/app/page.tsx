@@ -8,6 +8,7 @@ import { UserProfileCard } from "@/components/UserProfileCard";
 import { UserComparisonCard } from "@/components/UserComparisonCard";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
+import { HomeAnalysisAnimation } from "@/components/HomeAnalysisAnimation";
 import Image from "next/image";
 
 export default function Home() {
@@ -123,6 +124,11 @@ export default function Home() {
             <p className="mt-4 text-gray-400 max-w-2xl mx-auto text-base sm:text-lg">
               Deep insights into developer profiles with AI-powered comparisons, tech stack analysis, and real-time metrics
             </p>
+          </div>
+
+          {/* Analysis Animation */}
+          <div className="mb-8 lg:mb-10">
+            <HomeAnalysisAnimation />
           </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 lg:gap-6">

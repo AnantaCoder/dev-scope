@@ -135,6 +135,51 @@ export function NotificationBell() {
         return labels[reason] || reason;
     };
 
+    // Convert GitHub API URL to HTML URL
+    const getHtmlUrl = (notification: GitHubNotification): string => {
+        const apiUrl = notification.subject.url;
+        const repoHtmlUrl = notification.repository.html_url;
+
+        if (!apiUrl) {
+            // Fallback to repository URL if no subject URL
+            return repoHtmlUrl;
+        }
+
+        // Pattern: https://api.github.com/repos/owner/repo/type/id
+        // Convert to: https://github.com/owner/repo/type/id (for issues/pulls)
+
+        // Extract the path after /repos/
+        const match = apiUrl.match(/api\.github\.com\/repos\/([^/]+)\/([^/]+)\/(.+)/);
+        if (!match) {
+            return repoHtmlUrl;
+        }
+
+        const [, owner, repo, rest] = match;
+        const type = notification.subject.type;
+
+        // Handle different notification types
+        if (type === "Issue") {
+            // issues/123 -> issues/123
+            return `https://github.com/${owner}/${repo}/${rest}`;
+        } else if (type === "PullRequest") {
+            // pulls/123 -> pull/123
+            const prNumber = rest.replace("pulls/", "pull/");
+            return `https://github.com/${owner}/${repo}/${prNumber}`;
+        } else if (type === "Release") {
+            // releases/123456 -> We can link to releases page (can't get tag without API call)
+            return `https://github.com/${owner}/${repo}/releases`;
+        } else if (type === "Commit") {
+            // commits/sha -> commit/sha
+            return `https://github.com/${owner}/${repo}/${rest.replace("commits/", "commit/")}`;
+        } else if (type === "Discussion") {
+            // discussions/123 -> discussions/123
+            return `https://github.com/${owner}/${repo}/${rest}`;
+        } else {
+            // Default: try direct conversion
+            return `https://github.com/${owner}/${repo}/${rest}`;
+        }
+    };
+
     const formatTime = (dateString: string) => {
         const date = new Date(dateString);
         const now = new Date();
@@ -221,7 +266,7 @@ export function NotificationBell() {
                                         className={`p-3 hover:bg-[#21262d]/50 cursor-pointer transition-colors ${notification.unread ? 'bg-[#58a6ff]/5' : ''}`}
                                         onClick={() => {
                                             if (notification.unread) markAsRead(notification.id);
-                                            window.open(notification.repository.html_url, "_blank");
+                                            window.open(getHtmlUrl(notification), "_blank");
                                         }}
                                     >
                                         <div className="flex items-start gap-3">
