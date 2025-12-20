@@ -53,21 +53,19 @@ export function Navbar() {
                             </svg>
                             <span className="text-sm">Rankings</span>
                         </Link>
+                        <Link
+                            href="/repos"
+                            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all font-medium ${isActive("/repos")
+                                ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-[#e6edf3] border border-green-500/30 shadow-lg shadow-green-500/10"
+                                : "text-[#8b949e] hover:text-[#e6edf3] hover:bg-[#21262d]/70 border border-transparent"
+                                }`}
+                        >
+                            <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                            </svg>
+                            <span className="text-sm">Repos</span>
+                        </Link>
 
-                        {isAuthenticated && (
-                            <Link
-                                href="/history"
-                                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all font-medium ${isActive("/history")
-                                    ? "bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-[#e6edf3] border border-purple-500/30 shadow-lg shadow-purple-500/10"
-                                    : "text-[#8b949e] hover:text-[#e6edf3] hover:bg-[#21262d]/70 border border-transparent"
-                                    }`}
-                            >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <span className="text-sm">History</span>
-                            </Link>
-                        )}
                     </nav>
 
                     {/* Right Side - Auth */}
@@ -95,17 +93,16 @@ export function Navbar() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                                 </svg>
                             </Link>
-                            {isAuthenticated && (
-                                <Link
-                                    href="/history"
-                                    className={`p-2 rounded-lg transition-all ${isActive("/history") ? "bg-[#21262d]" : "hover:bg-[#21262d]/50"
-                                        }`}
-                                >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </Link>
-                            )}
+                            <Link
+                                href="/repos"
+                                className={`p-2 rounded-lg transition-all ${isActive("/repos") ? "bg-[#21262d]" : "hover:bg-[#21262d]/50"
+                                    }`}
+                            >
+                                <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                                </svg>
+                            </Link>
+
                         </div>
 
                         {/* Profile Button */}

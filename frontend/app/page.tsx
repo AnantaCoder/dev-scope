@@ -9,6 +9,9 @@ import { UserComparisonCard } from "@/components/UserComparisonCard";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { HomeAnalysisAnimation } from "@/components/HomeAnalysisAnimation";
+import { AIAnalysisButton } from "@/components/AIAnalysisButton";
+import { AIAnalysisResult } from "@/components/AIAnalysisResult";
+import { useAIAnalysis } from "@/hooks/useAIAnalysis";
 import Image from "next/image";
 
 export default function Home() {
@@ -22,10 +25,11 @@ export default function Home() {
   const [streak, setStreak] = useState<StreakInfo | null>(null);
   const [batchResults, setBatchResults] = useState<Record<string, APIResponse> | null>(null);
   const [cacheStats, setCacheStats] = useState<CacheStats | null>(null);
-  const [aiComparison, setAiComparison] = useState<string>("");
-  const [loadingAI, setLoadingAI] = useState<boolean>(false);
   const [totalSearches, setTotalSearches] = useState(0);
   const [clearing, setClearing] = useState(false);
+
+  // AI Analysis hook with rate limiting
+  const aiAnalysis = useAIAnalysis({ cooldownSeconds: 30 });
 
   useEffect(() => { fetchCacheStats(); }, []);
 
@@ -64,7 +68,7 @@ export default function Home() {
     const usernames = batchUsers.split(",").map((u) => u.trim()).filter((u) => u);
     if (usernames.length === 0) { setError("Please enter at least one username"); return; }
     if (usernames.length > 10) { setError("Maximum 10 usernames allowed"); return; }
-    setLoading(true); setError(""); setBatchResults(null); setAiComparison("");
+    setLoading(true); setError(""); setBatchResults(null); aiAnalysis.clearResult();
     setTotalSearches(prev => prev + usernames.length);
     try {
       const result = await api.getBatchStatus(usernames);
@@ -76,14 +80,21 @@ export default function Home() {
 
   const getAIComparison = async () => {
     if (!batchResults) return;
-    const users = Object.values(batchResults).filter((r: APIResponse) => !r.error && r.data).map((r: APIResponse) => r.data);
+    const users = Object.values(batchResults).filter((r: APIResponse) => !r.error && r.data).map((r: APIResponse) => r.data as GitHubUser);
     if (users.length < 2) { setError("Need at least 2 users for AI comparison"); return; }
-    setLoadingAI(true); setAiComparison("");
-    try {
-      const result = await api.getAIComparison(users as GitHubUser[]);
-      setAiComparison(result.comparison);
-    } catch { setError("Failed to get AI comparison."); }
-    finally { setLoadingAI(false); }
+
+    const formattedUsers = users.map(u => ({
+      login: u.login,
+      name: u.name,
+      avatar_url: u.avatar_url,
+      bio: u.bio || "",
+      public_repos: u.public_repos,
+      followers: u.followers,
+      following: u.following,
+      html_url: u.html_url,
+    }));
+
+    await aiAnalysis.analyzeUsers(formattedUsers);
   };
 
   const clearCache = async () => {
@@ -238,42 +249,25 @@ export default function Home() {
                       Compare
                     </button>
                     {batchResults && Object.keys(batchResults).length > 1 && (
-                      <button
+                      <AIAnalysisButton
                         onClick={getAIComparison}
-                        disabled={loadingAI}
-                        className="flex-1 py-3 text-sm font-medium bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 disabled:from-gray-700 disabled:to-gray-600 text-white rounded-lg transition-all flex items-center justify-center gap-2 hover:glow-purple shadow-lg shadow-purple-500/20"
-                      >
-                        {loadingAI ? (
-                          <>
-                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /></svg>
-                            <span className="hidden sm:inline">Analyzing...</span>
-                          </>
-                        ) : (
-                          <>
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                            <span>AI Analysis</span>
-                          </>
-                        )}
-                      </button>
+                        loading={aiAnalysis.loading}
+                        cooldown={aiAnalysis.cooldown}
+                        className="flex-1"
+                      />
                     )}
                   </div>
                 </div>
               </div>
 
               {/* AI Comparison Result */}
-              {aiComparison && !loadingAI && (
-                <div className="premium-card border-purple-500/30 glow-purple">
-                  <div className="px-4 sm:px-5 py-4 border-b border-white/5 bg-gradient-to-r from-purple-500/10 to-pink-500/10">
-                    <h3 className="text-sm font-semibold gradient-text-alt flex items-center gap-2">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                      AI Analysis
-                      <span className="ml-auto text-[10px] px-2 py-0.5 bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-300 rounded-full border border-green-500/30">NVIDIA</span>
-                    </h3>
-                  </div>
-                  <div className="p-4 sm:p-5">
-                    <p className="text-sm text-gray-200 leading-relaxed whitespace-pre-wrap">{aiComparison}</p>
-                  </div>
-                </div>
+              {aiAnalysis.result && !aiAnalysis.loading && (
+                <AIAnalysisResult
+                  result={aiAnalysis.result}
+                  error={aiAnalysis.error}
+                  onClear={aiAnalysis.clearResult}
+                  showClearButton={true}
+                />
               )}
 
               {/* Batch Results */}

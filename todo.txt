@@ -1,0 +1,21 @@
+# DevScope - TODO
+
+## In Progress
+1. Add backend rate limiting for AI comparison API
+2. User activity heatmap on profile page
+3. Repository contribution insights
+4. Code review statistics dashboard
+5. Team/Organization comparison feature
+6. dev os chatbot
+7. Webhook notifications for ranking changes
+8. Dark/Light theme toggle
+9. Mobile app (React Native)
+
+## Bug Fixes
+- Fix notification badge count sync
+- Improve mobile responsiveness on rankings page
+
+## Performance
+- Add Redis caching for AI responses
+- Implement lazy loading for repo lists
+- Optimize GitHub API batch requests
