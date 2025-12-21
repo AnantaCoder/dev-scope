@@ -24,6 +24,7 @@ export default function SearchHistoryPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalEntries, setTotalEntries] = useState(0);
+    const [isClearing, setIsClearing] = useState(false);
     const pageSize = 50;
     const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -127,6 +128,43 @@ export default function SearchHistoryPage() {
         router.push(`/profile/${username}`);
     }, [router]);
 
+    const clearSearchHistory = useCallback(async () => {
+        if (!confirm('Are you sure you want to clear all your search history? This action cannot be undone.')) {
+            return;
+        }
+
+        setIsClearing(true);
+        setError(null);
+
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const response = await fetch(`${apiUrl}/api/search/history/clear`, {
+                method: 'DELETE',
+                credentials: 'include',
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to clear search history');
+            }
+
+            const data = await response.json();
+            if (data.error) {
+                throw new Error(data.message || 'Failed to clear search history');
+            }
+
+            // Clear local state
+            setHistory([]);
+            setTotalEntries(0);
+            setTotalPages(1);
+            setCurrentPage(1);
+        } catch (err) {
+            console.error('Clear history error:', err);
+            setError(err instanceof Error ? err.message : 'Failed to clear search history');
+        } finally {
+            setIsClearing(false);
+        }
+    }, []);
+
     // Memoize loading component to prevent re-renders
     const loadingComponent = useMemo(() => (
         <div className="min-h-screen flex flex-col premium-bg">
@@ -168,9 +206,35 @@ export default function SearchHistoryPage() {
 
             <main className="flex-1 max-w-[1400px] mx-auto px-4 lg:px-8 py-8 w-full relative z-10">
                 {/* Page Header */}
-                <div className="mb-8 text-center">
-                    <h1 className="text-3xl font-bold tracking-tight gradient-text">Search History</h1>
-                    <p className="text-gray-400 mt-1">Your recent GitHub profile searches</p>
+                <div className="mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="text-center sm:text-left">
+                        <h1 className="text-3xl font-bold tracking-tight gradient-text">Search History</h1>
+                        <p className="text-gray-400 mt-1">Your recent GitHub profile searches</p>
+                    </div>
+                    {history.length > 0 && (
+                        <button
+                            onClick={clearSearchHistory}
+                            disabled={isClearing}
+                            className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 hover:text-red-300 rounded-lg text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isClearing ? (
+                                <>
+                                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                    </svg>
+                                    <span>Clearing...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    <span>Clear All</span>
+                                </>
+                            )}
+                        </button>
+                    )}
                 </div>
 
                 {error && (

@@ -153,3 +153,41 @@ func (h *SearchHandler) LogSearchHistory(ctx context.Context, userID int, search
 		log.Printf("⚠️ [Search] Failed to log search history: %v", err)
 	}
 }
+
+// ClearSearchHistoryHandler clears all search history for the authenticated user
+func (h *SearchHandler) ClearSearchHistoryHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		writeJSON(w, http.StatusMethodNotAllowed, map[string]interface{}{
+			"error":   true,
+			"message": "Method not allowed",
+		})
+		return
+	}
+
+	user, ok := r.Context().Value("user").(*models.User)
+	if !ok {
+		writeJSON(w, http.StatusUnauthorized, map[string]interface{}{
+			"error":   true,
+			"message": "Unauthorized",
+		})
+		return
+	}
+
+	ctx := r.Context()
+
+	if err := h.userRepo.ClearSearchHistory(ctx, user.ID); err != nil {
+		log.Printf("❌ [Search] Failed to clear search history for user %d: %v", user.ID, err)
+		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"error":   true,
+			"message": "Failed to clear search history",
+		})
+		return
+	}
+
+	log.Printf("🗑️ [Search] Cleared search history for user %d (%s)", user.ID, user.Username)
+
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"error":   false,
+		"message": "Search history cleared successfully",
+	})
+}

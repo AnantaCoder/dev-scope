@@ -120,6 +120,7 @@ func main() {
 
 	// Search history endpoints (protected)
 	http.HandleFunc("/api/search/history", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(searchHandler.GetSearchHistoryHandler)))
+	http.HandleFunc("/api/search/history/clear", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(searchHandler.ClearSearchHistoryHandler)))
 
 	// Private data endpoints (protected - users can ONLY access their own data)
 	http.HandleFunc("/api/me/private", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(privateDataHandler.GetMyPrivateDataHandler)))

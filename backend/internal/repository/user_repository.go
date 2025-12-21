@@ -246,3 +246,10 @@ func (r *UserRepository) LogActivity(ctx context.Context, log *models.ActivityLo
 		log.UserID, log.Action, log.Metadata, log.IPAddress, log.UserAgent,
 	).Scan(&log.ID, &log.CreatedAt)
 }
+
+// ClearSearchHistory deletes all search history for a user
+func (r *UserRepository) ClearSearchHistory(ctx context.Context, userID int) error {
+	query := `DELETE FROM search_history WHERE user_id = $1`
+	_, err := r.db.ExecContext(ctx, query, userID)
+	return err
+}

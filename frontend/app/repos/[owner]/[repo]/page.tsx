@@ -4,6 +4,9 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { AIAnalysisResult } from "@/components/AIAnalysisResult";
+import { AIAnalysisButton } from "@/components/AIAnalysisButton";
+import { useAIAnalysis } from "@/hooks/useAIAnalysis";
 import Image from "next/image";
 import { api } from "@/lib/api";
 
@@ -72,19 +75,11 @@ export default function RepoDetailPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [copiedClone, setCopiedClone] = useState(false);
-    const [aiAnalysis, setAiAnalysis] = useState<string>("");
-    const [aiLoading, setAiLoading] = useState(false);
-    const [aiCooldown, setAiCooldown] = useState(0);
     const [activeTab, setActiveTab] = useState<"commits" | "issues">("commits");
     const [page, setPage] = useState(1);
 
-    // Rate limit cooldown timer
-    useEffect(() => {
-        if (aiCooldown > 0) {
-            const timer = setTimeout(() => setAiCooldown(aiCooldown - 1), 1000);
-            return () => clearTimeout(timer);
-        }
-    }, [aiCooldown]);
+    // AI Analysis hook with built-in rate limiting
+    const aiAnalysis = useAIAnalysis({ cooldownSeconds: 30 });
 
     const fetchRepoData = useCallback(async () => {
         setLoading(true);
@@ -131,31 +126,15 @@ export default function RepoDetailPage() {
     };
 
     const getAIAnalysis = async () => {
-        if (!repoData || aiCooldown > 0) return;
-        setAiLoading(true);
-        setAiAnalysis("");
-        try {
-            const result = await api.getAIAnalysis({
-                type: "repo",
-                repo_owner: repoData.owner.login,
-                repo_name: repoData.name,
-                description: repoData.description || "",
-                language: repoData.language || "Unknown",
-                stars: repoData.stargazers_count,
-                forks: repoData.forks_count,
-            });
-
-            if (result.error) {
-                throw new Error(result.message || "API error");
-            }
-
-            setAiAnalysis(result.analysis || `Analysis complete for ${repoData.full_name}`);
-        } catch {
-            setAiAnalysis(`**${repoData.name}** is a ${repoData.language || "code"} repository with ${repoData.stargazers_count} stars and ${repoData.forks_count} forks.\n\n${repoData.description || ""}`);
-        } finally {
-            setAiLoading(false);
-            setAiCooldown(30); // 30 second cooldown
-        }
+        if (!repoData) return;
+        await aiAnalysis.analyzeRepo({
+            owner: repoData.owner.login,
+            name: repoData.name,
+            description: repoData.description || "",
+            language: repoData.language || "Unknown",
+            stars: repoData.stargazers_count,
+            forks: repoData.forks_count,
+        });
     };
 
     const formatTime = (dateString: string) => {
@@ -339,27 +318,22 @@ export default function RepoDetailPage() {
                                     </button>
                                 )}
 
-                                <button
+                                <AIAnalysisButton
                                     onClick={getAIAnalysis}
-                                    disabled={aiLoading || aiCooldown > 0}
-                                    className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all"
-                                >
-                                    {aiLoading ? (
-                                        <><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />Analyzing...</>
-                                    ) : aiCooldown > 0 ? (
-                                        <>⏱️ Wait {aiCooldown}s</>
-                                    ) : (
-                                        <><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>AI Analysis</>
-                                    )}
-                                </button>
+                                    loading={aiAnalysis.loading}
+                                    cooldown={aiAnalysis.cooldown}
+                                    className="w-full"
+                                />
                             </div>
 
                             {/* AI Analysis Result */}
-                            {aiAnalysis && (
-                                <div className="premium-card p-4 border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-transparent">
-                                    <h4 className="text-xs font-semibold text-purple-400 mb-2 uppercase tracking-wider">AI Insights</h4>
-                                    <p className="text-sm text-[#c9d1d9] whitespace-pre-wrap leading-relaxed">{aiAnalysis}</p>
-                                </div>
+                            {aiAnalysis.result && (
+                                <AIAnalysisResult
+                                    result={aiAnalysis.result}
+                                    error={aiAnalysis.error}
+                                    showClearButton={true}
+                                    onClear={aiAnalysis.clearResult}
+                                />
                             )}
                         </div>
 
