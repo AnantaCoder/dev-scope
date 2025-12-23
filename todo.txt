@@ -12,7 +12,7 @@
 9. Mobile app (React Native)
 
 ## Bug Fixes
-- Fix notification badge count sync
+- Fix notification badge count sync (done)
 - Improve mobile responsiveness on rankings page
 
 ## Performance
