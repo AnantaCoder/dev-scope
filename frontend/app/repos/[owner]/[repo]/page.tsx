@@ -8,6 +8,7 @@ import { AIAnalysisResult } from "@/components/AIAnalysisResult";
 import { AIAnalysisButton } from "@/components/AIAnalysisButton";
 import { useAIAnalysis } from "@/hooks/useAIAnalysis";
 import Image from "next/image";
+import Link from "next/link";
 import { api } from "@/lib/api";
 
 interface Repository {
@@ -56,6 +57,14 @@ interface Language {
     color: string;
 }
 
+interface Contributor {
+    id: number;
+    login: string;
+    avatar_url: string;
+    html_url: string;
+    contributions: number;
+}
+
 const LANGUAGE_COLORS: Record<string, string> = {
     TypeScript: "#3178c6", JavaScript: "#f1e05a", Python: "#3572A5", Go: "#00ADD8",
     Rust: "#dea584", Java: "#b07219", "C++": "#f34b7d", C: "#555555", Ruby: "#701516",
@@ -75,7 +84,8 @@ export default function RepoDetailPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [copiedClone, setCopiedClone] = useState(false);
-    const [activeTab, setActiveTab] = useState<"commits" | "issues">("commits");
+    const [activeTab, setActiveTab] = useState<"commits" | "issues" | "contributors">("commits");
+    const [contributors, setContributors] = useState<Contributor[]>([]);
     const [page, setPage] = useState(1);
 
     // AI Analysis hook with built-in rate limiting
@@ -85,11 +95,12 @@ export default function RepoDetailPage() {
         setLoading(true);
         setError(null);
         try {
-            const [repoRes, commitsRes, issuesRes, langsRes] = await Promise.all([
+            const [repoRes, commitsRes, issuesRes, langsRes, contributorsRes] = await Promise.all([
                 fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers: { Accept: "application/vnd.github.v3+json" } }),
                 fetch(`https://api.github.com/repos/${owner}/${repo}/commits?per_page=30`, { headers: { Accept: "application/vnd.github.v3+json" } }),
                 fetch(`https://api.github.com/repos/${owner}/${repo}/issues?state=all&per_page=30`, { headers: { Accept: "application/vnd.github.v3+json" } }),
                 fetch(`https://api.github.com/repos/${owner}/${repo}/languages`, { headers: { Accept: "application/vnd.github.v3+json" } }),
+                fetch(`https://api.github.com/repos/${owner}/${repo}/contributors?per_page=30`, { headers: { Accept: "application/vnd.github.v3+json" } }),
             ]);
 
             if (!repoRes.ok) throw new Error("Repository not found");
@@ -106,6 +117,7 @@ export default function RepoDetailPage() {
                     color: LANGUAGE_COLORS[name] || "#8b949e",
                 })).sort((a, b) => b.percentage - a.percentage));
             }
+            if (contributorsRes.ok) setContributors(await contributorsRes.json());
         } catch (err) {
             setError(err instanceof Error ? err.message : "Failed to load repository");
         } finally {
@@ -149,7 +161,7 @@ export default function RepoDetailPage() {
     const formatSize = (kb: number) => kb < 1024 ? `${kb} KB` : `${(kb / 1024).toFixed(1)} MB`;
 
     const itemsPerPage = 6;
-    const currentItems = activeTab === "commits" ? commits : issues;
+    const currentItems = activeTab === "commits" ? commits : activeTab === "issues" ? issues : contributors;
     const paginatedItems = currentItems.slice((page - 1) * itemsPerPage, page * itemsPerPage);
     const totalPages = Math.ceil(currentItems.length / itemsPerPage);
 
@@ -369,6 +381,19 @@ export default function RepoDetailPage() {
                                             Issues
                                             <span className="px-1.5 py-0.5 text-[10px] bg-black/20 rounded">{issues.length}</span>
                                         </button>
+                                        <button
+                                            onClick={() => setActiveTab("contributors")}
+                                            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === "contributors"
+                                                ? "bg-[#238636] text-white"
+                                                : "bg-[#21262d] text-[#8b949e] hover:text-white hover:bg-[#30363d]"
+                                                }`}
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                            </svg>
+                                            Contributors
+                                            <span className="px-1.5 py-0.5 text-[10px] bg-black/20 rounded">{contributors.length}</span>
+                                        </button>
                                     </div>
 
                                     {/* Pagination Info */}
@@ -436,11 +461,43 @@ export default function RepoDetailPage() {
                                         );
                                     })}
 
-                                    {paginatedItems.length === 0 && (
-                                        <div className="flex items-center justify-center h-40 text-[#6e7681]">
-                                            No {activeTab} found
-                                        </div>
-                                    )}
+                                    {activeTab === "contributors" && paginatedItems.map((item) => {
+                                        const contributor = item as Contributor;
+                                        return (
+                                            <Link
+                                                key={contributor.id}
+                                                href={`/profile/${contributor.login}`}
+                                                className="flex items-center gap-3 p-4 bg-[#0d1117] rounded-xl border border-[#21262d] hover:border-[#30363d] transition-all group"
+                                            >
+                                                <Image
+                                                    src={contributor.avatar_url}
+                                                    alt={contributor.login}
+                                                    width={40}
+                                                    height={40}
+                                                    className="rounded-full ring-2 ring-white/10"
+                                                />
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm text-white font-medium group-hover:text-[#58a6ff] transition-colors">
+                                                        @{contributor.login}
+                                                    </p>
+                                                    <p className="text-xs text-[#6e7681]">
+                                                        {contributor.contributions.toLocaleString()} commits
+                                                    </p>
+                                                </div>
+                                                <div className="px-3 py-1.5 bg-purple-500/10 text-purple-400 text-xs font-medium rounded-lg border border-purple-500/20">
+                                                    {contributor.contributions.toLocaleString()}
+                                                </div>
+                                            </Link>
+                                        );
+                                    })}
+
+                                    {((activeTab === "commits" && commits.length === 0) ||
+                                        (activeTab === "issues" && issues.length === 0) ||
+                                        (activeTab === "contributors" && contributors.length === 0)) && (
+                                            <div className="flex items-center justify-center h-40 text-[#6e7681]">
+                                                No {activeTab} found
+                                            </div>
+                                        )}
                                 </div>
 
                                 {/* Pagination Footer */}
