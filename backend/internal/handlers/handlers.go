@@ -50,7 +50,7 @@ func (s *Server) SetDevAIRepository(repo *repository.DevAIRepository) {
 // HomeHandler handles the home endpoint
 func (s *Server) HomeHandler(w http.ResponseWriter, r *http.Request) {
 	response := map[string]interface{}{
-		"message":      "GitHub Status API v2.0.0 - Pure Go Implementation",
+		"message":      "DevScope API v1.0.0 - Pure Go Implementation",
 		"architecture": "Clean Architecture with Package Structure",
 		"features": []string{
 			"High-performance concurrent processing",

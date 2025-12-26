@@ -15,7 +15,7 @@ export const Footer: React.FC = () => {
                             <p className="text-sm text-[#8b949e]">
                                 Created by <a href="https://github.com/AnantaCoder" target="_blank" rel="noopener noreferrer" className="text-[#58a6ff] hover:underline">@AnantaCoder</a>
                             </p>
-                            <span className="px-1.5 py-0.5 text-[10px] font-mono bg-[#21262d] border border-[#30363d] rounded text-[#8b949e]">v2.0.0</span>
+                            <span className="px-1.5 py-0.5 text-[10px] font-mono bg-[#21262d] border border-[#30363d] rounded text-[#8b949e]">v1.0.0</span>
                         </div>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap justify-center">
