@@ -168,6 +168,13 @@ export default function ChatPage() {
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const mentionSearchRef = useRef<HTMLInputElement>(null);
 
+    // Close sidebar on mobile by default
+    useEffect(() => {
+        if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+            setIsSidebarOpen(false);
+        }
+    }, []);
+
     // Redirect if not authenticated
     useEffect(() => {
         if (!loading && !isAuthenticated) {
@@ -1138,8 +1145,8 @@ export default function ChatPage() {
                         )}
                     </div>
 
-                    {/* Fixed Input Area at Bottom */}
-                    <div className="flex-shrink-0 p-4 border-t border-zinc-800/60 bg-zinc-900/50">
+                    {/* Fixed Input Area at Bottom - Sticky on mobile */}
+                    <div className="flex-shrink-0 p-4 border-t border-zinc-800/60 bg-zinc-900/95 lg:bg-zinc-900/50 sticky bottom-0 lg:relative z-10 backdrop-blur-lg lg:backdrop-blur-none pb-safe">
                         <div className="max-w-3xl mx-auto">
                             {/* Current mentions display */}
                             {currentMentions.length > 0 && (
