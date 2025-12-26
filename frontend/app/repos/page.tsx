@@ -6,9 +6,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { SignInCard } from "@/components/SignInCard";
 import { RepoCard } from "@/components/RepoCard";
-import { Repository, LANGUAGE_COLORS } from "@/types/github";
-import Image from "next/image";
-import Link from "next/link";
+import { Repository } from "@/types/github";
 
 
 const LANGUAGES_LIST = ["TypeScript", "JavaScript", "Python", "Go", "Rust", "Java", "C++", "Ruby", "PHP", "Swift", "Kotlin"];
@@ -100,13 +98,6 @@ export default function ReposPage() {
             fetchMyRepos();
         }
     }, [isAuthenticated, user?.username, fetchMyRepos]);
-
-    // Get unique languages from repos
-    const getLanguages = (repos: Repository[]) => {
-        const langs = new Set<string>();
-        repos.forEach((r) => r.language && langs.add(r.language));
-        return Array.from(langs).sort();
-    };
 
     // Sort and filter repos
     const processRepos = (repos: Repository[]) => {

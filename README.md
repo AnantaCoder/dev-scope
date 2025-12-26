@@ -23,37 +23,34 @@
 
 ## 🆕 What's New (December 2025)
 
-### Just Implemented!
+### 🤖 Dev AI Chatbot - Your Intelligent Coding Assistant
 
-🔐 **GitHub OAuth Authentication** - Sign in with your GitHub account and get personalized features
+**Full-featured AI chatbot with GitHub integration!**
 
-- Secure OAuth 2.0 flow with session management
-- Access to private repositories (with permission)
-- Profile display in navbar with avatar and stats
-- Persistent sessions for 30 days
+- **@user Mentions** - Get detailed GitHub profile insights
+- **@owner/repo Mentions** - Repository analysis with stats, recent commits
+- **@owner/repo/path/file Analysis** - Fetch and analyze any file from GitHub repos
+- **📋 PR Review** - Analyze Pull Requests with `@owner/repo#123` format
+- **Conversation Storage** - All chats saved to PostgreSQL database
+- **Export to Markdown** - Download conversations as `.md` files
+- **Code Analysis Modal** - Paste code for AI review
+- **Keyboard Shortcuts** - `Ctrl+N` new chat, `Ctrl+K` focus, `?` shortcuts
 
-📊 **User Rankings Leaderboard** - See top GitHub developers ranked by comprehensive score
+### 🎨 Responsive UI Updates
 
-- Multi-factor scoring algorithm (followers, stars, repos, forks, contributions)
-- Paginated leaderboard with 50 users per page
-- Medal display for top 3 positions 🥇🥈🥉
-- Real-time ranking updates
+- **Resizable Sidebar** - Drag to resize (200-500px), mobile overlay
+- **Premium Privacy Page** - Gradient design at `/privacy`
+- **Improved Landing Page** - Simplified binary animation, chatbot features
 
-🗄️ **PostgreSQL Database Integration** - Persistent data storage with Neon
+### Previously Added
 
-- User accounts and session management
-- Search history tracking
-- Activity logging
-- Optimized with indexes and connection pooling
+🔐 **GitHub OAuth Authentication** - Sign in with your GitHub account
 
-📱 **Enhanced UI/UX** - New navigation and user experience improvements
+📊 **User Rankings Leaderboard** - Top developers ranked by comprehensive score
 
-- Profile button with dropdown menu in navbar
-- Dedicated rankings page at `/rankings`
-- Responsive design for all screen sizes
-- Seamless authentication flow
+🗄️ **PostgreSQL Database** - Persistent data storage with Neon
 
-[See IMPLEMENTATION.md for full details](#) • [Setup Guide →](SETUP.md)
+[See full changelog →](#)
 
 ---
 
@@ -77,8 +74,12 @@
 
 #### 🤖 **AI-Powered Insights**
 
+- **Dev AI Chatbot**: Full-featured conversational assistant at `/chat`
+- **GitHub Mentions**: `@user`, `@owner/repo`, `@owner/repo/path/file`, `@owner/repo#PR`
+- **PR Review**: Analyze Pull Requests with diff inspection and code review
+- **File Analysis**: Fetch and review any file from public GitHub repos
+- **Code Review Modal**: Paste code directly for AI analysis
 - **NVIDIA LLaMA 3.1 Integration**: Advanced AI model for deep analysis
-- **Intelligent Comparisons**: Natural language insights comparing multiple developers
 - **Context-Aware Analysis**: AI considers tech stack, contribution patterns, and specializations
 - **Rate Limiting**: 10 AI requests per minute per IP with smart throttling
 

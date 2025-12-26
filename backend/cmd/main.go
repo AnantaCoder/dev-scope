@@ -78,6 +78,7 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	rankingRepo := repository.NewRankingRepository(db)
 	privateDataRepo := repository.NewPrivateDataRepository(db)
+	devaiRepo := repository.NewDevAIRepository(db)
 
 	// Initialize services
 	githubService := service.NewGitHubService(cfg, cacheInstance)
@@ -96,6 +97,7 @@ func main() {
 	// Initialize handlers
 	searchHandler := handlers.NewSearchHandler(userRepo)
 	server := handlers.NewServer(cfg, cacheInstance, githubService, rankingService, searchHandler)
+	server.SetDevAIRepository(devaiRepo) // Connect DevAI repository
 	authHandler := handlers.NewAuthHandler(authService, userRepo, cfg.FrontendURL, rankingService)
 	rankingHandler := handlers.NewRankingHandler(rankingService)
 	privateDataHandler := handlers.NewPrivateDataHandler(privateDataService, authService)
@@ -176,6 +178,39 @@ func main() {
 		}
 	})))
 	http.HandleFunc("/api/user/", handlers.SecureCORSMiddleware(authMiddleware.OptionalAuth(server.GetExtendedUserHandler)))
+
+	// Dev AI endpoints (authenticated)
+	http.HandleFunc("/api/devai/chat", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			server.DevAIChatHandler(w, r)
+		} else {
+			http.NotFound(w, r)
+		}
+	})))
+	http.HandleFunc("/api/devai/search/repos", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(server.DevAISearchReposHandler)))
+	http.HandleFunc("/api/devai/search/users", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(server.DevAISearchUsersHandler)))
+
+	// DevAI conversation management endpoints
+	http.HandleFunc("/api/devai/conversations", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "GET":
+			server.DevAIGetConversationsHandler(w, r)
+		case "POST":
+			server.DevAICreateConversationHandler(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	})))
+	http.HandleFunc("/api/devai/conversations/", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "GET":
+			server.DevAIGetConversationHandler(w, r)
+		case "DELETE":
+			server.DevAIDeleteConversationHandler(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	})))
 
 	// Print startup info
 	fmt.Println("=" + strings.Repeat("=", 75))

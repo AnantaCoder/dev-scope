@@ -12,6 +12,7 @@ import (
 	"github-api/backend/internal/cache"
 	"github-api/backend/internal/config"
 	"github-api/backend/internal/models"
+	"github-api/backend/internal/repository"
 	"github-api/backend/internal/service"
 )
 
@@ -24,6 +25,7 @@ type Server struct {
 	startTime      time.Time
 	aiLimiter      *RateLimiter
 	searchHandler  *SearchHandler
+	devaiRepo      *repository.DevAIRepository
 }
 
 // NewServer creates a new server instance
@@ -38,6 +40,11 @@ func NewServer(cfg *config.Config, c *cache.Cache, svc *service.GitHubService, r
 		aiLimiter:     NewRateLimiter(10, time.Minute),
 		searchHandler: searchHandler,
 	}
+}
+
+// SetDevAIRepository sets the DevAI repository (called from main.go after initialization)
+func (s *Server) SetDevAIRepository(repo *repository.DevAIRepository) {
+	s.devaiRepo = repo
 }
 
 // HomeHandler handles the home endpoint

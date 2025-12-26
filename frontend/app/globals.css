@@ -213,3 +213,44 @@ textarea:focus {
       #000000;
   }
 }
+
+/* Dev AI Chatbot Animations */
+@keyframes slide-up-chat {
+  from {
+    transform: translateY(100%) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes bounce-subtle {
+  0%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-4px);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up-chat 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Chatbot message bubble animations */
+@keyframes message-appear {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chatbot-message-enter {
+  animation: message-appear 0.2s ease-out;
+}

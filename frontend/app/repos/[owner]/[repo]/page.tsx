@@ -9,7 +9,6 @@ import { AIAnalysisButton } from "@/components/AIAnalysisButton";
 import { useAIAnalysis } from "@/hooks/useAIAnalysis";
 import Image from "next/image";
 import Link from "next/link";
-import { api } from "@/lib/api";
 
 interface Repository {
     id: number;
@@ -196,9 +195,9 @@ export default function RepoDetailPage() {
                         </div>
                         <h2 className="text-xl font-bold text-white mb-2">Repository Not Found</h2>
                         <p className="text-[#8b949e] mb-4">{error}</p>
-                        <a href="/repos" className="inline-flex items-center gap-2 px-4 py-2 bg-[#238636] hover:bg-[#2ea043] text-white rounded-lg transition-all">
+                        <Link href="/repos" className="inline-flex items-center gap-2 px-4 py-2 bg-[#238636] hover:bg-[#2ea043] text-white rounded-lg transition-all">
                             ← Back to Repos
-                        </a>
+                        </Link>
                     </div>
                 </main>
                 <Footer />
@@ -220,7 +219,7 @@ export default function RepoDetailPage() {
                 <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-6">
                     {/* Breadcrumb */}
                     <nav className="flex items-center gap-2 text-sm mb-6">
-                        <a href="/repos" className="text-[#8b949e] hover:text-white transition-colors">Repos</a>
+                        <Link href="/repos" className="text-[#8b949e] hover:text-white transition-colors">Repos</Link>
                         <span className="text-[#30363d]">/</span>
                         <span className="text-[#8b949e]">{owner}</span>
                         <span className="text-[#30363d]">/</span>

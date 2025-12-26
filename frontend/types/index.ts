@@ -94,3 +94,23 @@ export interface AIAnalyzeResponse {
   analysis: string;
   message?: string;
 }
+
+// Dev AI Chatbot types
+export interface DevAIMention {
+  type: "repo" | "user";
+  value: string;
+}
+
+export interface DevAIChatRequest {
+  message: string;
+  conversation_id?: string;
+  mentions?: DevAIMention[];
+}
+
+export interface DevAIChatResponse {
+  error: boolean;
+  response: string;
+  conversation_id: string;
+  message?: string;
+}
+

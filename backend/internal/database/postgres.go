@@ -194,6 +194,30 @@ func (db *DB) InitSchema(ctx context.Context) error {
 	CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);
 	CREATE INDEX IF NOT EXISTS idx_user_private_data_user_id ON user_private_data(user_id);
 	CREATE INDEX IF NOT EXISTS idx_user_private_data_github_id ON user_private_data(github_id);
+
+	-- DevAI Conversations table
+	CREATE TABLE IF NOT EXISTS devai_conversations (
+		id SERIAL PRIMARY KEY,
+		user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+		title VARCHAR(255) NOT NULL DEFAULT 'New Chat',
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+	);
+
+	-- DevAI Messages table
+	CREATE TABLE IF NOT EXISTS devai_messages (
+		id SERIAL PRIMARY KEY,
+		conversation_id INT NOT NULL REFERENCES devai_conversations(id) ON DELETE CASCADE,
+		role VARCHAR(20) NOT NULL,
+		content TEXT NOT NULL,
+		mentions JSONB,
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+	);
+
+	-- DevAI Indexes
+	CREATE INDEX IF NOT EXISTS idx_devai_conversations_user_id ON devai_conversations(user_id);
+	CREATE INDEX IF NOT EXISTS idx_devai_conversations_updated_at ON devai_conversations(updated_at DESC);
+	CREATE INDEX IF NOT EXISTS idx_devai_messages_conversation_id ON devai_messages(conversation_id);
 	`
 
 	_, err := db.ExecContext(ctx, schema)

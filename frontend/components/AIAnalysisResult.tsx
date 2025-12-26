@@ -116,7 +116,6 @@ function formatAnalysisResult(text: string): React.ReactNode {
     let key = 0;
     let inCodeBlock = false;
     let codeBlockContent: string[] = [];
-    let codeBlockLang = "";
     let currentList: { type: "ul" | "ol"; items: { num?: string; content: React.ReactNode }[] } | null = null;
 
     const flushList = () => {
@@ -168,7 +167,6 @@ function formatAnalysisResult(text: string): React.ReactNode {
             } else {
                 // Start code block
                 flushList();
-                codeBlockLang = trimmedLine.slice(3);
                 inCodeBlock = true;
             }
             continue;

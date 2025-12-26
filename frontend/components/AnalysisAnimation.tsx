@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 
 export function AnalysisAnimation() {
     const [metrics, setMetrics] = useState(Array(12).fill(0));
+    const [packetId, setPacketId] = useState(() => Math.floor(Date.now() / 1000));
 
     // Simulate changing metrics
     useEffect(() => {
         const interval = setInterval(() => {
             setMetrics(prev => prev.map(() => Math.random() * 100));
+            setPacketId(Math.floor(Date.now() / 1000));
         }, 1000);
         return () => clearInterval(interval);
     }, []);
@@ -70,7 +72,7 @@ export function AnalysisAnimation() {
 
                     <div className="text-right">
                         <p className="text-xs text-blue-400 font-mono animate-pulse">Scanning User Data...</p>
-                        <p className="text-[10px] text-gray-500 font-mono mt-0.5">Packet ID: {Math.floor(Date.now() / 1000)}</p>
+                        <p className="text-[10px] text-gray-500 font-mono mt-0.5">Packet ID: {packetId}</p>
                     </div>
                 </div>
             </div>

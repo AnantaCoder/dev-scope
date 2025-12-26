@@ -2,41 +2,39 @@
 
 import { useEffect, useState, useCallback } from "react";
 
+// Terminal output simulation
+const TERMINAL_COMMANDS = [
+    "$ git log --oneline | head -5",
+    "a3f2c1d feat: implement OAuth flow",
+    "b7e4f9a fix: resolve memory leak",
+    "c8d5e2b refactor: optimize queries",
+    "$ npm run analyze",
+    "> Scanning repositories...",
+    "> Found 47 public repos",
+    "$ gh api user/repos --jq '.[].language'",
+    "TypeScript",
+    "Python",
+    "Go",
+    "$ wc -l **/*.ts | tail -1",
+    "  24,847 total",
+    "$ docker stats --no-stream",
+    "CPU: 12.4% | MEM: 256MB",
+];
+
 export function HomeAnalysisAnimation() {
     const [activeIndex, setActiveIndex] = useState(0);
     const [chartData, setChartData] = useState(Array(12).fill(30));
     const [progress, setProgress] = useState(0);
     const [terminalLines, setTerminalLines] = useState<string[]>([]);
     const [codeMetrics, setCodeMetrics] = useState({ commits: 0, lines: 0, files: 0 });
-    const [binaryMatrix, setBinaryMatrix] = useState<{ char: string; lit: boolean }[][]>([]);
-
-    // Terminal output simulation
-    const terminalCommands = [
-        "$ git log --oneline | head -5",
-        "a3f2c1d feat: implement OAuth flow",
-        "b7e4f9a fix: resolve memory leak",
-        "c8d5e2b refactor: optimize queries",
-        "$ npm run analyze",
-        "> Scanning repositories...",
-        "> Found 47 public repos",
-        "$ gh api user/repos --jq '.[].language'",
-        "TypeScript",
-        "Python",
-        "Go",
-        "$ wc -l **/*.ts | tail -1",
-        "  24,847 total",
-        "$ git shortlog -sn | head -3",
-        "   892  anantacoder",
-        "$ docker stats --no-stream",
-        "CPU: 12.4% | MEM: 256MB",
-    ];
+    const [binaryStream, setBinaryStream] = useState<string[]>([]);
 
     // Add terminal line
     const addTerminalLine = useCallback(() => {
         setTerminalLines(prev => {
-            const newLine = terminalCommands[Math.floor(Math.random() * terminalCommands.length)];
+            const newLine = TERMINAL_COMMANDS[Math.floor(Math.random() * TERMINAL_COMMANDS.length)];
             const updated = [...prev, newLine];
-            return updated.slice(-6); // Keep last 6 lines
+            return updated.slice(-6);
         });
     }, []);
 
@@ -75,84 +73,23 @@ export function HomeAnalysisAnimation() {
         return () => clearInterval(interval);
     }, [addTerminalLine]);
 
-    // Binary matrix animation with ANANTACODER sliding text
-    const [textOffset, setTextOffset] = useState(50);
-
+    // Simple binary stream - just 01s
     useEffect(() => {
-        // Simple 5x3 pixel font for letters
-        const font: Record<string, number[][]> = {
-            'A': [[0, 1, 0], [1, 0, 1], [1, 1, 1], [1, 0, 1], [1, 0, 1]],
-            'N': [[1, 0, 1], [1, 1, 1], [1, 1, 1], [1, 0, 1], [1, 0, 1]],
-            'T': [[1, 1, 1], [0, 1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0]],
-            'C': [[1, 1, 1], [1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 1, 1]],
-            'O': [[1, 1, 1], [1, 0, 1], [1, 0, 1], [1, 0, 1], [1, 1, 1]],
-            'D': [[1, 1, 0], [1, 0, 1], [1, 0, 1], [1, 0, 1], [1, 1, 0]],
-            'E': [[1, 1, 1], [1, 0, 0], [1, 1, 0], [1, 0, 0], [1, 1, 1]],
-            'R': [[1, 1, 0], [1, 0, 1], [1, 1, 0], [1, 0, 1], [1, 0, 1]],
-            ' ': [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
-        };
-
-        const text = "ANANTACODER";
-        const letterWidth = 4; // 3 pixels + 1 space
-        const textWidth = text.length * letterWidth;
-
-        const generateMatrix = (offset: number) => {
-            const rows = 8;
-            const cols = 50;
-            const matrix: { char: string; lit: boolean }[][] = [];
-
-            for (let i = 0; i < rows; i++) {
-                const row: { char: string; lit: boolean }[] = [];
-                for (let j = 0; j < cols; j++) {
-                    const char = Math.random() > 0.5 ? '1' : '0';
-                    let lit = false;
-
-                    // Check if this position should be lit for the text
-                    // Text is vertically centered (rows 1-5 for 5-pixel high font)
-                    if (i >= 1 && i <= 5) {
-                        const textRow = i - 1;
-                        const textCol = j - offset;
-
-                        if (textCol >= 0 && textCol < textWidth) {
-                            const letterIndex = Math.floor(textCol / letterWidth);
-                            const pixelInLetter = textCol % letterWidth;
-
-                            if (letterIndex < text.length && pixelInLetter < 3) {
-                                const letter = text[letterIndex];
-                                const pattern = font[letter] || font[' '];
-                                if (pattern[textRow] && pattern[textRow][pixelInLetter] === 1) {
-                                    lit = true;
-                                }
-                            }
-                        }
-                    }
-
-                    row.push({ char, lit });
-                }
-                matrix.push(row);
+        const generateBinaryRow = () => {
+            let row = "";
+            for (let i = 0; i < 50; i++) {
+                row += Math.random() > 0.5 ? "1" : "0";
             }
-            return matrix;
+            return row;
         };
 
-        // Animation loop for sliding
-        const slideInterval = setInterval(() => {
-            setTextOffset(prev => {
-                const newOffset = prev - 1;
-                return newOffset < -text.length * letterWidth ? 50 : newOffset;
+        const interval = setInterval(() => {
+            setBinaryStream(prev => {
+                const newRows = [...prev, generateBinaryRow()];
+                return newRows.slice(-8);
             });
-        }, 80);
-
-        const matrixInterval = setInterval(() => {
-            setTextOffset(prev => {
-                setBinaryMatrix(generateMatrix(prev));
-                return prev;
-            });
-        }, 100);
-
-        return () => {
-            clearInterval(slideInterval);
-            clearInterval(matrixInterval);
-        };
+        }, 150);
+        return () => clearInterval(interval);
     }, []);
 
     const stages = [
@@ -164,18 +101,14 @@ export function HomeAnalysisAnimation() {
 
     return (
         <div className="relative w-full bg-gradient-to-br from-[#0a0a0f] via-[#0d1117] to-[#0a0a0f] rounded-2xl border border-white/10 overflow-hidden">
-            {/* Animated Grid Background */}
+            {/* Subtle Grid Background */}
             <div
-                className="absolute inset-0 opacity-[0.03]"
+                className="absolute inset-0 opacity-[0.02]"
                 style={{
                     backgroundImage: `linear-gradient(rgba(59,130,246,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.5) 1px, transparent 1px)`,
                     backgroundSize: "20px 20px",
                 }}
             />
-
-            {/* Scanning Lines */}
-            <div className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-40 animate-scan-down" />
-            <div className="absolute inset-y-0 w-px bg-gradient-to-b from-transparent via-purple-500 to-transparent opacity-30 animate-scan-right" />
 
             {/* Header Bar */}
             <div className="flex items-center justify-between px-4 py-2 border-b border-white/5 bg-black/40">
@@ -259,8 +192,8 @@ export function HomeAnalysisAnimation() {
                     </div>
                 </div>
 
-                {/* Center Panel: Chart Visualization */}
-                <div className="flex-1 p-4 flex flex-col">
+                {/* Center Panel: Chart + Binary Stream - Hidden on mobile */}
+                <div className="hidden lg:flex flex-1 p-4 flex-col">
                     <div className="text-[10px] text-gray-500 font-mono mb-2 flex items-center justify-between">
                         <span>CONTRIBUTION_GRAPH</span>
                         <span className="text-blue-400">{Math.round(progress)}%</span>
@@ -279,103 +212,71 @@ export function HomeAnalysisAnimation() {
                         ))}
                     </div>
 
-                    {/* Metrics Row with Binary Background */}
-                    <div className="mt-3 relative">
-                        {/* Binary background for stats */}
-                        <div className="absolute inset-0 overflow-hidden rounded-lg opacity-30 font-mono text-[8px] leading-tight">
-                            {binaryMatrix.slice(0, 4).map((row, i) => (
-                                <div key={i} className="whitespace-nowrap overflow-hidden">
-                                    {row.map((bit, j) => (
-                                        <span key={j} className={bit.lit ? 'text-green-400 font-bold' : 'text-green-600/30'}>{bit.char}</span>
-                                    ))}
-                                </div>
-                            ))}
+                    {/* Metrics Row */}
+                    <div className="mt-3 grid grid-cols-3 gap-2">
+                        <div className="bg-black/60 rounded-lg p-2 text-center border border-white/5">
+                            <p className="text-lg font-bold text-orange-400 font-mono">{codeMetrics.commits}</p>
+                            <p className="text-[9px] text-gray-500">COMMITS</p>
                         </div>
-                        <div className="grid grid-cols-3 gap-2 relative z-10">
-                            <div className="bg-black/60 rounded-lg p-2 text-center border border-white/5 backdrop-blur-sm">
-                                <p className="text-lg font-bold text-orange-400 font-mono">{codeMetrics.commits}</p>
-                                <p className="text-[9px] text-gray-500">COMMITS</p>
-                            </div>
-                            <div className="bg-black/60 rounded-lg p-2 text-center border border-white/5 backdrop-blur-sm">
-                                <p className="text-lg font-bold text-blue-400 font-mono">{codeMetrics.lines.toLocaleString()}</p>
-                                <p className="text-[9px] text-gray-500">LINES</p>
-                            </div>
-                            <div className="bg-black/60 rounded-lg p-2 text-center border border-white/5 backdrop-blur-sm">
-                                <p className="text-lg font-bold text-green-400 font-mono">{codeMetrics.files}</p>
-                                <p className="text-[9px] text-gray-500">FILES</p>
-                            </div>
+                        <div className="bg-black/60 rounded-lg p-2 text-center border border-white/5">
+                            <p className="text-lg font-bold text-blue-400 font-mono">{codeMetrics.lines.toLocaleString()}</p>
+                            <p className="text-[9px] text-gray-500">LINES</p>
+                        </div>
+                        <div className="bg-black/60 rounded-lg p-2 text-center border border-white/5">
+                            <p className="text-lg font-bold text-green-400 font-mono">{codeMetrics.files}</p>
+                            <p className="text-[9px] text-gray-500">FILES</p>
                         </div>
                     </div>
                 </div>
 
-                {/* Right Panel: Code Preview */}
+                {/* Right Panel: Binary Stream + Chatbot Features */}
                 <div className="flex-1 p-4 border-l border-white/5">
-                    <div className="text-[10px] text-gray-500 font-mono mb-2">LANGUAGE_DETECTION</div>
-                    <div className="bg-black/60 rounded-lg p-3 font-mono text-[10px] space-y-2">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-blue-500" />
-                                <span className="text-blue-400">TypeScript</span>
-                            </div>
-                            <span className="text-gray-400">42.3%</span>
+                    {/* Binary Data Stream */}
+                    <div className="bg-black/60 rounded-lg p-3 border border-green-500/20 mb-3 overflow-hidden">
+                        <div className="text-[10px] text-green-400 font-mono mb-2 flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                            DATA_STREAM
                         </div>
-                        <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-                            <div className="h-full bg-blue-500 rounded-full" style={{ width: '42.3%' }} />
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-yellow-500" />
-                                <span className="text-yellow-400">Python</span>
-                            </div>
-                            <span className="text-gray-400">28.7%</span>
-                        </div>
-                        <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-                            <div className="h-full bg-yellow-500 rounded-full" style={{ width: '28.7%' }} />
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-cyan-500" />
-                                <span className="text-cyan-400">Go</span>
-                            </div>
-                            <span className="text-gray-400">18.2%</span>
-                        </div>
-                        <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-                            <div className="h-full bg-cyan-500 rounded-full" style={{ width: '18.2%' }} />
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-gray-500" />
-                                <span className="text-gray-400">Other</span>
-                            </div>
-                            <span className="text-gray-400">10.8%</span>
-                        </div>
-                        <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-                            <div className="h-full bg-gray-500 rounded-full" style={{ width: '10.8%' }} />
+                        <div className="font-mono text-[10px] sm:text-[11px] md:text-xs leading-relaxed text-green-500 h-24 sm:h-28 overflow-hidden">
+                            {binaryStream.map((row, i) => (
+                                <div key={i} className="whitespace-nowrap tracking-wider animate-fade-in">
+                                    {row}
+                                </div>
+                            ))}
                         </div>
                     </div>
 
-                    {/* Binary Data Fill - ANANTACODER sliding text */}
-                    <div className="mt-3 bg-black/40 rounded-lg p-2 border border-white/5">
-                        <div className="text-[10px] text-gray-500 font-mono mb-1">DATA_STREAM</div>
-                        <div className="font-mono text-[9px] leading-tight overflow-hidden">
-                            {binaryMatrix.map((row, i) => (
-                                <div key={i} className="flex">
-                                    {row.map((bit, j) => (
-                                        <span
-                                            key={j}
-                                            className={`w-2 text-center transition-all duration-75 ${bit.lit
-                                                    ? 'text-cyan-400 font-bold scale-110'
-                                                    : 'text-gray-700'
-                                                }`}
-                                        >
-                                            {bit.char}
-                                        </span>
-                                    ))}
-                                </div>
-                            ))}
+                    {/* AI Chatbot Features */}
+                    <div className="bg-gradient-to-br from-purple-500/10 to-indigo-500/10 rounded-lg p-3 border border-purple-500/20">
+                        <div className="flex items-center gap-2 mb-2">
+                            <div className="w-6 h-6 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+                                <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                </svg>
+                            </div>
+                            <span className="text-[11px] font-semibold text-white">Dev AI Chatbot</span>
+                        </div>
+                        <div className="space-y-1.5 text-[9px]">
+                            <div className="flex items-center gap-2 text-gray-400">
+                                <span className="text-indigo-400">@user</span>
+                                <span className="text-gray-600">→</span>
+                                <span>GitHub profile insights</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-400">
+                                <span className="text-purple-400">@repo</span>
+                                <span className="text-gray-600">→</span>
+                                <span>Repository analysis</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-400">
+                                <span className="text-green-400">&lt;/&gt;</span>
+                                <span className="text-gray-600">→</span>
+                                <span>Code review & suggestions</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-400">
+                                <span className="text-amber-400">↓</span>
+                                <span className="text-gray-600">→</span>
+                                <span>Export conversations</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -405,33 +306,12 @@ export function HomeAnalysisAnimation() {
             <div className="absolute bottom-0 right-0 w-6 h-6 border-r-2 border-b-2 border-cyan-500/20 rounded-br" />
 
             <style jsx>{`
-        @keyframes scan-down {
-          0% { top: 0; }
-          100% { top: 100%; }
-        }
-        @keyframes scan-right {
-          0% { left: 0; }
-          100% { left: 100%; }
-        }
         @keyframes fade-in {
           from { opacity: 0; transform: translateY(5px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes scroll-left {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
-        }
-        .animate-scan-down {
-          animation: scan-down 2.5s linear infinite;
-        }
-        .animate-scan-right {
-          animation: scan-right 3s linear infinite;
-        }
         .animate-fade-in {
           animation: fade-in 0.3s ease-out;
-        }
-        .animate-scroll-left {
-          animation: scroll-left 10s linear infinite;
         }
       `}</style>
         </div>

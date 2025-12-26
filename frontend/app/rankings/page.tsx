@@ -7,7 +7,7 @@ import { SignInCard } from "@/components/SignInCard";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function RankingsPage() {
-    const { loading, login, isAuthenticated } = useAuth();
+    const { loading, isAuthenticated } = useAuth();
 
     return (
         <div className="min-h-screen flex flex-col premium-bg text-white">

@@ -66,6 +66,21 @@ export function Navbar() {
                             <span className="text-sm">Repos</span>
                         </Link>
 
+                        {isAuthenticated && (
+                            <Link
+                                href="/chat"
+                                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all font-medium ${isActive("/chat")
+                                    ? "bg-gradient-to-r from-purple-500/20 to-violet-500/20 text-[#e6edf3] border border-purple-500/30 shadow-lg shadow-purple-500/10"
+                                    : "text-[#8b949e] hover:text-[#e6edf3] hover:bg-[#21262d]/70 border border-transparent"
+                                    }`}
+                            >
+                                <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                                </svg>
+                                <span className="text-sm">Dev AI</span>
+                            </Link>
+                        )}
+
                     </nav>
 
                     {/* Right Side - Auth */}
@@ -102,6 +117,17 @@ export function Navbar() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                                 </svg>
                             </Link>
+                            {isAuthenticated && (
+                                <Link
+                                    href="/chat"
+                                    className={`p-2 rounded-lg transition-all ${isActive("/chat") ? "bg-[#21262d]" : "hover:bg-[#21262d]/50"
+                                        }`}
+                                >
+                                    <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                                    </svg>
+                                </Link>
+                            )}
 
                         </div>
 
