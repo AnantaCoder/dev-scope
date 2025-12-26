@@ -1164,31 +1164,31 @@ export default function ChatPage() {
                             <div className="relative">
                                 {/* Sleek @ Mention Popup */}
                                 {showMentionPopup && (
-                                    <div className="absolute bottom-full left-0 right-0 mb-2 bg-zinc-900 border border-zinc-700/60 rounded-xl shadow-2xl overflow-hidden backdrop-blur-xl max-h-80 z-20">
-                                        <div className="p-3 border-b border-zinc-800">
-                                            <div className="flex items-center gap-2">
-                                                <div className="flex gap-1">
+                                    <div className="absolute bottom-full left-0 right-0 mb-2 bg-zinc-900 border border-zinc-700/60 rounded-xl shadow-2xl overflow-hidden backdrop-blur-xl max-h-[60vh] lg:max-h-80 z-20">
+                                        <div className="p-2 lg:p-3 border-b border-zinc-800">
+                                            <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-2">
+                                                <div className="flex flex-wrap gap-1">
                                                     <button
                                                         onClick={() => setMentionType("user")}
-                                                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${mentionType === "user" ? "bg-indigo-500 text-white" : "bg-zinc-800 text-zinc-400 hover:text-white"}`}
+                                                        className={`px-2 py-1 lg:px-3 lg:py-1.5 rounded-lg text-[10px] lg:text-xs font-medium transition-all ${mentionType === "user" ? "bg-indigo-500 text-white" : "bg-zinc-800 text-zinc-400 hover:text-white"}`}
                                                     >
                                                         👤 Users
                                                     </button>
                                                     <button
                                                         onClick={() => setMentionType("repo")}
-                                                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${mentionType === "repo" ? "bg-indigo-500 text-white" : "bg-zinc-800 text-zinc-400 hover:text-white"}`}
+                                                        className={`px-2 py-1 lg:px-3 lg:py-1.5 rounded-lg text-[10px] lg:text-xs font-medium transition-all ${mentionType === "repo" ? "bg-indigo-500 text-white" : "bg-zinc-800 text-zinc-400 hover:text-white"}`}
                                                     >
                                                         📁 Repos
                                                     </button>
                                                     <button
                                                         onClick={() => setMentionType("file")}
-                                                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${mentionType === "file" ? "bg-cyan-500 text-white" : "bg-zinc-800 text-zinc-400 hover:text-white"}`}
+                                                        className={`px-2 py-1 lg:px-3 lg:py-1.5 rounded-lg text-[10px] lg:text-xs font-medium transition-all ${mentionType === "file" ? "bg-cyan-500 text-white" : "bg-zinc-800 text-zinc-400 hover:text-white"}`}
                                                     >
                                                         📄 File
                                                     </button>
                                                     <button
                                                         onClick={() => setMentionType("pr")}
-                                                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${mentionType === "pr" ? "bg-green-500 text-white" : "bg-zinc-800 text-zinc-400 hover:text-white"}`}
+                                                        className={`px-2 py-1 lg:px-3 lg:py-1.5 rounded-lg text-[10px] lg:text-xs font-medium transition-all ${mentionType === "pr" ? "bg-green-500 text-white" : "bg-zinc-800 text-zinc-400 hover:text-white"}`}
                                                     >
                                                         📋 PR
                                                     </button>
@@ -1199,23 +1199,23 @@ export default function ChatPage() {
                                                         type="text"
                                                         value={mentionSearch}
                                                         onChange={(e) => setMentionSearch(e.target.value)}
-                                                        placeholder={`Search ${mentionType === "repo" ? "repositories" : "users"}...`}
-                                                        className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm placeholder:text-zinc-500 focus:outline-none focus:border-indigo-500"
+                                                        placeholder={`Search ${mentionType === "repo" ? "repos" : "users"}...`}
+                                                        className="w-full lg:flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm placeholder:text-zinc-500 focus:outline-none focus:border-indigo-500"
                                                         autoFocus
                                                     />
                                                 )}
                                             </div>
                                         </div>
                                         {mentionType === "file" ? (
-                                            <div className="p-4 space-y-3">
-                                                <p className="text-xs text-zinc-400">Enter file path: <span className="text-cyan-400">owner/repo/path/to/file.ext</span></p>
-                                                <div className="flex gap-2">
+                                            <div className="p-3 lg:p-4 space-y-2 lg:space-y-3">
+                                                <p className="text-xs text-zinc-400">File path: <span className="text-cyan-400">owner/repo/path/file</span></p>
+                                                <div className="flex flex-col gap-2 lg:flex-row lg:gap-2">
                                                     <input
                                                         type="text"
                                                         value={mentionSearch}
                                                         onChange={(e) => setMentionSearch(e.target.value)}
-                                                        placeholder="facebook/react/packages/react/index.js"
-                                                        className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm placeholder:text-zinc-500 focus:outline-none focus:border-cyan-500 font-mono"
+                                                        placeholder="owner/repo/path/file.js"
+                                                        className="w-full lg:flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm placeholder:text-zinc-500 focus:outline-none focus:border-cyan-500 font-mono"
                                                         autoFocus
                                                     />
                                                     <button
@@ -1236,23 +1236,23 @@ export default function ChatPage() {
                                                             }
                                                         }}
                                                         disabled={!mentionSearch || mentionSearch.split('/').length < 3}
-                                                        className="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 disabled:bg-zinc-700 disabled:text-zinc-500 text-white rounded-lg text-sm font-medium transition-colors"
+                                                        className="w-full lg:w-auto px-4 py-2 bg-cyan-500 hover:bg-cyan-600 disabled:bg-zinc-700 disabled:text-zinc-500 text-white rounded-lg text-sm font-medium transition-colors"
                                                     >
                                                         Add
                                                     </button>
                                                 </div>
-                                                <p className="text-[10px] text-zinc-600">Example: AnantaCoder/dev-scope/backend/cmd/main.go</p>
+                                                <p className="text-[10px] text-zinc-600 hidden lg:block">Example: AnantaCoder/dev-scope/backend/cmd/main.go</p>
                                             </div>
                                         ) : mentionType === "pr" ? (
-                                            <div className="p-4 space-y-3">
-                                                <p className="text-xs text-zinc-400">Enter PR reference: <span className="text-green-400">owner/repo#123</span></p>
-                                                <div className="flex gap-2">
+                                            <div className="p-3 lg:p-4 space-y-2 lg:space-y-3">
+                                                <p className="text-xs text-zinc-400">Enter PR: <span className="text-green-400">owner/repo#123</span></p>
+                                                <div className="flex flex-col gap-2 lg:flex-row lg:gap-2">
                                                     <input
                                                         type="text"
                                                         value={mentionSearch}
                                                         onChange={(e) => setMentionSearch(e.target.value)}
-                                                        placeholder="facebook/react#12345"
-                                                        className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm placeholder:text-zinc-500 focus:outline-none focus:border-green-500 font-mono"
+                                                        placeholder="owner/repo#123"
+                                                        className="w-full lg:flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm placeholder:text-zinc-500 focus:outline-none focus:border-green-500 font-mono"
                                                         autoFocus
                                                     />
                                                     <button
@@ -1273,7 +1273,7 @@ export default function ChatPage() {
                                                             }
                                                         }}
                                                         disabled={!mentionSearch || !mentionSearch.includes('#') || mentionSearch.split('#')[1]?.length === 0}
-                                                        className="px-4 py-2 bg-green-500 hover:bg-green-600 disabled:bg-zinc-700 disabled:text-zinc-500 text-white rounded-lg text-sm font-medium transition-colors"
+                                                        className="w-full lg:w-auto px-4 py-2 bg-green-500 hover:bg-green-600 disabled:bg-zinc-700 disabled:text-zinc-500 text-white rounded-lg text-sm font-medium transition-colors"
                                                     >
                                                         Review
                                                     </button>
