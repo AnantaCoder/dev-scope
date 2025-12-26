@@ -147,13 +147,41 @@ func (s *Server) DevAIChatHandler(w http.ResponseWriter, r *http.Request) {
 	prompt := buildDevAIPrompt(user, req.Message, mentionContext)
 	log.Printf("🔄 [DevAI] Processing message for user %s...", user.Username)
 
+	// Construct message history
+	var messages []NVIDIAMessage
+	messages = append(messages, NVIDIAMessage{Role: "system", Content: getDevAISystemPrompt(user)})
+
+	// Fetch conversation history if available
+	if req.ConversationID > 0 && s.devaiRepo != nil {
+		history, err := s.devaiRepo.GetMessagesByConversationID(r.Context(), req.ConversationID)
+		if err == nil {
+			// Limit to last 20 messages to conserve context window
+			startIdx := 0
+			if len(history) > 20 {
+				startIdx = len(history) - 20
+			}
+
+			for i := startIdx; i < len(history); i++ {
+				role := history[i].Role
+				// Map "assistant" to "assistant" (or whatever the API expects, typically "assistant")
+				// Map "user" to "user"
+				messages = append(messages, NVIDIAMessage{
+					Role:    role,
+					Content: history[i].Content,
+				})
+			}
+		} else {
+			log.Printf("⚠️ [DevAI] Failed to fetch conversation history: %v", err)
+		}
+	}
+
+	// Append current user message
+	messages = append(messages, NVIDIAMessage{Role: "user", Content: prompt})
+
 	nvidiaReq := NVIDIARequest{
-		Model: "qwen/qwen3-next-80b-a3b-instruct",
-		Messages: []NVIDIAMessage{
-			{Role: "system", Content: getDevAISystemPrompt(user)},
-			{Role: "user", Content: prompt},
-		},
-		Temperature: 0.7,
+		Model:       "qwen/qwen3-next-80b-a3b-instruct", // Using a capable model
+		Messages:    messages,
+		Temperature: 0.7, // Higher temp for more creative/conversational responses
 		MaxTokens:   800,
 	}
 

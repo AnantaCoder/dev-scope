@@ -28,6 +28,16 @@ export function HomeAnalysisAnimation() {
     const [terminalLines, setTerminalLines] = useState<string[]>([]);
     const [codeMetrics, setCodeMetrics] = useState({ commits: 0, lines: 0, files: 0 });
     const [binaryStream, setBinaryStream] = useState<string[]>([]);
+    const [time, setTime] = useState("");
+
+    // Set time on client-side only to avoid hydration mismatch
+    useEffect(() => {
+        setTime(new Date().toLocaleTimeString());
+        const timer = setInterval(() => {
+            setTime(new Date().toLocaleTimeString());
+        }, 1000);
+        return () => clearInterval(timer);
+    }, []);
 
     // Add terminal line
     const addTerminalLine = useCallback(() => {
@@ -125,7 +135,7 @@ export function HomeAnalysisAnimation() {
                         <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                         LIVE
                     </span>
-                    <span className="text-[10px] text-gray-500 font-mono">{new Date().toLocaleTimeString()}</span>
+                    <span className="text-[10px] text-gray-500 font-mono">{time}</span>
                 </div>
             </div>
 
@@ -268,9 +278,14 @@ export function HomeAnalysisAnimation() {
                                 <span>Repository analysis</span>
                             </div>
                             <div className="flex items-center gap-2 text-gray-400">
-                                <span className="text-green-400">&lt;/&gt;</span>
+                                <span className="text-cyan-400">@file</span>
                                 <span className="text-gray-600">→</span>
-                                <span>Code review & suggestions</span>
+                                <span>File analysis & explain</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-400">
+                                <span className="text-green-400">@pr</span>
+                                <span className="text-gray-600">→</span>
+                                <span>Pull request review</span>
                             </div>
                             <div className="flex items-center gap-2 text-gray-400">
                                 <span className="text-amber-400">↓</span>
