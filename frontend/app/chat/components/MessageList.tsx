@@ -117,13 +117,14 @@ export const MessageList: React.FC<MessageListProps> = ({
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                         </svg>
                     </button>
+                    {/* Shortcuts Toggle - Hidden on mobile */}
                     <button
                         onClick={() => setShowShortcuts(!showShortcuts)}
-                        className="p-2 hover:bg-zinc-800 rounded-lg transition-colors group"
+                        className="hidden md:flex p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors relative group"
                         title="Keyboard Shortcuts (?)"
                     >
-                        <svg className="w-4 h-4 text-zinc-500 group-hover:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707" />
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                         </svg>
                     </button>
                 </div>
@@ -206,8 +207,8 @@ export const MessageList: React.FC<MessageListProps> = ({
                             </div>
                         </div>
 
-                        {/* Keyboard shortcuts hint */}
-                        <div className="flex items-center gap-4 text-xs text-zinc-600">
+                        {/* Keyboard shortcuts hint - Hidden on mobile */}
+                        <div className="hidden md:flex mt-4 text-xs text-zinc-500 items-center gap-2 opacity-0 animate-fade-in" style={{ animationDelay: '500ms', animationFillMode: 'forwards' }}>
                             <span>Press <kbd className="px-1.5 py-0.5 bg-zinc-800 rounded text-zinc-400">?</kbd> for shortcuts</span>
                             <span>•</span>
                             <span><kbd className="px-1.5 py-0.5 bg-zinc-800 rounded text-zinc-400">Ctrl+N</kbd> new chat</span>

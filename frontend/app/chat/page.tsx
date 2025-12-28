@@ -427,7 +427,16 @@ export default function ChatPage() {
         return (
             <div className="h-screen flex flex-col bg-[#09090b]">
                 <Navbar />
-                <div className="flex-1 flex items-center justify-center">
+                <div className="flex-1 flex items-center justify-center flex-col gap-4">
+                    {/* Keyboard Shortcuts Hint - Hidden on mobile */}
+                    <div className="hidden md:flex items-center gap-4 text-xs text-zinc-500">
+                        <div className="flex items-center gap-1.5">
+                            <kbd className="px-1.5 py-0.5 bg-[#21262d] border border-[#30363d] rounded text-[10px] font-mono text-zinc-400">⌘</kbd>
+                            <span>+</span>
+                            <kbd className="px-1.5 py-0.5 bg-[#21262d] border border-[#30363d] rounded text-[10px] font-mono text-zinc-400">K</kbd>
+                            <span>to clear</span>
+                        </div>
+                    </div>
                     <div className="flex items-center gap-3">
                         <div className="w-2 h-2 bg-zinc-600 rounded-full animate-pulse" />
                         <div className="w-2 h-2 bg-zinc-600 rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
