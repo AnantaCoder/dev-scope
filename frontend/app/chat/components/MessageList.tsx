@@ -4,6 +4,34 @@ import { Message, Conversation, UserResult } from '../types';
 import { parseMentions, formatContent } from '../utils/markdownUtils';
 // import { UserComparisonCard } from './UserComparisonCard';
 
+// Typewriter component for incremental text rendering
+const Typewriter = ({ content, onComplete }: { content: string, onComplete?: () => void }) => {
+    const [displayedContent, setDisplayedContent] = React.useState("");
+    const [currentIndex, setCurrentIndex] = React.useState(0);
+
+    React.useEffect(() => {
+        // Reset if content changes drastically (e.g. new message)
+        if (currentIndex === 0 && content.length > 0) {
+            setDisplayedContent("");
+        }
+    }, [content, currentIndex]);
+
+    React.useEffect(() => {
+        if (currentIndex < content.length) {
+            const timeout = setTimeout(() => {
+                setDisplayedContent(prev => prev + content[currentIndex]);
+                setCurrentIndex(prev => prev + 1);
+            }, 3); // Fast typing speed
+
+            return () => clearTimeout(timeout);
+        } else if (onComplete) {
+            onComplete();
+        }
+    }, [currentIndex, content, onComplete]);
+
+    return <div className="text-sm leading-relaxed">{formatContent(displayedContent)}</div>;
+};
+
 interface MessageListProps {
     currentConversation: Conversation | null;
     isLoading: boolean;
@@ -17,6 +45,7 @@ interface MessageListProps {
     isSidebarOpen: boolean;
     setIsSidebarOpen: (isOpen: boolean) => void;
     isSwitching: boolean;
+    latestResponseId: number | null;
 }
 
 export const MessageList: React.FC<MessageListProps> = ({
@@ -31,7 +60,8 @@ export const MessageList: React.FC<MessageListProps> = ({
     showShortcuts,
     isSidebarOpen,
     setIsSidebarOpen,
-    isSwitching
+    isSwitching,
+    latestResponseId
 }) => {
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -242,7 +272,11 @@ export const MessageList: React.FC<MessageListProps> = ({
                                                     ))}
                                                 </div>
                                             )}
-                                            <div className="text-sm leading-relaxed">{formatContent(msg.content)}</div>
+                                            {msg.role === "assistant" && latestResponseId === msg.id ? (
+                                                <Typewriter content={msg.content} />
+                                            ) : (
+                                                <div className="text-sm leading-relaxed">{formatContent(msg.content)}</div>
+                                            )}
                                         </div>
                                         {/* Copy button below AI messages */}
                                         {msg.role === "assistant" && (

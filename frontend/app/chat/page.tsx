@@ -206,6 +206,7 @@ export default function ChatPage() {
             const data = await response.json();
             if (!data.error && data.conversation) {
                 setCurrentConversation(data.conversation);
+                setLatestResponseId(null);
             }
         } catch (e) {
             console.error("Failed to load conversation", e);
@@ -320,6 +321,7 @@ export default function ChatPage() {
     // Create new conversation
     const createNewConversation = async () => {
         setCurrentConversation(null);
+        setLatestResponseId(null);
         setCurrentMentions([]);
         setMessage("");
     };
@@ -381,6 +383,7 @@ export default function ChatPage() {
             };
 
             setCurrentConversation(finalConv);
+            setLatestResponseId(assistantMessage.id);
 
             // Refresh conversations list to get updated data
             loadConversations();
@@ -471,6 +474,7 @@ export default function ChatPage() {
                         isSidebarOpen={isSidebarOpen}
                         setIsSidebarOpen={setIsSidebarOpen}
                         isSwitching={isSwitching}
+                        latestResponseId={latestResponseId}
                     />
 
                     <ChatInput
