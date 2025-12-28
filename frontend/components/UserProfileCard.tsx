@@ -64,68 +64,84 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({ user, techStac
 
   return (
     <div className="space-y-4">
-      {/* Main Profile Card */}
-      <div className="premium-card rounded-2xl overflow-hidden">
-        <div className="p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="shrink-0 mx-auto sm:mx-0">
+      {/* Solar Eclipse Profile Card */}
+      <div className="relative overflow-hidden rounded-[2rem] bg-black border border-zinc-800 shadow-[0_0_50px_rgba(0,0,0,0.5)] group">
+
+        {/* Eclipse Background Effect */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-radial from-transparent via-black/90 to-black z-10" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-white/5 rounded-full blur-[100px] animate-pulse-slow" />
+          <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-overlay" />
+        </div>
+
+        <div className="relative z-10 p-8 sm:p-10 flex flex-col items-center text-center">
+
+          {/* Avatar - The Eclipse */}
+          <div className="relative mb-6">
+            <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-orange-400 via-yellow-200 to-orange-400 opacity-75 blur-md animate-spin-slow group-hover:opacity-100 transition-opacity duration-700" />
+            <div className="absolute -inset-4 rounded-full bg-white/5 blur-xl" />
+            <div className="relative w-32 h-32 rounded-full p-1 bg-black overflow-hidden ring-1 ring-white/20 shadow-[0_0_30px_rgba(255,200,100,0.2)]">
               <Image
                 src={user.avatar_url}
                 alt={user.login}
-                width={96}
-                height={96}
-                className="rounded-full ring-1 ring-[#30363d]"
+                fill
+                className="object-cover rounded-full"
               />
             </div>
-            <div className="flex-1 text-center sm:text-left">
-              <h3 className="text-xl font-semibold text-[#e6edf3]">{user.name || user.login}</h3>
-              <p className="text-[#8b949e]">@{user.login}</p>
-              {user.bio && <p className="text-[#8b949e] text-sm mt-2 line-clamp-2">{user.bio}</p>}
-              <div className="flex flex-wrap justify-center sm:justify-start gap-4 mt-3 text-sm text-[#8b949e]">
-                {user.location && (
-                  <span className="flex items-center gap-1">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    </svg>
-                    {user.location}
-                  </span>
-                )}
-                {user.company && (
-                  <span className="flex items-center gap-1">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
-                    {user.company}
-                  </span>
-                )}
-                <span className="flex items-center gap-1">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  Joined {memberSince}
-                </span>
-              </div>
-            </div>
+
+            {/* Orbiting Elements (Optional: small indicators) */}
+            <div className="absolute top-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-black shadow-[0_0_10px_rgba(74,222,128,0.8)] animate-pulse" title="Online" />
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-4 border-t border-white/10">
-            <div className="text-center p-3 bg-black/30 backdrop-blur-sm border border-white/5 rounded-xl hover:border-blue-500/30 transition-all">
-              <p className="text-xl font-semibold text-white">{user.public_repos}</p>
-              <p className="text-xs text-gray-400">Repositories</p>
+          <h3 className="text-3xl font-bold text-white tracking-tight mb-1 drop-shadow-md">{user.name || user.login}</h3>
+          <p className="text-zinc-400 font-medium tracking-wide mb-4">@{user.login}</p>
+
+          {user.bio && (
+            <div className="max-w-md mx-auto mb-6 relative">
+              <span className="absolute -left-2 -top-2 text-2xl text-zinc-700 font-serif">"</span>
+              <p className="text-zinc-300 text-sm leading-relaxed italic">{user.bio}</p>
+              <span className="absolute -right-2 bottom-0 text-2xl text-zinc-700 font-serif">"</span>
             </div>
-            <div className="text-center p-3 bg-black/30 backdrop-blur-sm border border-white/5 rounded-xl hover:border-purple-500/30 transition-all">
-              <p className="text-xl font-semibold text-white">{user.followers.toLocaleString()}</p>
-              <p className="text-xs text-gray-400">Followers</p>
-            </div>
-            <div className="text-center p-3 bg-black/30 backdrop-blur-sm border border-white/5 rounded-xl hover:border-purple-500/30 transition-all">
-              <p className="text-xl font-semibold text-white">{user.following.toLocaleString()}</p>
-              <p className="text-xs text-gray-400">Following</p>
-            </div>
-            <div className="text-center p-3 bg-black/30 backdrop-blur-sm border border-white/5 rounded-xl hover:border-blue-500/30 transition-all">
-              <p className="text-xl font-semibold text-[#e6edf3]">{user.public_gists}</p>
-              <p className="text-xs text-[#8b949e]">Gists</p>
-            </div>
+          )}
+
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm text-zinc-400 mb-8">
+            {user.location && (
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/5">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                </svg>
+                {user.location}
+              </span>
+            )}
+            {user.company && (
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/5">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                {user.company}
+              </span>
+            )}
+            <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/5">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              Joined {memberSince}
+            </span>
+          </div>
+
+          {/* Metrics Band */}
+          <div className="w-full grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl">
+            {[
+              { label: 'Repos', value: user.public_repos, color: 'text-blue-400' },
+              { label: 'Followers', value: user.followers.toLocaleString(), color: 'text-purple-400' },
+              { label: 'Following', value: user.following.toLocaleString(), color: 'text-purple-400' },
+              { label: 'Gists', value: user.public_gists, color: 'text-emerald-400' }
+            ].map((stat, i) => (
+              <div key={i} className="flex flex-col items-center p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-colors">
+                <span className={`text-2xl font-bold ${stat.color} drop-shadow-sm`}>{stat.value}</span>
+                <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold mt-1">{stat.label}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
