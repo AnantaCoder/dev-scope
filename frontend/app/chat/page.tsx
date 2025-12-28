@@ -26,6 +26,8 @@ export default function ChatPage() {
     const [sidebarWidth, setSidebarWidth] = useState(288); // 288px = 18rem = w-72
     const [isResizing, setIsResizing] = useState(false);
     const [isLoadingConversations, setIsLoadingConversations] = useState(true);
+    const [isSwitching, setIsSwitching] = useState(false);
+    const [latestResponseId, setLatestResponseId] = useState<number | null>(null);
 
     // @ mention state
     const [showMentionPopup, setShowMentionPopup] = useState(false);
@@ -197,6 +199,7 @@ export default function ChatPage() {
 
     const loadConversationMessages = async (convId: number) => {
         try {
+            setIsSwitching(true);
             const response = await fetch(`${API_BASE}/api/devai/conversations/${convId}`, {
                 credentials: "include"
             });
@@ -206,6 +209,8 @@ export default function ChatPage() {
             }
         } catch (e) {
             console.error("Failed to load conversation", e);
+        } finally {
+            setIsSwitching(false);
         }
     };
 
@@ -449,6 +454,7 @@ export default function ChatPage() {
                     createNewConversation={createNewConversation}
                     loadConversationMessages={loadConversationMessages}
                     setDeleteConfirmId={setDeleteConfirmId}
+                    isSwitching={isSwitching}
                 />
 
                 <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
@@ -464,6 +470,7 @@ export default function ChatPage() {
                         showShortcuts={showShortcuts}
                         isSidebarOpen={isSidebarOpen}
                         setIsSidebarOpen={setIsSidebarOpen}
+                        isSwitching={isSwitching}
                     />
 
                     <ChatInput

@@ -16,6 +16,7 @@ interface MessageListProps {
     showShortcuts: boolean;
     isSidebarOpen: boolean;
     setIsSidebarOpen: (isOpen: boolean) => void;
+    isSwitching: boolean;
 }
 
 export const MessageList: React.FC<MessageListProps> = ({
@@ -29,7 +30,8 @@ export const MessageList: React.FC<MessageListProps> = ({
     setShowShortcuts,
     showShortcuts,
     isSidebarOpen,
-    setIsSidebarOpen
+    setIsSidebarOpen,
+    isSwitching
 }) => {
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -185,83 +187,92 @@ export const MessageList: React.FC<MessageListProps> = ({
                     </div>
                 ) : (
                     <div className="max-w-3xl mx-auto space-y-6">
-                        {currentConversation.messages.map(msg => (
-                            <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                                <div className={`max-w-[85%] group ${msg.role === "user" ? "" : ""}`}>
-                                    <div className="flex items-center gap-2 mb-2">
-                                        {msg.role === "assistant" ? (
-                                            <>
-                                                <div className="w-7 h-7 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
-                                                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                                    </svg>
+                        {isSwitching ? (
+                            <div className="flex-1 flex flex-col items-center justify-center min-h-[50vh]">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className="w-8 h-8 rounded-full border-2 border-indigo-500/30 border-t-indigo-500 animate-spin" />
+                                </div>
+                                <p className="text-zinc-500 text-sm animate-pulse">Loading conversation...</p>
+                            </div>
+                        ) : (
+                            currentConversation.messages.map(msg => (
+                                <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                                    <div className={`max-w-[85%] group ${msg.role === "user" ? "" : ""}`}>
+                                        <div className="flex items-center gap-2 mb-2">
+                                            {msg.role === "assistant" ? (
+                                                <>
+                                                    <div className="w-7 h-7 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+                                                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                                        </svg>
+                                                    </div>
+                                                    <span className="text-xs font-medium text-zinc-400">Dev AI</span>
+                                                    <button
+                                                        onClick={() => copyToClipboard(msg.content, msg.id)}
+                                                        className="ml-auto p-1.5 hover:bg-zinc-700 rounded-md transition-colors opacity-0 group-hover:opacity-100"
+                                                        title="Copy response"
+                                                    >
+                                                        {copiedMsgId === msg.id ? (
+                                                            <svg className="w-3.5 h-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                        ) : (
+                                                            <svg className="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                            </svg>
+                                                        )}
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <span className="text-xs font-medium text-zinc-400">You</span>
+                                                    {user?.avatar_url && (
+                                                        <Image src={user.avatar_url} alt="You" width={28} height={28} className="w-7 h-7 rounded-lg" />
+                                                    )}
+                                                </>
+                                            )}
+                                        </div>
+                                        <div className={`rounded-2xl px-4 py-3 ${msg.role === "user" ? "bg-indigo-600 text-white" : "bg-zinc-800/80 text-zinc-200 border border-zinc-700/50"}`}>
+                                            {parseMentions(msg.mentions).length > 0 && (
+                                                <div className="flex flex-wrap gap-1.5 mb-2">
+                                                    {parseMentions(msg.mentions).map((m, i) => (
+                                                        <span key={i} className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-500/20 rounded-md text-[11px] font-medium text-indigo-300">
+                                                            {m.type === "repo" ? "📁" : "👤"} {m.value}
+                                                        </span>
+                                                    ))}
                                                 </div>
-                                                <span className="text-xs font-medium text-zinc-400">Dev AI</span>
+                                            )}
+                                            <div className="text-sm leading-relaxed">{formatContent(msg.content)}</div>
+                                        </div>
+                                        {/* Copy button below AI messages */}
+                                        {msg.role === "assistant" && (
+                                            <div className="mt-2 flex items-center gap-2">
                                                 <button
                                                     onClick={() => copyToClipboard(msg.content, msg.id)}
-                                                    className="ml-auto p-1.5 hover:bg-zinc-700 rounded-md transition-colors opacity-0 group-hover:opacity-100"
-                                                    title="Copy response"
+                                                    className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 rounded-lg transition-colors"
                                                 >
                                                     {copiedMsgId === msg.id ? (
-                                                        <svg className="w-3.5 h-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                        </svg>
+                                                        <>
+                                                            <svg className="w-3.5 h-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                            <span className="text-green-400">Copied!</span>
+                                                        </>
                                                     ) : (
-                                                        <svg className="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                                        </svg>
+                                                        <>
+                                                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                            </svg>
+                                                            <span>Copy</span>
+                                                        </>
                                                     )}
                                                 </button>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <span className="text-xs font-medium text-zinc-400">You</span>
-                                                {user?.avatar_url && (
-                                                    <Image src={user.avatar_url} alt="You" width={28} height={28} className="w-7 h-7 rounded-lg" />
-                                                )}
-                                            </>
-                                        )}
-                                    </div>
-                                    <div className={`rounded-2xl px-4 py-3 ${msg.role === "user" ? "bg-indigo-600 text-white" : "bg-zinc-800/80 text-zinc-200 border border-zinc-700/50"}`}>
-                                        {parseMentions(msg.mentions).length > 0 && (
-                                            <div className="flex flex-wrap gap-1.5 mb-2">
-                                                {parseMentions(msg.mentions).map((m, i) => (
-                                                    <span key={i} className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-500/20 rounded-md text-[11px] font-medium text-indigo-300">
-                                                        {m.type === "repo" ? "📁" : "👤"} {m.value}
-                                                    </span>
-                                                ))}
                                             </div>
                                         )}
-                                        <div className="text-sm leading-relaxed">{formatContent(msg.content)}</div>
                                     </div>
-                                    {/* Copy button below AI messages */}
-                                    {msg.role === "assistant" && (
-                                        <div className="mt-2 flex items-center gap-2">
-                                            <button
-                                                onClick={() => copyToClipboard(msg.content, msg.id)}
-                                                className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 rounded-lg transition-colors"
-                                            >
-                                                {copiedMsgId === msg.id ? (
-                                                    <>
-                                                        <svg className="w-3.5 h-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                        </svg>
-                                                        <span className="text-green-400">Copied!</span>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                                        </svg>
-                                                        <span>Copy</span>
-                                                    </>
-                                                )}
-                                            </button>
-                                        </div>
-                                    )}
                                 </div>
-                            </div>
-                        ))}
+                            ))
+                        )}
 
                         {/* Loading indicator */}
                         {isLoading && (

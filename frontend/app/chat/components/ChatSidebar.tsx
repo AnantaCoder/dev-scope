@@ -13,6 +13,7 @@ interface ChatSidebarProps {
     createNewConversation: () => void;
     loadConversationMessages: (id: number) => void;
     setDeleteConfirmId: (id: number) => void;
+    isSwitching: boolean;
 }
 
 export const ChatSidebar: React.FC<ChatSidebarProps> = ({
@@ -26,7 +27,8 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
     currentConversation,
     createNewConversation,
     loadConversationMessages,
-    setDeleteConfirmId
+    setDeleteConfirmId,
+    isSwitching
 }) => {
     return (
         <>
@@ -53,7 +55,8 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                     <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Conversations</span>
                     <button
                         onClick={createNewConversation}
-                        className="p-2 hover:bg-zinc-800 rounded-lg transition-colors group"
+                        disabled={isSwitching}
+                        className={`p-2 rounded-lg transition-colors group ${isSwitching ? "opacity-50 cursor-not-allowed" : "hover:bg-zinc-800"}`}
                         title="New Chat"
                     >
                         <svg className="w-4 h-4 text-zinc-500 group-hover:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -63,7 +66,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 </div>
 
                 {/* Scrollable conversation list */}
-                <div className="flex-1 overflow-y-auto p-2">
+                <div className={`flex-1 overflow-y-auto p-2 ${isSwitching ? "pointer-events-none opacity-50" : ""}`}>
                     {isLoadingConversations ? (
                         <div className="flex justify-center py-8">
                             <div className="w-5 h-5 border-2 border-zinc-600 border-t-indigo-500 rounded-full animate-spin" />
