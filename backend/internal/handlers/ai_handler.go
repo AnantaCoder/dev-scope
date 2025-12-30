@@ -15,6 +15,9 @@ import (
 
 const NVIDIA_API_BASE = "https://integrate.api.nvidia.com/v1"
 
+// AI_MODEL_NAME is the single source of truth for the AI model used across all handlers
+const AI_MODEL_NAME = "qwen/qwen3-coder-480b-a35b-instruct"
+
 // AIComparisonRequest represents the request for AI comparison
 type AIComparisonRequest struct {
 	Users []models.GitHubUser `json:"users"`
@@ -101,7 +104,7 @@ func (s *Server) AIComparisonHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("🔄 [AI] Comparing %d users...", len(req.Users))
 
 	nvidiaReq := NVIDIARequest{
-		Model: "qwen/qwen3-next-80b-a3b-instruct",
+		Model: AI_MODEL_NAME,
 		Messages: []NVIDIAMessage{
 			{Role: "system", Content: "You are a detailed GitHub profile analyst. Provide comprehensive comparisons with insights. Use markdown formatting with headers and bullet points. Be thorough in your analysis."},
 			{Role: "user", Content: prompt},
@@ -268,7 +271,7 @@ func (s *Server) AIAnalyzeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("🔄 [AI] Analyzing %s: %s...", req.Type, req.Username+req.RepoName)
 
 	nvidiaReq := NVIDIARequest{
-		Model: "qwen/qwen3-next-80b-a3b-instruct",
+		Model: AI_MODEL_NAME,
 		Messages: []NVIDIAMessage{
 			{Role: "system", Content: "You are a concise GitHub analyst. Provide very brief insights in 2-3 bullet points. Maximum 80 words."},
 			{Role: "user", Content: prompt},

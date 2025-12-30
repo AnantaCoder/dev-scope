@@ -179,9 +179,9 @@ func (s *Server) DevAIChatHandler(w http.ResponseWriter, r *http.Request) {
 	messages = append(messages, NVIDIAMessage{Role: "user", Content: prompt})
 
 	nvidiaReq := NVIDIARequest{
-		Model:       "qwen/qwen3-coder-480b-a35b-instruct", 
+		Model:       AI_MODEL_NAME, // Uses single source of truth from ai_handler.go
 		Messages:    messages,
-		Temperature: 0.7, 
+		Temperature: 0.7,
 		MaxTokens:   800,
 	}
 
