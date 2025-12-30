@@ -13,9 +13,9 @@ interface RepoCardProps {
 
 export function RepoCard({ repo, copiedId, onCopy, showCloneButton = true }: RepoCardProps) {
     return (
-        <div className="relative p-4 bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-xl border border-white/10 rounded-xl hover:border-blue-500/40 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300 group overflow-hidden">
+        <div className="relative p-4 bg-gradient-to-br from-[#F5E7C6]/5 to-[#1E2345]/30 backdrop-blur-xl border border-[#F5E7C6]/10 rounded-xl hover:border-[#FF6D1F]/40 hover:shadow-lg hover:shadow-[#FF6D1F]/10 transition-all duration-300 group overflow-hidden">
             {/* Gradient overlay on hover */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-0 bg-gradient-to-br from-[#FF6D1F]/5 to-[#F5E7C6]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
             <div className="relative z-10">
                 {/* Header with repo name */}
@@ -29,14 +29,14 @@ export function RepoCard({ repo, copiedId, onCopy, showCloneButton = true }: Rep
                             alt={repo.owner.login}
                             width={20}
                             height={20}
-                            className="rounded-full flex-shrink-0 ring-2 ring-white/10"
+                            className="rounded-full flex-shrink-0 ring-2 ring-[#F5E7C6]/10"
                         />
-                        <span className="text-[#58a6ff] font-semibold truncate group-hover/name:text-blue-300 transition-colors">
+                        <span className="text-[#FF6D1F] font-semibold truncate group-hover/name:text-[#FF8A47] transition-colors">
                             {repo.name}
                         </span>
                     </Link>
                     {repo.private && (
-                        <span className="text-[10px] px-1.5 py-0.5 bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 rounded flex-shrink-0">
+                        <span className="text-[10px] px-1.5 py-0.5 bg-[#F5E7C6]/10 text-[#F5E7C6] border border-[#F5E7C6]/20 rounded flex-shrink-0">
                             Private
                         </span>
                     )}
@@ -44,7 +44,7 @@ export function RepoCard({ repo, copiedId, onCopy, showCloneButton = true }: Rep
 
                 {/* Description */}
                 {repo.description && (
-                    <p className="text-sm text-[#8b949e] line-clamp-2 mb-3">{repo.description}</p>
+                    <p className="text-sm text-[#A8A0B8] line-clamp-2 mb-3 font-['Gotham']">{repo.description}</p>
                 )}
 
                 {/* Topics */}
@@ -53,29 +53,29 @@ export function RepoCard({ repo, copiedId, onCopy, showCloneButton = true }: Rep
                         {repo.topics.slice(0, 3).map((topic) => (
                             <span
                                 key={topic}
-                                className="text-[10px] px-2 py-0.5 bg-blue-500/10 text-blue-400 rounded-full border border-blue-500/20"
+                                className="text-[10px] px-2 py-0.5 bg-[#FF6D1F]/10 text-[#FF8A47] rounded-full border border-[#FF6D1F]/20"
                             >
                                 {topic}
                             </span>
                         ))}
                         {repo.topics.length > 3 && (
-                            <span className="text-[10px] text-[#8b949e]">+{repo.topics.length - 3}</span>
+                            <span className="text-[10px] text-[#6B6580]">+{repo.topics.length - 3}</span>
                         )}
                     </div>
                 )}
 
                 {/* Stats */}
-                <div className="flex flex-wrap items-center gap-3 text-xs text-[#8b949e] mb-3">
+                <div className="flex flex-wrap items-center gap-3 text-xs text-[#6B6580] mb-3">
                     {repo.language && (
                         <div className="flex items-center gap-1">
                             <span
-                                className="w-2.5 h-2.5 rounded-full ring-1 ring-white/20"
-                                style={{ backgroundColor: LANGUAGE_COLORS[repo.language] || "#8b949e" }}
+                                className="w-2.5 h-2.5 rounded-full ring-1 ring-[#F5E7C6]/20"
+                                style={{ backgroundColor: LANGUAGE_COLORS[repo.language] || "#6B6580" }}
                             />
-                            <span>{repo.language}</span>
+                            <span className="text-[#D4C9A8]">{repo.language}</span>
                         </div>
                     )}
-                    <div className="flex items-center gap-1 text-yellow-400/80">
+                    <div className="flex items-center gap-1 text-[#F5E7C6]">
                         <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 16 16">
                             <path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z" />
                         </svg>
@@ -87,7 +87,7 @@ export function RepoCard({ repo, copiedId, onCopy, showCloneButton = true }: Rep
                         </svg>
                         <span>{repo.forks_count.toLocaleString()}</span>
                     </div>
-                    <span className="text-[#6e7681]">•</span>
+                    <span className="text-[#4A4560]">•</span>
                     <span>{formatRepoDate(repo.updated_at)}</span>
                 </div>
 
@@ -95,7 +95,7 @@ export function RepoCard({ repo, copiedId, onCopy, showCloneButton = true }: Rep
                 <div className="flex flex-wrap gap-2">
                     <Link
                         href={`/repos/${repo.owner.login}/${repo.name}`}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-500/20 to-blue-600/20 hover:from-blue-500/30 hover:to-blue-600/30 text-blue-400 text-xs font-medium rounded-lg border border-blue-500/30 transition-all shadow-sm"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-[#FF6D1F]/20 to-[#FF8A47]/20 hover:from-[#FF6D1F]/30 hover:to-[#FF8A47]/30 text-[#FF6D1F] text-xs font-medium rounded-lg border border-[#FF6D1F]/30 transition-all shadow-sm"
                     >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -107,8 +107,8 @@ export function RepoCard({ repo, copiedId, onCopy, showCloneButton = true }: Rep
                         <button
                             onClick={(e) => onCopy(repo, e)}
                             className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${copiedId === repo.id
-                                    ? "bg-green-500/20 text-green-400 border-green-500/30"
-                                    : "bg-white/5 hover:bg-white/10 text-[#8b949e] border-white/10"
+                                ? "bg-green-500/20 text-green-400 border-green-500/30"
+                                : "bg-[#F5E7C6]/5 hover:bg-[#F5E7C6]/10 text-[#6B6580] border-[#F5E7C6]/10"
                                 }`}
                         >
                             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

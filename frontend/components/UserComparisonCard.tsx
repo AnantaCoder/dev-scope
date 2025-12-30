@@ -29,11 +29,11 @@ const formatNumber = (num: number): string => {
 
 export const UserComparisonCard: React.FC<UserComparisonCardProps> = ({ users }) => {
     const metrics: MetricData[] = useMemo(() => [
-        { label: 'Repos', key: 'public_repos', color: '#58a6ff', icon: <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg> },
-        { label: 'Followers', key: 'followers', color: '#a371f7', icon: <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg> },
+        { label: 'Repos', key: 'public_repos', color: '#FF6D1F', icon: <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg> },
+        { label: 'Followers', key: 'followers', color: '#F5E7C6', icon: <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg> },
         { label: 'Following', key: 'following', color: '#238636', icon: <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg> },
-        { label: 'Gists', key: 'public_gists', color: '#d29922', icon: <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg> },
-        { label: 'Years', key: 'experience', color: '#f0883e', icon: <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> },
+        { label: 'Gists', key: 'public_gists', color: '#FF8A47', icon: <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg> },
+        { label: 'Years', key: 'experience', color: '#D4C9A8', icon: <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> },
     ], []);
 
     const getUserValue = (user: GitHubUser, key: keyof GitHubUser | 'experience'): number => {
@@ -78,24 +78,24 @@ export const UserComparisonCard: React.FC<UserComparisonCardProps> = ({ users })
                     return (
                         <div
                             key={user.login}
-                            className={`premium-card p-4 text-center relative group hover:scale-105 transition-all ${isTopOverall ? 'border-yellow-500/50 glow-orange ring-2 ring-yellow-500/20' : ''}`}
+                            className={`premium-card p-4 text-center relative group hover:scale-105 transition-all ${isTopOverall ? 'border-[#FF6D1F]/50 ring-2 ring-[#FF6D1F]/20 shadow-lg shadow-[#FF6D1F]/10' : ''}`}
                         >
                             {isTopOverall && (
                                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold bg-gradient-to-r from-yellow-500 to-orange-500 text-black rounded-full shadow-xl animate-pulse-glow">
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold bg-gradient-to-r from-[#FF6D1F] to-[#CC5719] text-white rounded-full shadow-xl animate-pulse-glow">
                                         👑 Winner
                                     </span>
                                 </div>
                             )}
                             <div className="relative inline-block mt-2">
-                                <Image src={user.avatar_url} alt={user.login} width={64} height={64} className="rounded-full mx-auto ring-2 ring-white/20 shadow-xl group-hover:ring-white/40 transition-all" />
-                                {isTopOverall && <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-yellow-500/20 to-orange-500/20 animate-pulse" />}
+                                <Image src={user.avatar_url} alt={user.login} width={64} height={64} className="rounded-full mx-auto ring-2 ring-[#F5E7C6]/20 shadow-xl group-hover:ring-[#F5E7C6]/40 transition-all" />
+                                {isTopOverall && <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#FF6D1F]/20 to-[#F5E7C6]/10 animate-pulse" />}
                             </div>
-                            <h3 className="mt-3 text-sm font-semibold text-white truncate">{user.name || user.login}</h3>
-                            <p className="text-xs text-gray-400 truncate">@{user.login}</p>
-                            <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 rounded-full">
-                                <span className="text-sm font-bold text-yellow-400">{winsCount}</span>
-                                <span className="text-[10px] text-gray-400 font-medium">wins</span>
+                            <h3 className="mt-3 text-sm font-semibold text-[#F5E7C6] truncate">{user.name || user.login}</h3>
+                            <p className="text-xs text-[#6B6580] truncate">@{user.login}</p>
+                            <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-[#FF6D1F]/10 to-[#F5E7C6]/5 border border-[#FF6D1F]/30 rounded-full">
+                                <span className="text-sm font-bold text-[#FF6D1F]">{winsCount}</span>
+                                <span className="text-[10px] text-[#6B6580] font-medium">wins</span>
                             </div>
                         </div>
                     );
@@ -104,9 +104,9 @@ export const UserComparisonCard: React.FC<UserComparisonCardProps> = ({ users })
 
             {/* Metrics Comparison - Mobile Friendly */}
             <div className="premium-card overflow-hidden">
-                <div className="px-4 sm:px-5 py-4 border-b border-white/5 bg-gradient-to-r from-blue-500/10 to-purple-500/10">
-                    <h4 className="text-sm font-semibold gradient-text flex items-center gap-2">
-                        <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="px-4 sm:px-5 py-4 border-b border-[#F5E7C6]/5 bg-gradient-to-r from-[#FF6D1F]/10 to-[#F5E7C6]/5">
+                    <h4 className="text-sm font-semibold text-[#F5E7C6] flex items-center gap-2">
+                        <svg className="w-4 h-4 text-[#FF6D1F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
                         Metrics Battle
@@ -120,7 +120,7 @@ export const UserComparisonCard: React.FC<UserComparisonCardProps> = ({ users })
                             <div key={metric.key} className="space-y-3">
                                 <div className="flex items-center gap-2 text-sm">
                                     <span style={{ color: metric.color }}>{metric.icon}</span>
-                                    <span className="text-gray-300 font-semibold">{metric.label}</span>
+                                    <span className="text-[#F5E7C6] font-semibold">{metric.label}</span>
                                 </div>
                                 {/* Mobile: Stack vertically, Desktop: Grid */}
                                 <div className="space-y-2.5 sm:space-y-0 sm:grid sm:gap-3" style={{ gridTemplateColumns: `repeat(${Math.min(users.length, 5)}, minmax(0, 1fr))` }}>
@@ -131,14 +131,14 @@ export const UserComparisonCard: React.FC<UserComparisonCardProps> = ({ users })
                                         const displayValue = metric.key === 'experience' ? `${value}y` : formatNumber(value);
                                         return (
                                             <div key={user.login} className="flex sm:flex-col items-center gap-2 sm:gap-1.5 group">
-                                                <Image src={user.avatar_url} alt={user.login} width={28} height={28} className="rounded-full sm:hidden shrink-0 ring-1 ring-white/20" />
+                                                <Image src={user.avatar_url} alt={user.login} width={28} height={28} className="rounded-full sm:hidden shrink-0 ring-1 ring-[#F5E7C6]/20" />
                                                 <div className="flex-1 sm:w-full">
                                                     <div className="flex items-center justify-between sm:justify-center gap-2 mb-1.5">
-                                                        <span className="text-xs text-gray-400 sm:hidden truncate max-w-[80px] font-medium">{user.login}</span>
-                                                        <span className={`text-sm font-bold ${isTop ? 'text-white' : 'text-gray-400'}`}>{displayValue}</span>
-                                                        {isTop && <span className="text-[10px] px-2 py-0.5 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold shrink-0 shadow-lg">#1</span>}
+                                                        <span className="text-xs text-[#6B6580] sm:hidden truncate max-w-[80px] font-medium">{user.login}</span>
+                                                        <span className={`text-sm font-bold ${isTop ? 'text-[#F5E7C6]' : 'text-[#6B6580]'}`}>{displayValue}</span>
+                                                        {isTop && <span className="text-[10px] px-2 py-0.5 rounded-full bg-gradient-to-r from-[#FF6D1F] to-[#CC5719] text-white font-bold shrink-0 shadow-lg">#1</span>}
                                                     </div>
-                                                    <div className="h-2.5 bg-black/40 rounded-full overflow-hidden backdrop-blur-sm border border-white/5">
+                                                    <div className="h-2.5 bg-[#090B1B]/60 rounded-full overflow-hidden backdrop-blur-sm border border-[#F5E7C6]/5">
                                                         <div className={`h-full rounded-full transition-all duration-700 ${isTop ? 'shadow-lg' : ''}`} style={{ width: `${percentage}%`, backgroundColor: metric.color, opacity: isTop ? 1 : 0.6, boxShadow: isTop ? `0 0 10px ${metric.color}` : 'none' }}></div>
                                                     </div>
                                                 </div>
@@ -154,10 +154,10 @@ export const UserComparisonCard: React.FC<UserComparisonCardProps> = ({ users })
 
             {/* Overall Leaderboard */}
             <div className="premium-card overflow-hidden">
-                <div className="px-4 sm:px-5 py-4 border-b border-white/5 bg-gradient-to-r from-yellow-500/10 to-orange-500/10">
+                <div className="px-4 sm:px-5 py-4 border-b border-[#F5E7C6]/5 bg-gradient-to-r from-[#FF6D1F]/10 to-[#F5E7C6]/5">
                     <h4 className="text-sm font-semibold flex items-center gap-2">
                         <span className="text-xl">🏆</span>
-                        <span className="gradient-text-premium">Leaderboard</span>
+                        <span className="text-[#F5E7C6]">Leaderboard</span>
                     </h4>
                 </div>
                 <div className="p-4 sm:p-5 space-y-3">
@@ -169,16 +169,16 @@ export const UserComparisonCard: React.FC<UserComparisonCardProps> = ({ users })
                             const isTop = score === maxOverallScore;
                             const medals = ['🥇', '🥈', '🥉'];
                             return (
-                                <div key={user.login} className={`flex items-center gap-3 sm:gap-4 p-4 rounded-xl backdrop-blur-sm transition-all hover:scale-[1.02] ${isTop ? 'bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 glow-orange' : 'bg-white/5 border border-white/10'}`}>
+                                <div key={user.login} className={`flex items-center gap-3 sm:gap-4 p-4 rounded-xl backdrop-blur-sm transition-all hover:scale-[1.02] ${isTop ? 'bg-gradient-to-r from-[#FF6D1F]/10 to-[#F5E7C6]/5 border border-[#FF6D1F]/30 shadow-lg shadow-[#FF6D1F]/10' : 'bg-[#F5E7C6]/5 border border-[#F5E7C6]/10'}`}>
                                     <span className="text-2xl w-8 text-center shrink-0">{medals[position] || `#${position + 1}`}</span>
-                                    <Image src={user.avatar_url} alt={user.login} width={40} height={40} className="rounded-full ring-2 ring-white/20 shrink-0 shadow-lg" />
+                                    <Image src={user.avatar_url} alt={user.login} width={40} height={40} className="rounded-full ring-2 ring-[#F5E7C6]/20 shrink-0 shadow-lg" />
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center justify-between gap-2 mb-1.5">
-                                            <span className="text-sm font-semibold text-white truncate">{user.name || user.login}</span>
-                                            <span className={`text-sm font-bold ${isTop ? 'text-yellow-400' : 'text-gray-400'}`}>{score} pts</span>
+                                            <span className="text-sm font-semibold text-[#F5E7C6] truncate">{user.name || user.login}</span>
+                                            <span className={`text-sm font-bold ${isTop ? 'text-[#FF6D1F]' : 'text-[#6B6580]'}`}>{score} pts</span>
                                         </div>
-                                        <div className="h-2 bg-black/40 rounded-full overflow-hidden border border-white/5">
-                                            <div className={`h-full rounded-full transition-all duration-700 ${isTop ? 'bg-gradient-to-r from-yellow-500 to-orange-500 shadow-lg' : 'bg-gradient-to-r from-blue-500 to-cyan-500'}`} style={{ width: `${percentage}%`, boxShadow: isTop ? '0 0 15px rgba(234, 179, 8, 0.5)' : 'none' }}></div>
+                                        <div className="h-2 bg-[#090B1B]/60 rounded-full overflow-hidden border border-[#F5E7C6]/5">
+                                            <div className={`h-full rounded-full transition-all duration-700 ${isTop ? 'bg-gradient-to-r from-[#FF6D1F] to-[#F5E7C6] shadow-lg' : 'bg-gradient-to-r from-[#F5E7C6]/60 to-[#D4C9A8]/60'}`} style={{ width: `${percentage}%`, boxShadow: isTop ? '0 0 15px rgba(255, 109, 31, 0.5)' : 'none' }}></div>
                                         </div>
                                     </div>
                                 </div>
@@ -195,21 +195,21 @@ export const UserComparisonCard: React.FC<UserComparisonCardProps> = ({ users })
                     return (
                         <div key={user.login} className="premium-card p-3 sm:p-4 hover:scale-105 transition-all group">
                             <div className="flex items-center gap-2 mb-3">
-                                <Image src={user.avatar_url} alt={user.login} width={24} height={24} className="rounded-full ring-1 ring-white/20 group-hover:ring-white/40 transition-all" />
-                                <span className="text-xs text-gray-300 truncate font-medium">{user.login}</span>
+                                <Image src={user.avatar_url} alt={user.login} width={24} height={24} className="rounded-full ring-1 ring-[#F5E7C6]/20 group-hover:ring-[#F5E7C6]/40 transition-all" />
+                                <span className="text-xs text-[#F5E7C6] truncate font-medium">{user.login}</span>
                             </div>
                             <div className="space-y-2 text-xs">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-gray-400">Wins</span>
-                                    <span className="text-yellow-400 font-bold">{winsCount}/{metrics.length}</span>
+                                    <span className="text-[#6B6580]">Wins</span>
+                                    <span className="text-[#FF6D1F] font-bold">{winsCount}/{metrics.length}</span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-gray-400">Ratio</span>
-                                    <span className="text-white font-semibold">{followerRatio}x</span>
+                                    <span className="text-[#6B6580]">Ratio</span>
+                                    <span className="text-[#F5E7C6] font-semibold">{followerRatio}x</span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-gray-400">Since</span>
-                                    <span className="text-white font-semibold">{new Date(user.created_at).getFullYear()}</span>
+                                    <span className="text-[#6B6580]">Since</span>
+                                    <span className="text-[#F5E7C6] font-semibold">{new Date(user.created_at).getFullYear()}</span>
                                 </div>
                             </div>
                         </div>

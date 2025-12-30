@@ -22,6 +22,30 @@ const axiosInstance = axios.create({
   withCredentials: true, // Include cookies for authentication
 });
 
+// Response interceptor to handle session expiration
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error: AxiosError) => {
+    // Check if error is 401 Unauthorized (session expired/invalid)
+    if (error.response?.status === 401) {
+      const currentPath = window.location.pathname;
+      
+      // Don't redirect if already on auth pages
+      if (!currentPath.includes('/choose-signin') && 
+          !currentPath.includes('/auth/callback') &&
+          currentPath !== '/') {
+        
+        // Trigger custom event for session expiration
+        window.dispatchEvent(new CustomEvent('session-expired'));
+        
+        // Optional: Show a notification
+        console.warn('Session expired or invalid. Please login again.');
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Type guard for Axios errors
 function isAxiosError(
   error: unknown

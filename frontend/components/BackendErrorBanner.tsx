@@ -14,23 +14,23 @@ export const BackendErrorBanner: React.FC<BackendErrorBannerProps> = ({ onRetry 
                     </svg>
                 </div>
                 <div className="flex-1">
-                    <h3 className="text-xl font-bold text-red-400 mb-2">⚠️ Backend Server Not Running</h3>
-                    <p className="text-red-300 mb-4">
+                    <h3 className="text-xl font-bold text-red-400 mb-2 font-['Gotham']">⚠️ Backend Server Not Running</h3>
+                    <p className="text-red-300 mb-4 font-['Gotham']">
                         The Go backend server is not responding. Please start the server to use the application.
                     </p>
-                    <div className="bg-black/50 rounded-lg p-4 font-mono text-sm">
-                        <p className="text-gray-400 mb-2">To start the backend server:</p>
-                        <code className="text-green-400">
+                    <div className="bg-[#090B1B]/70 rounded-lg p-4 font-mono text-sm border border-[#F5E7C6]/10">
+                        <p className="text-[#6B6580] mb-2">To start the backend server:</p>
+                        <code className="text-[#FF6D1F]">
                             cd d:\dev-scope\R1<br />
                             .\backend\cmd\go run main.go
                         </code>
-                        <p className="text-gray-400 mt-3 text-xs">
+                        <p className="text-[#6B6580] mt-3 text-xs">
                             The server will automatically load all API keys from the  .env file
                         </p>
                     </div>
                     <button
                         onClick={onRetry}
-                        className="mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors font-medium"
+                        className="mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors font-medium text-white"
                     >
                         🔄 Retry Connection
                     </button>

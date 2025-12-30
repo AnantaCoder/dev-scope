@@ -10,9 +10,9 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#090B1B]/80 backdrop-blur-sm" onClick={onClose}>
             <div
-                className="bg-zinc-900 border border-zinc-700/60 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl"
+                className="bg-[#0F1229] border border-[#F5E7C6]/10 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl shadow-black/40"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex items-center gap-4 mb-4">
@@ -22,17 +22,17 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
                         </svg>
                     </div>
                     <div>
-                        <h3 className="text-lg font-semibold text-white">Delete Conversation</h3>
-                        <p className="text-sm text-zinc-400">This action cannot be undone</p>
+                        <h3 className="text-lg font-semibold text-[#F5E7C6] font-['Gotham']">Delete Conversation</h3>
+                        <p className="text-sm text-[#6B6580]">This action cannot be undone</p>
                     </div>
                 </div>
-                <p className="text-zinc-300 text-sm mb-6">
+                <p className="text-[#A8A0B8] text-sm mb-6 font-['Gotham']">
                     Are you sure you want to delete this conversation? All messages will be permanently removed.
                 </p>
                 <div className="flex gap-3">
                     <button
                         onClick={onClose}
-                        className="flex-1 px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-xl text-sm font-medium transition-colors"
+                        className="flex-1 px-4 py-2.5 bg-[#1E2345] hover:bg-[#171B38] text-[#A8A0B8] hover:text-[#F5E7C6] rounded-xl text-sm font-medium transition-colors"
                     >
                         Cancel
                     </button>

@@ -173,17 +173,17 @@ export default function SearchHistoryPage() {
                 <div className="text-center">
                     {/* Musical Bars Loader */}
                     <div className="flex items-end justify-center gap-1.5 h-12 mb-4">
-                        <div className="w-1.5 bg-gradient-to-t from-blue-500 to-cyan-400 rounded-full animate-[bounce_0.6s_ease-in-out_infinite]" style={{ height: '20%' }}></div>
-                        <div className="w-1.5 bg-gradient-to-t from-blue-500 to-cyan-400 rounded-full animate-[bounce_0.6s_ease-in-out_0.1s_infinite]" style={{ height: '40%' }}></div>
-                        <div className="w-1.5 bg-gradient-to-t from-blue-500 to-cyan-400 rounded-full animate-[bounce_0.6s_ease-in-out_0.2s_infinite]" style={{ height: '60%' }}></div>
-                        <div className="w-1.5 bg-gradient-to-t from-blue-500 to-cyan-400 rounded-full animate-[bounce_0.6s_ease-in-out_0.3s_infinite]" style={{ height: '80%' }}></div>
-                        <div className="w-1.5 bg-gradient-to-t from-blue-500 to-cyan-400 rounded-full animate-[bounce_0.6s_ease-in-out_0.4s_infinite]" style={{ height: '100%' }}></div>
-                        <div className="w-1.5 bg-gradient-to-t from-blue-500 to-cyan-400 rounded-full animate-[bounce_0.6s_ease-in-out_0.5s_infinite]" style={{ height: '80%' }}></div>
-                        <div className="w-1.5 bg-gradient-to-t from-blue-500 to-cyan-400 rounded-full animate-[bounce_0.6s_ease-in-out_0.6s_infinite]" style={{ height: '60%' }}></div>
-                        <div className="w-1.5 bg-gradient-to-t from-blue-500 to-cyan-400 rounded-full animate-[bounce_0.6s_ease-in-out_0.7s_infinite]" style={{ height: '40%' }}></div>
-                        <div className="w-1.5 bg-gradient-to-t from-blue-500 to-cyan-400 rounded-full animate-[bounce_0.6s_ease-in-out_0.8s_infinite]" style={{ height: '20%' }}></div>
+                        <div className="w-1.5 bg-gradient-to-t from-[#FF6D1F] to-[#F5E7C6] rounded-full animate-[bounce_0.6s_ease-in-out_infinite]" style={{ height: '20%' }}></div>
+                        <div className="w-1.5 bg-gradient-to-t from-[#FF6D1F] to-[#F5E7C6] rounded-full animate-[bounce_0.6s_ease-in-out_0.1s_infinite]" style={{ height: '40%' }}></div>
+                        <div className="w-1.5 bg-gradient-to-t from-[#FF6D1F] to-[#F5E7C6] rounded-full animate-[bounce_0.6s_ease-in-out_0.2s_infinite]" style={{ height: '60%' }}></div>
+                        <div className="w-1.5 bg-gradient-to-t from-[#FF6D1F] to-[#F5E7C6] rounded-full animate-[bounce_0.6s_ease-in-out_0.3s_infinite]" style={{ height: '80%' }}></div>
+                        <div className="w-1.5 bg-gradient-to-t from-[#FF6D1F] to-[#F5E7C6] rounded-full animate-[bounce_0.6s_ease-in-out_0.4s_infinite]" style={{ height: '100%' }}></div>
+                        <div className="w-1.5 bg-gradient-to-t from-[#FF6D1F] to-[#F5E7C6] rounded-full animate-[bounce_0.6s_ease-in-out_0.5s_infinite]" style={{ height: '80%' }}></div>
+                        <div className="w-1.5 bg-gradient-to-t from-[#FF6D1F] to-[#F5E7C6] rounded-full animate-[bounce_0.6s_ease-in-out_0.6s_infinite]" style={{ height: '60%' }}></div>
+                        <div className="w-1.5 bg-gradient-to-t from-[#FF6D1F] to-[#F5E7C6] rounded-full animate-[bounce_0.6s_ease-in-out_0.7s_infinite]" style={{ height: '40%' }}></div>
+                        <div className="w-1.5 bg-gradient-to-t from-[#FF6D1F] to-[#F5E7C6] rounded-full animate-[bounce_0.6s_ease-in-out_0.8s_infinite]" style={{ height: '20%' }}></div>
                     </div>
-                    <p className="text-gray-400 text-sm">Loading your search history...</p>
+                    <p className="text-[#6B6580] text-sm">Loading your search history...</p>
                 </div>
             </div>
         </div>
@@ -194,12 +194,12 @@ export default function SearchHistoryPage() {
     }
 
     return (
-        <div className="min-h-screen flex flex-col premium-bg text-white">
-            {/* Floating Orbs */}
+        <div className="min-h-screen flex flex-col premium-bg text-[#F5E7C6]">
+            {/* Floating Orbs - Warm tones */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute top-20 left-[10%] w-96 h-96 bg-blue-500/20 rounded-full blur-[120px] animate-float" />
-                <div className="absolute top-40 right-[15%] w-80 h-80 bg-purple-500/20 rounded-full blur-[100px] animate-float" style={{ animationDelay: '2s' }} />
-                <div className="absolute bottom-20 left-[20%] w-72 h-72 bg-cyan-500/20 rounded-full blur-[90px] animate-float" style={{ animationDelay: '4s' }} />
+                <div className="absolute top-20 left-[10%] w-96 h-96 bg-[#FF6D1F]/15 rounded-full blur-[120px] animate-float" />
+                <div className="absolute top-40 right-[15%] w-80 h-80 bg-[#F5E7C6]/10 rounded-full blur-[100px] animate-float" style={{ animationDelay: '2s' }} />
+                <div className="absolute bottom-20 left-[20%] w-72 h-72 bg-[#FF8A47]/12 rounded-full blur-[90px] animate-float" style={{ animationDelay: '4s' }} />
             </div>
 
             <Navbar />
@@ -208,8 +208,8 @@ export default function SearchHistoryPage() {
                 {/* Page Header */}
                 <div className="mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="text-center sm:text-left">
-                        <h1 className="text-3xl font-bold tracking-tight gradient-text">Search History</h1>
-                        <p className="text-gray-400 mt-1">Your recent GitHub profile searches</p>
+                        <h1 className="text-3xl font-bold tracking-tight gradient-text-ember font-['Gotham']">Search History</h1>
+                        <p className="text-[#A8A0B8] mt-1 font-['Gotham']">Your recent GitHub profile searches</p>
                     </div>
                     {history.length > 0 && (
                         <button
@@ -248,13 +248,13 @@ export default function SearchHistoryPage() {
 
                 {history.length === 0 && !error ? (
                     <div className="premium-card p-12 text-center">
-                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/5 border border-white/10 mb-4">
-                            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#F5E7C6]/5 border border-[#F5E7C6]/10 mb-4">
+                            <svg className="w-8 h-8 text-[#6B6580]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                        <p className="text-gray-300 text-lg mb-2 font-semibold">No search history yet</p>
-                        <p className="text-gray-500 text-sm">Start searching for GitHub profiles to build your history</p>
+                        <p className="text-[#D4C9A8] text-lg mb-2 font-semibold">No search history yet</p>
+                        <p className="text-[#6B6580] text-sm">Start searching for GitHub profiles to build your history</p>
                     </div>
                 ) : (
                     <>
@@ -262,7 +262,7 @@ export default function SearchHistoryPage() {
                             {history.map((item) => (
                                 <div
                                     key={item.id}
-                                    className="premium-card p-3 hover:scale-[1.01] hover:glow-blue transition-all cursor-pointer group"
+                                    className="premium-card p-3 hover:scale-[1.01] hover:shadow-lg hover:shadow-[#FF6D1F]/10 transition-all cursor-pointer group"
                                     onClick={() => handleUsernameClick(item.searched_username)}
                                 >
                                     <div className="flex items-center justify-between">
@@ -273,33 +273,33 @@ export default function SearchHistoryPage() {
                                                     alt={item.searched_username}
                                                     width={40}
                                                     height={40}
-                                                    className="rounded-full border-2 border-white/20 group-hover:border-blue-500/50 group-hover:ring-2 group-hover:ring-blue-500/20 transition-all shadow-lg"
+                                                    className="rounded-full border-2 border-[#F5E7C6]/20 group-hover:border-[#FF6D1F]/50 group-hover:ring-2 group-hover:ring-[#FF6D1F]/20 transition-all shadow-lg"
                                                     unoptimized
                                                     onError={(e) => {
                                                         e.currentTarget.src = `https://ui-avatars.com/api/?name=${item.searched_username}&background=238636&color=fff&size=48`;
                                                     }}
                                                 />
-                                                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full border-2 border-black flex items-center justify-center shadow-lg">
+                                                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-gradient-to-br from-[#FF6D1F] to-[#CC5719] rounded-full border-2 border-[#090B1B] flex items-center justify-center shadow-lg">
                                                     <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                                     </svg>
                                                 </div>
                                             </div>
                                             <div>
-                                                <h3 className="text-white font-semibold text-base group-hover:gradient-text transition-all">
+                                                <h3 className="text-[#F5E7C6] font-semibold text-base group-hover:text-[#FF6D1F] transition-all">
                                                     {item.searched_username}
                                                 </h3>
                                                 <div className="flex items-center gap-2">
-                                                    <span className="px-2 py-0.5 text-xs font-mono bg-white/5 border border-white/10 rounded text-gray-400 backdrop-blur-sm">
+                                                    <span className="px-2 py-0.5 text-xs font-mono bg-[#F5E7C6]/5 border border-[#F5E7C6]/10 rounded text-[#A8A0B8] backdrop-blur-sm">
                                                         {getSearchTypeLabel(item.search_type)}
                                                     </span>
-                                                    <span className="text-gray-500 text-sm">
+                                                    <span className="text-[#6B6580] text-sm">
                                                         {formatDate(item.created_at)}
                                                     </span>
                                                 </div>
                                             </div>
                                         </div>
-                                        <svg className="w-5 h-5 text-gray-500 group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-5 h-5 text-[#6B6580] group-hover:text-[#FF6D1F] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                         </svg>
                                     </div>
@@ -310,24 +310,24 @@ export default function SearchHistoryPage() {
                         {/* Pagination - Centered */}
                         {totalPages > 1 && (
                             <div className="mt-8 flex flex-col items-center gap-4">
-                                <p className="text-sm text-gray-400">
+                                <p className="text-sm text-[#6B6580]">
                                     Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, totalEntries)} of {totalEntries} searches
                                 </p>
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                                         disabled={currentPage === 1}
-                                        className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-medium text-white hover:bg-white/10 hover:border-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all backdrop-blur-sm"
+                                        className="px-4 py-2 bg-[#1E2345]/60 border border-[#F5E7C6]/10 rounded-lg text-sm font-medium text-[#F5E7C6] hover:bg-[#1E2345] hover:border-[#FF6D1F]/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all backdrop-blur-sm"
                                     >
                                         Previous
                                     </button>
-                                    <span className="px-4 py-2 text-sm text-gray-300 font-medium">
+                                    <span className="px-4 py-2 text-sm text-[#A8A0B8] font-medium">
                                         Page {currentPage} of {totalPages}
                                     </span>
                                     <button
                                         onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                                         disabled={currentPage === totalPages}
-                                        className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-medium text-white hover:bg-white/10 hover:border-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all backdrop-blur-sm"
+                                        className="px-4 py-2 bg-[#1E2345]/60 border border-[#F5E7C6]/10 rounded-lg text-sm font-medium text-[#F5E7C6] hover:bg-[#1E2345] hover:border-[#FF6D1F]/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all backdrop-blur-sm"
                                     >
                                         Next
                                     </button>

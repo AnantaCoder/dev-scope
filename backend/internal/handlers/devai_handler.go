@@ -179,9 +179,9 @@ func (s *Server) DevAIChatHandler(w http.ResponseWriter, r *http.Request) {
 	messages = append(messages, NVIDIAMessage{Role: "user", Content: prompt})
 
 	nvidiaReq := NVIDIARequest{
-		Model:       "qwen/qwen3-next-80b-a3b-instruct", // Using a capable model
+		Model:       "qwen/qwen3-coder-480b-a35b-instruct", 
 		Messages:    messages,
-		Temperature: 0.7, // Higher temp for more creative/conversational responses
+		Temperature: 0.7, 
 		MaxTokens:   800,
 	}
 
@@ -882,7 +882,7 @@ func (s *Server) DevAIGetConversationsHandler(w http.ResponseWriter, r *http.Req
 	ctx := context.Background()
 	conversations, total, err := s.devaiRepo.GetConversationsByUserID(ctx, user.ID, limit, offset)
 	if err != nil {
-		log.Printf("❌ [DevAI] Failed to get conversations: %v", err)
+		log.Printf("❌ [DevAI] Failed to get conversations(api limit exceeded): %v", err)
 		writeJSON(w, http.StatusInternalServerError, ConversationsResponse{Error: true, Message: "Failed to get conversations"})
 		return
 	}

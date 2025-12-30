@@ -92,25 +92,25 @@ export function NotificationBell() {
         switch (type) {
             case "Issue":
                 return (
-                    <svg className="w-4 h-4 text-[#238636]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 );
             case "PullRequest":
                 return (
-                    <svg className="w-4 h-4 text-[#a371f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-[#FF8A47]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                     </svg>
                 );
             case "Release":
                 return (
-                    <svg className="w-4 h-4 text-[#58a6ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-[#FF6D1F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                     </svg>
                 );
             default:
                 return (
-                    <svg className="w-4 h-4 text-[#8b949e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-[#6B6580]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                     </svg>
                 );
@@ -135,20 +135,14 @@ export function NotificationBell() {
         return labels[reason] || reason;
     };
 
-    // Convert GitHub API URL to HTML URL
     const getHtmlUrl = (notification: GitHubNotification): string => {
         const apiUrl = notification.subject.url;
         const repoHtmlUrl = notification.repository.html_url;
 
         if (!apiUrl) {
-            // Fallback to repository URL if no subject URL
             return repoHtmlUrl;
         }
 
-        // Pattern: https://api.github.com/repos/owner/repo/type/id
-        // Convert to: https://github.com/owner/repo/type/id (for issues/pulls)
-
-        // Extract the path after /repos/
         const match = apiUrl.match(/api\.github\.com\/repos\/([^/]+)\/([^/]+)\/(.+)/);
         if (!match) {
             return repoHtmlUrl;
@@ -157,25 +151,18 @@ export function NotificationBell() {
         const [, owner, repo, rest] = match;
         const type = notification.subject.type;
 
-        // Handle different notification types
         if (type === "Issue") {
-            // issues/123 -> issues/123
             return `https://github.com/${owner}/${repo}/${rest}`;
         } else if (type === "PullRequest") {
-            // pulls/123 -> pull/123
             const prNumber = rest.replace("pulls/", "pull/");
             return `https://github.com/${owner}/${repo}/${prNumber}`;
         } else if (type === "Release") {
-            // releases/123456 -> We can link to releases page (can't get tag without API call)
             return `https://github.com/${owner}/${repo}/releases`;
         } else if (type === "Commit") {
-            // commits/sha -> commit/sha
             return `https://github.com/${owner}/${repo}/${rest.replace("commits/", "commit/")}`;
         } else if (type === "Discussion") {
-            // discussions/123 -> discussions/123
             return `https://github.com/${owner}/${repo}/${rest}`;
         } else {
-            // Default: try direct conversion
             return `https://github.com/${owner}/${repo}/${rest}`;
         }
     };
@@ -204,66 +191,66 @@ export function NotificationBell() {
                     setIsOpen(!isOpen);
                     if (!isOpen) fetchNotifications();
                 }}
-                className="relative p-2 rounded-lg hover:bg-[#21262d]/50 transition-all"
+                className="relative p-2 rounded-lg hover:bg-[#1E2345]/50 transition-all"
                 aria-label="Notifications"
             >
-                <svg className="w-5 h-5 text-[#8b949e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-[#A8A0B8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                 </svg>
                 {unreadCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center text-[10px] font-bold bg-[#da3633] text-white rounded-full">
+                    <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center text-[10px] font-bold bg-[#FF6D1F] text-white rounded-full">
                         {unreadCount > 99 ? "99+" : unreadCount}
                     </span>
                 )}
             </button>
 
             {isOpen && (
-                <div className="fixed sm:absolute inset-x-2 sm:inset-x-auto sm:right-0 top-16 sm:top-auto sm:mt-2 w-auto sm:w-96 max-w-[calc(100vw-1rem)] bg-[#161b22] border border-[#30363d] rounded-xl shadow-xl z-50 overflow-hidden">
-                    <div className="px-4 py-3 border-b border-[#30363d] bg-gradient-to-r from-[#58a6ff]/5 to-transparent flex items-center justify-between">
-                        <h3 className="text-sm font-semibold text-[#e6edf3] flex items-center gap-2">
-                            <svg className="w-4 h-4 text-[#58a6ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="fixed sm:absolute inset-x-2 sm:inset-x-auto sm:right-0 top-16 sm:top-auto sm:mt-2 w-auto sm:w-96 max-w-[calc(100vw-1rem)] bg-[#0F1229] border border-[#F5E7C6]/10 rounded-xl shadow-xl z-50 overflow-hidden">
+                    <div className="px-4 py-3 border-b border-[#F5E7C6]/8 bg-gradient-to-r from-[#FF6D1F]/5 to-transparent flex items-center justify-between">
+                        <h3 className="text-sm font-semibold text-[#F5E7C6] flex items-center gap-2 font-['Gotham']">
+                            <svg className="w-4 h-4 text-[#FF6D1F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
                             Notifications
                         </h3>
                         {unreadCount > 0 && (
-                            <span className="text-xs text-[#8b949e]">{unreadCount} unread</span>
+                            <span className="text-xs text-[#6B6580]">{unreadCount} unread</span>
                         )}
                     </div>
 
                     <div className="max-h-[60vh] sm:max-h-[400px] overflow-y-auto">
                         {loading ? (
                             <div className="p-8 text-center">
-                                <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#58a6ff]"></div>
-                                <p className="mt-2 text-sm text-[#8b949e]">Loading notifications...</p>
+                                <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#FF6D1F]"></div>
+                                <p className="mt-2 text-sm text-[#6B6580]">Loading notifications...</p>
                             </div>
                         ) : error ? (
                             <div className="p-8 text-center">
-                                <svg className="w-8 h-8 text-[#da3633] mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-8 h-8 text-red-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                <p className="text-sm text-[#da3633]">{error}</p>
+                                <p className="text-sm text-red-400">{error}</p>
                                 <button
                                     onClick={fetchNotifications}
-                                    className="mt-2 text-xs text-[#58a6ff] hover:underline"
+                                    className="mt-2 text-xs text-[#FF6D1F] hover:underline"
                                 >
                                     Try again
                                 </button>
                             </div>
                         ) : notifications.length === 0 ? (
                             <div className="p-8 text-center">
-                                <svg className="w-12 h-12 text-[#30363d] mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-12 h-12 text-[#1E2345] mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                                 </svg>
-                                <p className="text-sm text-[#8b949e]">No notifications</p>
-                                <p className="text-xs text-[#6e7681] mt-1">You&apos;re all caught up!</p>
+                                <p className="text-sm text-[#A8A0B8]">No notifications</p>
+                                <p className="text-xs text-[#6B6580] mt-1">You&apos;re all caught up!</p>
                             </div>
                         ) : (
-                            <div className="divide-y divide-[#30363d]">
+                            <div className="divide-y divide-[#F5E7C6]/5">
                                 {notifications.slice(0, 20).map((notification) => (
                                     <div
                                         key={notification.id}
-                                        className={`p-3 hover:bg-[#21262d]/50 cursor-pointer transition-colors ${notification.unread ? 'bg-[#58a6ff]/5' : ''}`}
+                                        className={`p-3 hover:bg-[#1E2345]/50 cursor-pointer transition-colors ${notification.unread ? 'bg-[#FF6D1F]/5' : ''}`}
                                         onClick={() => {
                                             if (notification.unread) markAsRead(notification.id);
                                             window.open(getHtmlUrl(notification), "_blank");
@@ -274,21 +261,21 @@ export function NotificationBell() {
                                                 {getNotificationIcon(notification.subject.type)}
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-sm text-[#e6edf3] font-medium truncate">
+                                                <p className="text-sm text-[#F5E7C6] font-medium truncate">
                                                     {notification.subject.title}
                                                 </p>
-                                                <p className="text-xs text-[#8b949e] truncate mt-0.5">
+                                                <p className="text-xs text-[#6B6580] truncate mt-0.5">
                                                     {notification.repository.full_name}
                                                 </p>
                                                 <div className="flex items-center gap-2 mt-1">
-                                                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#21262d] text-[#8b949e]">
+                                                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#1E2345] text-[#A8A0B8]">
                                                         {getReasonLabel(notification.reason)}
                                                     </span>
-                                                    <span className="text-[10px] text-[#6e7681]">
+                                                    <span className="text-[10px] text-[#6B6580]">
                                                         {formatTime(notification.updated_at)}
                                                     </span>
                                                     {notification.unread && (
-                                                        <span className="w-2 h-2 rounded-full bg-[#58a6ff]"></span>
+                                                        <span className="w-2 h-2 rounded-full bg-[#FF6D1F]"></span>
                                                     )}
                                                 </div>
                                             </div>
@@ -300,12 +287,12 @@ export function NotificationBell() {
                     </div>
 
                     {notifications.length > 0 && (
-                        <div className="px-4 py-3 border-t border-[#30363d] bg-[#0d1117]">
+                        <div className="px-4 py-3 border-t border-[#F5E7C6]/8 bg-[#090B1B]">
                             <a
                                 href="https://github.com/notifications"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-xs text-[#58a6ff] hover:underline flex items-center justify-center gap-1"
+                                className="text-xs text-[#FF6D1F] hover:underline flex items-center justify-center gap-1"
                             >
                                 View all on GitHub
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

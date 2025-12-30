@@ -334,11 +334,11 @@ export default function ProfilePage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex flex-col premium-bg text-white">
+            <div className="min-h-screen flex flex-col premium-bg text-[#F5E7C6]">
                 <div className="flex-1 flex items-center justify-center">
                     <div className="text-center">
-                        <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
-                        <p className="text-gray-400">Loading profile...</p>
+                        <div className="w-12 h-12 border-4 border-[#1E2345] border-t-[#FF6D1F] rounded-full animate-spin mx-auto mb-4"></div>
+                        <p className="text-[#6B6580]">Loading profile...</p>
                     </div>
                 </div>
             </div>
@@ -347,11 +347,11 @@ export default function ProfilePage() {
 
     if (error || !user) {
         return (
-            <div className="min-h-screen flex flex-col premium-bg text-white">
-                {/* Floating Orbs */}
+            <div className="min-h-screen flex flex-col premium-bg text-[#F5E7C6]">
+                {/* Floating Orbs - Warm tones */}
                 <div className="fixed inset-0 pointer-events-none overflow-hidden">
-                    <div className="absolute top-20 left-[10%] w-96 h-96 bg-red-500/20 rounded-full blur-[120px] animate-float" />
-                    <div className="absolute top-40 right-[15%] w-80 h-80 bg-orange-500/20 rounded-full blur-[100px] animate-float" style={{ animationDelay: '2s' }} />
+                    <div className="absolute top-20 left-[10%] w-96 h-96 bg-[#FF6D1F]/15 rounded-full blur-[120px] animate-float" />
+                    <div className="absolute top-40 right-[15%] w-80 h-80 bg-[#F5E7C6]/10 rounded-full blur-[100px] animate-float" style={{ animationDelay: '2s' }} />
                 </div>
 
                 <Navbar />
@@ -362,9 +362,9 @@ export default function ProfilePage() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                             </svg>
                         </div>
-                        <h2 className="text-2xl font-bold mb-2 gradient-text">User Not Found</h2>
-                        <p className="text-gray-400 mb-6">{error || `Could not find user @${username}`}</p>
-                        <Link href="/" className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white rounded-lg transition-all shadow-lg shadow-green-500/20 hover:glow-green">
+                        <h2 className="text-2xl font-bold mb-2 gradient-text-ember font-['Gotham']">User Not Found</h2>
+                        <p className="text-[#6B6580] mb-6">{error || `Could not find user @${username}`}</p>
+                        <Link href="/" className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#FF6D1F] to-[#CC5719] hover:from-[#FF8A47] hover:to-[#FF6D1F] text-white rounded-lg transition-all shadow-lg shadow-[#FF6D1F]/20">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                             </svg>
@@ -380,12 +380,12 @@ export default function ProfilePage() {
     const breakdown = getScoreBreakdown();
 
     return (
-        <div className="min-h-screen flex flex-col premium-bg text-white">
-            {/* Floating Orbs */}
+        <div className="min-h-screen flex flex-col premium-bg text-[#F5E7C6]">
+            {/* Floating Orbs - Warm tones */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute top-20 left-[10%] w-96 h-96 bg-blue-500/20 rounded-full blur-[120px] animate-float" />
-                <div className="absolute top-40 right-[15%] w-80 h-80 bg-purple-500/20 rounded-full blur-[100px] animate-float" style={{ animationDelay: '2s' }} />
-                <div className="absolute bottom-20 left-[20%] w-72 h-72 bg-cyan-500/20 rounded-full blur-[90px] animate-float" style={{ animationDelay: '4s' }} />
+                <div className="absolute top-20 left-[10%] w-96 h-96 bg-[#FF6D1F]/15 rounded-full blur-[120px] animate-float" />
+                <div className="absolute top-40 right-[15%] w-80 h-80 bg-[#F5E7C6]/10 rounded-full blur-[100px] animate-float" style={{ animationDelay: '2s' }} />
+                <div className="absolute bottom-20 left-[20%] w-72 h-72 bg-[#FF8A47]/12 rounded-full blur-[90px] animate-float" style={{ animationDelay: '4s' }} />
             </div>
 
             <Navbar />
@@ -458,7 +458,7 @@ export default function ProfilePage() {
                                     <button
                                         onClick={updateRanking}
                                         disabled={updating}
-                                        className="flex items-center gap-2 px-6 py-3 bg-[#238636] hover:bg-[#2ea043] disabled:opacity-50 text-white rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-green-500/30"
+                                        className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#FF6D1F] to-[#CC5719] hover:from-[#FF8A47] hover:to-[#FF6D1F] disabled:opacity-50 text-white rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-[#FF6D1F]/30"
                                     >
                                         {updating ? (
                                             <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /></svg>
@@ -480,8 +480,8 @@ export default function ProfilePage() {
                             <button
                                 onClick={() => handleTabChange('overview')}
                                 className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${activeTab === 'overview'
-                                    ? 'bg-gradient-to-r from-blue-600/90 to-purple-600/90 text-white shadow-lg shadow-blue-500/25'
-                                    : 'text-[#8b949e] hover:text-white hover:bg-white/10'
+                                    ? 'bg-gradient-to-r from-[#FF6D1F] to-[#CC5719] text-white shadow-lg shadow-[#FF6D1F]/25'
+                                    : 'text-[#6B6580] hover:text-[#F5E7C6] hover:bg-[#F5E7C6]/10'
                                     }`}
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -492,8 +492,8 @@ export default function ProfilePage() {
                             <button
                                 onClick={() => handleTabChange('repos')}
                                 className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${activeTab === 'repos'
-                                    ? 'bg-gradient-to-r from-blue-600/90 to-cyan-600/90 text-white shadow-lg shadow-blue-500/25'
-                                    : 'text-[#8b949e] hover:text-white hover:bg-white/10'
+                                    ? 'bg-gradient-to-r from-[#FF6D1F] to-[#FF8A47] text-white shadow-lg shadow-[#FF6D1F]/25'
+                                    : 'text-[#6B6580] hover:text-[#F5E7C6] hover:bg-[#F5E7C6]/10'
                                     }`}
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -505,8 +505,8 @@ export default function ProfilePage() {
                             <button
                                 onClick={() => handleTabChange('starred')}
                                 className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${activeTab === 'starred'
-                                    ? 'bg-gradient-to-r from-yellow-500/90 to-orange-500/90 text-white shadow-lg shadow-yellow-500/25'
-                                    : 'text-[#8b949e] hover:text-white hover:bg-white/10'
+                                    ? 'bg-gradient-to-r from-[#F5E7C6] to-[#FF6D1F] text-[#090B1B] shadow-lg shadow-[#F5E7C6]/25'
+                                    : 'text-[#6B6580] hover:text-[#F5E7C6] hover:bg-[#F5E7C6]/10'
                                     }`}
                             >
                                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -806,23 +806,23 @@ export default function ProfilePage() {
                                 {streak && (
                                     <div className="premium-card rounded-2xl p-5">
                                         <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-                                            <svg className="w-4 h-4 text-[#f0883e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className="w-4 h-4 text-[#FF6D1F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
                                             </svg>
                                             Activity Streak
                                         </h3>
                                         <div className="grid grid-cols-2 gap-3">
-                                            <div className="p-3 bg-black/30 backdrop-blur-sm border border-orange-500/20 rounded-xl text-center hover:border-orange-500/40 transition-all">
-                                                <p className="text-2xl font-bold text-orange-500">{streak.current_streak}</p>
-                                                <p className="text-xs text-gray-400">Current Streak</p>
+                                            <div className="p-3 bg-[#1E2345]/60 backdrop-blur-sm border border-[#FF6D1F]/20 rounded-xl text-center hover:border-[#FF6D1F]/40 transition-all">
+                                                <p className="text-2xl font-bold text-[#FF6D1F]">{streak.current_streak}</p>
+                                                <p className="text-xs text-[#6B6580]">Current Streak</p>
                                             </div>
-                                            <div className="p-3 bg-black/30 backdrop-blur-sm border border-purple-500/20 rounded-xl text-center hover:border-purple-500/40 transition-all">
-                                                <p className="text-2xl font-bold text-purple-500">{streak.longest_streak}</p>
-                                                <p className="text-xs text-gray-400">Longest Streak</p>
+                                            <div className="p-3 bg-[#1E2345]/60 backdrop-blur-sm border border-[#F5E7C6]/20 rounded-xl text-center hover:border-[#F5E7C6]/40 transition-all">
+                                                <p className="text-2xl font-bold text-[#F5E7C6]">{streak.longest_streak}</p>
+                                                <p className="text-xs text-[#6B6580]">Longest Streak</p>
                                             </div>
-                                            <div className="p-3 bg-black/30 backdrop-blur-sm border border-green-500/20 rounded-xl text-center col-span-2 hover:border-green-500/40 transition-all">
-                                                <p className="text-2xl font-bold text-[#238636]">{streak.total_days}</p>
-                                                <p className="text-xs text-[#8b949e]">Total Active Days</p>
+                                            <div className="p-3 bg-[#1E2345]/60 backdrop-blur-sm border border-[#FF8A47]/20 rounded-xl text-center col-span-2 hover:border-[#FF8A47]/40 transition-all">
+                                                <p className="text-2xl font-bold text-[#FF8A47]">{streak.total_days}</p>
+                                                <p className="text-xs text-[#6B6580]">Total Active Days</p>
                                             </div>
                                         </div>
                                     </div>
@@ -835,12 +835,12 @@ export default function ProfilePage() {
                                 {techStack && techStack.languages && Object.keys(techStack.languages).length > 0 && (
                                     <div className="premium-card rounded-2xl p-5">
                                         <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-                                            <svg className="w-4 h-4 text-[#a371f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className="w-4 h-4 text-[#FF6D1F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                                             </svg>
                                             Tech Stack
                                             {techStack.top_language && (
-                                                <span className="ml-auto px-2 py-0.5 text-xs font-medium bg-[#a371f7]/20 text-[#a371f7] rounded-full">{techStack.top_language}</span>
+                                                <span className="ml-auto px-2 py-0.5 text-xs font-medium bg-[#FF6D1F]/20 text-[#FF6D1F] rounded-full">{techStack.top_language}</span>
                                             )}
                                         </h3>
                                         <div className="space-y-3">
@@ -853,12 +853,12 @@ export default function ProfilePage() {
                                                     return (
                                                         <div key={lang}>
                                                             <div className="flex items-center justify-between text-sm mb-1">
-                                                                <span className="text-[#e6edf3]">{lang}</span>
-                                                                <span className="text-[#8b949e]">{count} repos ({percentage.toFixed(1)}%)</span>
+                                                                <span className="text-[#F5E7C6]">{lang}</span>
+                                                                <span className="text-[#6B6580]">{count} repos ({percentage.toFixed(1)}%)</span>
                                                             </div>
-                                                            <div className="h-2 bg-black/30 backdrop-blur-sm border border-white/5 rounded-full overflow-hidden">
+                                                            <div className="h-2 bg-[#1E2345]/60 backdrop-blur-sm border border-[#F5E7C6]/5 rounded-full overflow-hidden">
                                                                 <div
-                                                                    className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all"
+                                                                    className="h-full bg-gradient-to-r from-[#FF6D1F] to-[#F5E7C6] rounded-full transition-all"
                                                                     style={{ width: `${percentage}%` }}
                                                                 ></div>
                                                             </div>
@@ -866,7 +866,7 @@ export default function ProfilePage() {
                                                     );
                                                 })}
                                         </div>
-                                        <p className="mt-4 text-xs text-[#6e7681]">Based on {techStack.total_repos} public repositories</p>
+                                        <p className="mt-4 text-xs text-[#6B6580]">Based on {techStack.total_repos} public repositories</p>
                                     </div>
                                 )}
 
@@ -889,52 +889,52 @@ export default function ProfilePage() {
 
                                 {/* Quick Actions */}
                                 <div className="premium-card rounded-2xl p-5">
-                                    <h3 className="text-sm font-semibold mb-4"><span className="gradient-text">Quick Links</span></h3>
+                                    <h3 className="text-sm font-semibold mb-4"><span className="gradient-text-ember">Quick Links</span></h3>
                                     <div className="space-y-2">
                                         <button
                                             onClick={() => openPopup('followers')}
-                                            className="w-full flex items-center gap-3 p-3 bg-black/30 backdrop-blur-sm border border-white/5 hover:border-purple-500/30 rounded-xl transition-all text-left"
+                                            className="w-full flex items-center gap-3 p-3 bg-[#1E2345]/60 backdrop-blur-sm border border-[#F5E7C6]/5 hover:border-[#FF6D1F]/30 rounded-xl transition-all text-left"
                                         >
-                                            <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className="w-4 h-4 text-[#FF6D1F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                                             </svg>
-                                            <span className="text-sm text-[#e6edf3] flex-1">Followers</span>
-                                            <span className="text-xs text-[#8b949e] bg-white/5 px-2 py-1 rounded-lg">{user.followers}</span>
+                                            <span className="text-sm text-[#F5E7C6] flex-1">Followers</span>
+                                            <span className="text-xs text-[#6B6580] bg-[#F5E7C6]/5 px-2 py-1 rounded-lg">{user.followers}</span>
                                         </button>
                                         <button
                                             onClick={() => openPopup('following')}
-                                            className="w-full flex items-center gap-3 p-3 bg-black/30 backdrop-blur-sm border border-white/5 hover:border-blue-500/30 rounded-xl transition-all text-left"
+                                            className="w-full flex items-center gap-3 p-3 bg-[#1E2345]/60 backdrop-blur-sm border border-[#F5E7C6]/5 hover:border-[#FF6D1F]/30 rounded-xl transition-all text-left"
                                         >
-                                            <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className="w-4 h-4 text-[#F5E7C6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                             </svg>
-                                            <span className="text-sm text-[#e6edf3] flex-1">Following</span>
-                                            <span className="text-xs text-[#8b949e] bg-white/5 px-2 py-1 rounded-lg">{user.following}</span>
+                                            <span className="text-sm text-[#F5E7C6] flex-1">Following</span>
+                                            <span className="text-xs text-[#6B6580] bg-[#F5E7C6]/5 px-2 py-1 rounded-lg">{user.following}</span>
                                         </button>
                                     </div>
                                 </div>
 
                                 {/* Upgrade Banner - Compact version at bottom */}
                                 {isOwnProfile && authUser && !authUser.has_private_access && (
-                                    <div className="premium-card bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-purple-500/30 rounded-xl p-4">
+                                    <div className="premium-card bg-gradient-to-r from-[#FF6D1F]/10 to-[#F5E7C6]/10 border-[#FF6D1F]/30 rounded-xl p-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="p-2 bg-purple-500/20 rounded-lg">
-                                                <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <div className="p-2 bg-[#FF6D1F]/20 rounded-lg">
+                                                <svg className="w-5 h-5 text-[#FF6D1F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                                 </svg>
                                             </div>
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-2 mb-1">
-                                                    <h3 className="text-sm font-bold text-[#e6edf3]">Unlock Private Stats</h3>
-                                                    <span className="px-1.5 py-0.5 text-[10px] bg-purple-500/20 text-purple-300 rounded font-bold">PREMIUM</span>
+                                                    <h3 className="text-sm font-bold text-[#F5E7C6]">Unlock Private Stats</h3>
+                                                    <span className="px-1.5 py-0.5 text-[10px] bg-[#FF6D1F]/20 text-[#FF8A47] rounded font-bold">PREMIUM</span>
                                                 </div>
-                                                <p className="text-xs text-[#8b949e]">Access private repos, analytics & more</p>
+                                                <p className="text-xs text-[#6B6580]">Access private repos, analytics & more</p>
                                             </div>
                                             <button
                                                 onClick={() => {
                                                     window.location.href = `/choose-signin?pref=full`;
                                                 }}
-                                                className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-lg transition-all font-semibold text-xs shadow-lg shadow-purple-500/20 whitespace-nowrap"
+                                                className="px-3 py-1.5 bg-gradient-to-r from-[#FF6D1F] to-[#CC5719] hover:from-[#FF8A47] hover:to-[#FF6D1F] text-white rounded-lg transition-all font-semibold text-xs shadow-lg shadow-[#FF6D1F]/20 whitespace-nowrap"
                                             >
                                                 Upgrade
                                             </button>
@@ -948,26 +948,26 @@ export default function ProfilePage() {
                     {/* Repos Tab Content */}
                     {activeTab === 'repos' && (
                         <div className="premium-card rounded-2xl overflow-hidden">
-                            <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between">
+                            <div className="px-5 py-4 border-b border-[#F5E7C6]/10 flex items-center justify-between">
                                 <h3 className="text-lg font-semibold flex items-center gap-2">
-                                    <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-[#FF6D1F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                                     </svg>
-                                    <span className="gradient-text">Repositories</span>
-                                    {repos.length > 0 && <span className="text-sm text-[#8b949e]">({repos.length})</span>}
+                                    <span className="gradient-text-ember">Repositories</span>
+                                    {repos.length > 0 && <span className="text-sm text-[#6B6580]">({repos.length})</span>}
                                 </h3>
                                 {totalRepoPages > 1 && (
-                                    <span className="text-sm text-[#8b949e]">Page {reposPage} of {totalRepoPages}</span>
+                                    <span className="text-sm text-[#6B6580]">Page {reposPage} of {totalRepoPages}</span>
                                 )}
                             </div>
                             <div className="p-5">
                                 {reposLoading ? (
                                     <div className="flex items-center justify-center py-16">
-                                        <div className="w-10 h-10 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+                                        <div className="w-10 h-10 border-4 border-[#1E2345] border-t-[#FF6D1F] rounded-full animate-spin" />
                                     </div>
                                 ) : repos.length === 0 ? (
-                                    <div className="text-center py-16 text-[#8b949e]">
-                                        <svg className="w-16 h-16 mx-auto mb-4 text-[#30363d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div className="text-center py-16 text-[#6B6580]">
+                                        <svg className="w-16 h-16 mx-auto mb-4 text-[#4A4560]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                                         </svg>
                                         <p className="text-lg">No public repositories found</p>
@@ -985,21 +985,20 @@ export default function ProfilePage() {
                                             ))}
                                         </div>
 
-                                        {/* Pagination */}
                                         {totalRepoPages > 1 && (
-                                            <div className="flex items-center justify-center gap-2 mt-6 pt-4 border-t border-white/10">
+                                            <div className="flex items-center justify-center gap-2 mt-6 pt-4 border-t border-[#F5E7C6]/10">
                                                 <button
                                                     onClick={() => setReposPage((p) => Math.max(1, p - 1))}
                                                     disabled={reposPage === 1}
-                                                    className="px-4 py-2 bg-[#21262d] hover:bg-[#30363d] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm rounded-lg transition-all"
+                                                    className="px-4 py-2 bg-[#1E2345] hover:bg-[#171B38] disabled:opacity-50 disabled:cursor-not-allowed text-[#F5E7C6] text-sm rounded-lg transition-all border border-[#F5E7C6]/10"
                                                 >
                                                     Previous
                                                 </button>
-                                                <span className="text-sm text-[#8b949e]">{reposPage} / {totalRepoPages}</span>
+                                                <span className="text-sm text-[#6B6580]">{reposPage} / {totalRepoPages}</span>
                                                 <button
                                                     onClick={() => setReposPage((p) => Math.min(totalRepoPages, p + 1))}
                                                     disabled={reposPage === totalRepoPages}
-                                                    className="px-4 py-2 bg-[#21262d] hover:bg-[#30363d] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm rounded-lg transition-all"
+                                                    className="px-4 py-2 bg-[#1E2345] hover:bg-[#171B38] disabled:opacity-50 disabled:cursor-not-allowed text-[#F5E7C6] text-sm rounded-lg transition-all border border-[#F5E7C6]/10"
                                                 >
                                                     Next
                                                 </button>
@@ -1014,26 +1013,26 @@ export default function ProfilePage() {
                     {/* Starred Tab Content */}
                     {activeTab === 'starred' && (
                         <div className="premium-card rounded-2xl overflow-hidden">
-                            <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between">
+                            <div className="px-5 py-4 border-b border-[#F5E7C6]/10 flex items-center justify-between">
                                 <h3 className="text-lg font-semibold flex items-center gap-2">
-                                    <svg className="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-[#F5E7C6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                                     </svg>
-                                    <span className="gradient-text">Starred Repositories</span>
-                                    {starredRepos.length > 0 && <span className="text-sm text-[#8b949e]">({starredRepos.length})</span>}
+                                    <span className="gradient-text-ember">Starred Repositories</span>
+                                    {starredRepos.length > 0 && <span className="text-sm text-[#6B6580]">({starredRepos.length})</span>}
                                 </h3>
                                 {totalStarredPages > 1 && (
-                                    <span className="text-sm text-[#8b949e]">Page {starredPage} of {totalStarredPages}</span>
+                                    <span className="text-sm text-[#6B6580]">Page {starredPage} of {totalStarredPages}</span>
                                 )}
                             </div>
                             <div className="p-5">
                                 {starredLoading ? (
                                     <div className="flex items-center justify-center py-16">
-                                        <div className="w-10 h-10 border-4 border-yellow-500/20 border-t-yellow-500 rounded-full animate-spin" />
+                                        <div className="w-10 h-10 border-4 border-[#1E2345] border-t-[#F5E7C6] rounded-full animate-spin" />
                                     </div>
                                 ) : starredRepos.length === 0 ? (
-                                    <div className="text-center py-16 text-[#8b949e]">
-                                        <svg className="w-16 h-16 mx-auto mb-4 text-[#30363d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div className="text-center py-16 text-[#6B6580]">
+                                        <svg className="w-16 h-16 mx-auto mb-4 text-[#4A4560]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                                         </svg>
                                         <p className="text-lg">No starred repositories found</p>
@@ -1051,21 +1050,20 @@ export default function ProfilePage() {
                                             ))}
                                         </div>
 
-                                        {/* Pagination */}
                                         {totalStarredPages > 1 && (
-                                            <div className="flex items-center justify-center gap-2 mt-6 pt-4 border-t border-white/10">
+                                            <div className="flex items-center justify-center gap-2 mt-6 pt-4 border-t border-[#F5E7C6]/10">
                                                 <button
                                                     onClick={() => setStarredPage((p) => Math.max(1, p - 1))}
                                                     disabled={starredPage === 1}
-                                                    className="px-4 py-2 bg-[#21262d] hover:bg-[#30363d] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm rounded-lg transition-all"
+                                                    className="px-4 py-2 bg-[#1E2345] hover:bg-[#171B38] disabled:opacity-50 disabled:cursor-not-allowed text-[#F5E7C6] text-sm rounded-lg transition-all border border-[#F5E7C6]/10"
                                                 >
                                                     Previous
                                                 </button>
-                                                <span className="text-sm text-[#8b949e]">{starredPage} / {totalStarredPages}</span>
+                                                <span className="text-sm text-[#6B6580]">{starredPage} / {totalStarredPages}</span>
                                                 <button
                                                     onClick={() => setStarredPage((p) => Math.min(totalStarredPages, p + 1))}
                                                     disabled={starredPage === totalStarredPages}
-                                                    className="px-4 py-2 bg-[#21262d] hover:bg-[#30363d] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm rounded-lg transition-all"
+                                                    className="px-4 py-2 bg-[#1E2345] hover:bg-[#171B38] disabled:opacity-50 disabled:cursor-not-allowed text-[#F5E7C6] text-sm rounded-lg transition-all border border-[#F5E7C6]/10"
                                                 >
                                                     Next
                                                 </button>
@@ -1086,35 +1084,35 @@ export default function ProfilePage() {
                     onClick={closePopup}
                 >
                     <div
-                        className="relative w-full max-w-lg bg-[#0d1117] border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+                        className="relative w-full max-w-lg bg-[#0d1117] border border-[#F5E7C6]/10 rounded-2xl shadow-2xl overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Header */}
-                        <div className="relative flex items-center justify-center p-5 border-b border-white/10 bg-gradient-to-r from-purple-500/10 to-blue-500/10">
-                            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                        <div className="relative flex items-center justify-center p-5 border-b border-[#F5E7C6]/10 bg-gradient-to-r from-[#FF6D1F]/10 to-[#F5E7C6]/10">
+                            <h3 className="text-lg font-bold text-[#F5E7C6] flex items-center gap-2">
                                 {popupType === 'followers' ? (
                                     <>
-                                        <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-5 h-5 text-[#FF6D1F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                                         </svg>
                                         Followers
-                                        <span className="text-sm text-[#8b949e]">({user?.followers || 0})</span>
+                                        <span className="text-sm text-[#6B6580]">({user?.followers || 0})</span>
                                     </>
                                 ) : (
                                     <>
-                                        <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-5 h-5 text-[#F5E7C6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                         </svg>
                                         Following
-                                        <span className="text-sm text-[#8b949e]">({user?.following || 0})</span>
+                                        <span className="text-sm text-[#6B6580]">({user?.following || 0})</span>
                                     </>
                                 )}
                             </h3>
                             <button
                                 onClick={closePopup}
-                                className="absolute right-4 p-2 hover:bg-white/10 rounded-lg transition-colors"
+                                className="absolute right-4 p-2 hover:bg-[#F5E7C6]/10 rounded-lg transition-colors"
                             >
-                                <svg className="w-5 h-5 text-[#8b949e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 text-[#6B6580]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                             </button>
@@ -1124,11 +1122,11 @@ export default function ProfilePage() {
                         <div className="p-5 max-h-[60vh] overflow-y-auto">
                             {popupLoading ? (
                                 <div className="flex items-center justify-center py-12">
-                                    <div className="w-10 h-10 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
+                                    <div className="w-10 h-10 border-4 border-[#1E2345] border-t-[#FF6D1F] rounded-full animate-spin" />
                                 </div>
                             ) : (popupType === 'followers' ? followers : following).length === 0 ? (
-                                <div className="text-center py-12 text-[#8b949e]">
-                                    <svg className="w-16 h-16 mx-auto mb-4 text-[#30363d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="text-center py-12 text-[#6B6580]">
+                                    <svg className="w-16 h-16 mx-auto mb-4 text-[#4A4560]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                     </svg>
                                     <p className="text-lg">No {popupType} found</p>
@@ -1142,7 +1140,7 @@ export default function ProfilePage() {
                                             onClick={closePopup}
                                             className="group relative"
                                         >
-                                            <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-transparent hover:border-purple-500/50 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-purple-500/20">
+                                            <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-transparent hover:border-[#FF6D1F]/50 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-[#FF6D1F]/20">
                                                 <Image
                                                     src={person.avatar_url}
                                                     alt={person.login}
@@ -1152,7 +1150,7 @@ export default function ProfilePage() {
                                                 />
                                             </div>
                                             {/* Tooltip */}
-                                            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-[#161b22] border border-white/10 rounded-lg text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
+                                            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-[#1E2345] border border-[#F5E7C6]/10 rounded-lg text-xs text-[#F5E7C6] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
                                                 @{person.login}
                                             </div>
                                         </Link>

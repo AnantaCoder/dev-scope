@@ -29,9 +29,9 @@ export function AIAnalysisButton({
     const baseStyles = "flex items-center justify-center gap-2 font-semibold rounded-xl transition-all";
 
     const variantStyles = {
-        default: "py-3 px-6 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white",
-        compact: "py-2 px-4 text-sm bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/20",
-        outline: "py-3 px-6 bg-transparent border-2 border-purple-500 text-purple-400 hover:bg-purple-500/10",
+        default: "py-3 px-6 bg-gradient-to-r from-[#FF6D1F] to-[#CC5719] hover:from-[#FF8A47] hover:to-[#FF6D1F] text-white shadow-lg shadow-[#FF6D1F]/20",
+        compact: "py-2 px-4 text-sm bg-[#FF6D1F]/10 hover:bg-[#FF6D1F]/20 text-[#FF8A47] border border-[#FF6D1F]/20",
+        outline: "py-3 px-6 bg-transparent border-2 border-[#FF6D1F] text-[#FF8A47] hover:bg-[#FF6D1F]/10",
     };
 
     const disabledStyles = "disabled:opacity-60 disabled:cursor-not-allowed";

@@ -41,6 +41,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Check authentication status on mount
   useEffect(() => {
     checkAuth();
+
+    // Listen for session expiration events
+    const handleSessionExpired = () => {
+      console.log('Session expired, logging out...');
+      setUser(null);
+      // Redirect to home page with message
+      window.location.href = '/?session=expired';
+    };
+
+    window.addEventListener('session-expired', handleSessionExpired);
+
+    return () => {
+      window.removeEventListener('session-expired', handleSessionExpired);
+    };
   }, []);
 
   const checkAuth = async () => {

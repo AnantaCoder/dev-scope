@@ -113,7 +113,7 @@ export default function RepoDetailPage() {
                 setLanguages(Object.entries(langsJson).map(([name, bytes]) => ({
                     name,
                     percentage: Math.round(((bytes as number) / total) * 1000) / 10,
-                    color: LANGUAGE_COLORS[name] || "#8b949e",
+                    color: LANGUAGE_COLORS[name] || "#6B6580",
                 })).sort((a, b) => b.percentage - a.percentage));
             }
             if (contributorsRes.ok) setContributors(await contributorsRes.json());
@@ -169,12 +169,12 @@ export default function RepoDetailPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex flex-col premium-bg text-white">
+            <div className="min-h-screen flex flex-col premium-bg text-[#F5E7C6]">
                 <Navbar />
                 <main className="flex-1 flex items-center justify-center">
                     <div className="text-center">
-                        <div className="w-12 h-12 mx-auto mb-4 border-4 border-[#30363d] border-t-[#58a6ff] rounded-full animate-spin" />
-                        <p className="text-[#8b949e]">Loading repository...</p>
+                        <div className="w-12 h-12 mx-auto mb-4 border-4 border-[#1E2345] border-t-[#FF6D1F] rounded-full animate-spin" />
+                        <p className="text-[#6B6580]">Loading repository...</p>
                     </div>
                 </main>
                 <Footer />
@@ -184,7 +184,7 @@ export default function RepoDetailPage() {
 
     if (error || !repoData) {
         return (
-            <div className="min-h-screen flex flex-col premium-bg text-white">
+            <div className="min-h-screen flex flex-col premium-bg text-[#F5E7C6]">
                 <Navbar />
                 <main className="flex-1 flex items-center justify-center p-4">
                     <div className="text-center premium-card p-8 max-w-md">
@@ -193,9 +193,9 @@ export default function RepoDetailPage() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </div>
-                        <h2 className="text-xl font-bold text-white mb-2">Repository Not Found</h2>
-                        <p className="text-[#8b949e] mb-4">{error}</p>
-                        <Link href="/repos" className="inline-flex items-center gap-2 px-4 py-2 bg-[#238636] hover:bg-[#2ea043] text-white rounded-lg transition-all">
+                        <h2 className="text-xl font-bold text-[#F5E7C6] mb-2 font-['Gotham']">Repository Not Found</h2>
+                        <p className="text-[#6B6580] mb-4">{error}</p>
+                        <Link href="/repos" className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#FF6D1F] to-[#CC5719] hover:from-[#FF8A47] hover:to-[#FF6D1F] text-white rounded-lg transition-all">
                             ← Back to Repos
                         </Link>
                     </div>
@@ -206,11 +206,11 @@ export default function RepoDetailPage() {
     }
 
     return (
-        <div className="min-h-screen flex flex-col premium-bg text-white">
-            {/* Background Effects */}
+        <div className="min-h-screen flex flex-col premium-bg text-[#F5E7C6]">
+            {/* Background Effects - Warm tones */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-blue-500/8 rounded-full blur-[100px]" />
-                <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-purple-500/8 rounded-full blur-[100px]" />
+                <div className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-[#FF6D1F]/8 rounded-full blur-[100px]" />
+                <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-[#F5E7C6]/8 rounded-full blur-[100px]" />
             </div>
 
             <Navbar />
@@ -219,11 +219,11 @@ export default function RepoDetailPage() {
                 <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-6">
                     {/* Breadcrumb */}
                     <nav className="flex items-center gap-2 text-sm mb-6">
-                        <Link href="/repos" className="text-[#8b949e] hover:text-white transition-colors">Repos</Link>
-                        <span className="text-[#30363d]">/</span>
-                        <span className="text-[#8b949e]">{owner}</span>
-                        <span className="text-[#30363d]">/</span>
-                        <span className="text-white font-medium">{repo}</span>
+                        <Link href="/repos" className="text-[#6B6580] hover:text-[#FF6D1F] transition-colors">Repos</Link>
+                        <span className="text-[#4A4560]">/</span>
+                        <span className="text-[#6B6580]">{owner}</span>
+                        <span className="text-[#4A4560]">/</span>
+                        <span className="text-[#F5E7C6] font-medium">{repo}</span>
                     </nav>
 
                     {/* Main Grid */}
@@ -234,31 +234,31 @@ export default function RepoDetailPage() {
                             {/* Header Card */}
                             <div className="premium-card p-5">
                                 <div className="flex items-center gap-3 mb-4">
-                                    <Image src={repoData.owner.avatar_url} alt={owner} width={44} height={44} className="rounded-xl" />
+                                    <Image src={repoData.owner.avatar_url} alt={owner} width={44} height={44} className="rounded-xl ring-2 ring-[#FF6D1F]/20" />
                                     <div className="flex-1 min-w-0">
-                                        <h1 className="text-lg font-bold text-white truncate">{repoData.name}</h1>
-                                        <p className="text-sm text-[#8b949e]">{owner}</p>
+                                        <h1 className="text-lg font-bold text-[#F5E7C6] truncate font-['Gotham']">{repoData.name}</h1>
+                                        <p className="text-sm text-[#6B6580]">{owner}</p>
                                     </div>
                                     {repoData.private && (
-                                        <span className="px-2 py-1 text-[10px] bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 rounded-md">Private</span>
+                                        <span className="px-2 py-1 text-[10px] bg-[#F5E7C6]/10 text-[#F5E7C6] border border-[#F5E7C6]/20 rounded-md">Private</span>
                                     )}
                                 </div>
 
                                 {repoData.description && (
-                                    <p className="text-sm text-[#8b949e] mb-4 leading-relaxed">{repoData.description}</p>
+                                    <p className="text-sm text-[#A8A0B8] mb-4 leading-relaxed font-['Gotham']">{repoData.description}</p>
                                 )}
 
                                 {/* Stats */}
                                 <div className="grid grid-cols-4 gap-2 mb-4">
                                     {[
-                                        { value: repoData.stargazers_count, label: "Stars", color: "text-yellow-400" },
-                                        { value: repoData.forks_count, label: "Forks", color: "text-blue-400" },
-                                        { value: repoData.open_issues_count, label: "Issues", color: "text-green-400" },
-                                        { value: formatSize(repoData.size), label: "Size", color: "text-purple-400" },
+                                        { value: repoData.stargazers_count, label: "Stars", color: "text-[#F5E7C6]" },
+                                        { value: repoData.forks_count, label: "Forks", color: "text-[#FF6D1F]" },
+                                        { value: repoData.open_issues_count, label: "Issues", color: "text-[#FF8A47]" },
+                                        { value: formatSize(repoData.size), label: "Size", color: "text-[#D4C9A8]" },
                                     ].map((stat) => (
-                                        <div key={stat.label} className="text-center p-2 bg-[#0d1117] rounded-lg">
+                                        <div key={stat.label} className="text-center p-2 bg-[#1E2345]/60 rounded-lg">
                                             <p className={`text-lg font-bold ${stat.color}`}>{typeof stat.value === "number" ? stat.value.toLocaleString() : stat.value}</p>
-                                            <p className="text-[10px] text-[#6e7681]">{stat.label}</p>
+                                            <p className="text-[10px] text-[#6B6580]">{stat.label}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -267,13 +267,13 @@ export default function RepoDetailPage() {
                                 {repoData.topics && repoData.topics.length > 0 && (
                                     <div className="flex flex-wrap gap-1.5 mb-4">
                                         {repoData.topics.slice(0, 5).map((topic) => (
-                                            <span key={topic} className="text-[10px] px-2 py-0.5 bg-[#388bfd]/10 text-[#58a6ff] rounded-full">{topic}</span>
+                                            <span key={topic} className="text-[10px] px-2 py-0.5 bg-[#FF6D1F]/10 text-[#FF8A47] rounded-full">{topic}</span>
                                         ))}
                                     </div>
                                 )}
 
                                 {/* Meta */}
-                                <div className="text-xs text-[#6e7681] space-y-1 pt-3 border-t border-[#21262d]">
+                                <div className="text-xs text-[#6B6580] space-y-1 pt-3 border-t border-[#F5E7C6]/10">
                                     <p>📅 Updated {formatTime(repoData.updated_at)}</p>
                                     {repoData.license && <p>📄 {repoData.license.name}</p>}
                                     <p>🌿 {repoData.default_branch}</p>
@@ -283,7 +283,7 @@ export default function RepoDetailPage() {
                             {/* Languages */}
                             {languages.length > 0 && (
                                 <div className="premium-card p-4">
-                                    <h3 className="text-sm font-semibold text-white mb-3">Languages</h3>
+                                    <h3 className="text-sm font-semibold text-[#F5E7C6] mb-3 font-['Gotham']">Languages</h3>
                                     <div className="h-2 rounded-full overflow-hidden flex mb-3">
                                         {languages.map((l) => (
                                             <div key={l.name} style={{ width: `${l.percentage}%`, backgroundColor: l.color }} />
@@ -294,9 +294,9 @@ export default function RepoDetailPage() {
                                             <div key={l.name} className="flex items-center justify-between text-xs">
                                                 <div className="flex items-center gap-1.5">
                                                     <span className="w-2 h-2 rounded-full" style={{ backgroundColor: l.color }} />
-                                                    <span className="text-white">{l.name}</span>
+                                                    <span className="text-[#D4C9A8]">{l.name}</span>
                                                 </div>
-                                                <span className="text-[#6e7681]">{l.percentage}%</span>
+                                                <span className="text-[#6B6580]">{l.percentage}%</span>
                                             </div>
                                         ))}
                                     </div>
@@ -309,7 +309,7 @@ export default function RepoDetailPage() {
                                     href={repoData.html_url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center justify-center gap-2 w-full py-3 bg-[#238636] hover:bg-[#2ea043] text-white font-semibold rounded-xl transition-all"
+                                    className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-[#FF6D1F] to-[#CC5719] hover:from-[#FF8A47] hover:to-[#FF6D1F] text-white font-semibold rounded-xl transition-all shadow-lg shadow-[#FF6D1F]/20"
                                 >
                                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" /></svg>
                                     View on GitHub
@@ -318,7 +318,7 @@ export default function RepoDetailPage() {
                                 {!repoData.private && (
                                     <button
                                         onClick={copyCloneCommand}
-                                        className={`flex items-center justify-center gap-2 w-full py-3 font-semibold rounded-xl border transition-all ${copiedClone ? "bg-green-500/20 text-green-400 border-green-500/30" : "bg-[#21262d] hover:bg-[#30363d] text-white border-[#30363d]"
+                                        className={`flex items-center justify-center gap-2 w-full py-3 font-semibold rounded-xl border transition-all ${copiedClone ? "bg-green-500/20 text-green-400 border-green-500/30" : "bg-[#1E2345]/60 hover:bg-[#1E2345] text-[#F5E7C6] border-[#F5E7C6]/10"
                                             }`}
                                     >
                                         {copiedClone ? (
@@ -352,13 +352,13 @@ export default function RepoDetailPage() {
                         <div className="lg:col-span-2">
                             <div className="premium-card overflow-hidden">
                                 {/* Tab Header - At Top */}
-                                <div className="flex items-center justify-between p-4 border-b border-[#21262d] bg-[#0d1117]">
+                                <div className="flex items-center justify-between p-4 border-b border-[#F5E7C6]/10 bg-[#1E2345]/60">
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => setActiveTab("commits")}
                                             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === "commits"
-                                                ? "bg-[#238636] text-white"
-                                                : "bg-[#21262d] text-[#8b949e] hover:text-white hover:bg-[#30363d]"
+                                                ? "bg-gradient-to-r from-[#FF6D1F] to-[#CC5719] text-white"
+                                                : "bg-[#1E2345] text-[#6B6580] hover:text-[#F5E7C6] hover:bg-[#171B38]"
                                                 }`}
                                         >
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -370,8 +370,8 @@ export default function RepoDetailPage() {
                                         <button
                                             onClick={() => setActiveTab("issues")}
                                             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === "issues"
-                                                ? "bg-[#238636] text-white"
-                                                : "bg-[#21262d] text-[#8b949e] hover:text-white hover:bg-[#30363d]"
+                                                ? "bg-gradient-to-r from-[#FF6D1F] to-[#CC5719] text-white"
+                                                : "bg-[#1E2345] text-[#6B6580] hover:text-[#F5E7C6] hover:bg-[#171B38]"
                                                 }`}
                                         >
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -383,8 +383,8 @@ export default function RepoDetailPage() {
                                         <button
                                             onClick={() => setActiveTab("contributors")}
                                             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === "contributors"
-                                                ? "bg-[#238636] text-white"
-                                                : "bg-[#21262d] text-[#8b949e] hover:text-white hover:bg-[#30363d]"
+                                                ? "bg-gradient-to-r from-[#FF6D1F] to-[#CC5719] text-white"
+                                                : "bg-[#1E2345] text-[#6B6580] hover:text-[#F5E7C6] hover:bg-[#171B38]"
                                                 }`}
                                         >
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -396,7 +396,7 @@ export default function RepoDetailPage() {
                                     </div>
 
                                     {/* Pagination Info */}
-                                    <div className="text-xs text-[#6e7681]">
+                                    <div className="text-xs text-[#6B6580]">
                                         Page {page} of {totalPages || 1}
                                     </div>
                                 </div>
@@ -411,21 +411,21 @@ export default function RepoDetailPage() {
                                                 href={commit.html_url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="flex items-start gap-3 p-4 bg-[#0d1117] rounded-xl border border-[#21262d] hover:border-[#30363d] transition-all group"
+                                                className="flex items-start gap-3 p-4 bg-[#1E2345]/60 rounded-xl border border-[#F5E7C6]/10 hover:border-[#FF6D1F]/30 transition-all group"
                                             >
                                                 {commit.author ? (
                                                     <Image src={commit.author.avatar_url} alt="" width={32} height={32} className="rounded-lg" />
                                                 ) : (
-                                                    <div className="w-8 h-8 rounded-lg bg-[#21262d] flex items-center justify-center text-[10px] text-[#6e7681]">?</div>
+                                                    <div className="w-8 h-8 rounded-lg bg-[#1E2345] flex items-center justify-center text-[10px] text-[#6B6580]">?</div>
                                                 )}
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-sm text-white font-medium group-hover:text-[#58a6ff] transition-colors line-clamp-1">{commit.commit.message.split("\n")[0]}</p>
-                                                    <div className="flex items-center gap-2 mt-1.5 text-xs text-[#6e7681]">
-                                                        <span className="text-[#8b949e]">{commit.author?.login || commit.commit.author.name}</span>
+                                                    <p className="text-sm text-[#F5E7C6] font-medium group-hover:text-[#FF6D1F] transition-colors line-clamp-1">{commit.commit.message.split("\n")[0]}</p>
+                                                    <div className="flex items-center gap-2 mt-1.5 text-xs text-[#6B6580]">
+                                                        <span className="text-[#A8A0B8]">{commit.author?.login || commit.commit.author.name}</span>
                                                         <span>•</span>
                                                         <span>{formatTime(commit.commit.author.date)}</span>
                                                         <span>•</span>
-                                                        <code className="px-1.5 py-0.5 bg-[#21262d] text-[#58a6ff] rounded text-[10px] font-mono">{commit.sha.slice(0, 7)}</code>
+                                                        <code className="px-1.5 py-0.5 bg-[#1E2345] text-[#FF6D1F] rounded text-[10px] font-mono">{commit.sha.slice(0, 7)}</code>
                                                     </div>
                                                 </div>
                                             </a>
@@ -440,20 +440,20 @@ export default function RepoDetailPage() {
                                                 href={issue.html_url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="flex items-start gap-3 p-4 bg-[#0d1117] rounded-xl border border-[#21262d] hover:border-[#30363d] transition-all group"
+                                                className="flex items-start gap-3 p-4 bg-[#1E2345]/60 rounded-xl border border-[#F5E7C6]/10 hover:border-[#FF6D1F]/30 transition-all group"
                                             >
-                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${issue.state === "open" ? "bg-green-500/10" : "bg-purple-500/10"}`}>
-                                                    <svg className={`w-4 h-4 ${issue.state === "open" ? "text-green-500" : "text-purple-500"}`} fill="currentColor" viewBox="0 0 16 16">
+                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${issue.state === "open" ? "bg-green-500/10" : "bg-[#FF6D1F]/10"}`}>
+                                                    <svg className={`w-4 h-4 ${issue.state === "open" ? "text-green-500" : "text-[#FF6D1F]"}`} fill="currentColor" viewBox="0 0 16 16">
                                                         {issue.state === "open" ? <path d="M8 9.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM8 0a8 8 0 100 16A8 8 0 008 0zM1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0z" /> : <path d="M11.28 6.78a.75.75 0 00-1.06-1.06L7.25 8.69 5.78 7.22a.75.75 0 00-1.06 1.06l2 2a.75.75 0 001.06 0l3.5-3.5zM16 8A8 8 0 110 8a8 8 0 0116 0z" />}
                                                     </svg>
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-sm text-white font-medium group-hover:text-[#58a6ff] transition-colors line-clamp-1">{issue.title}</p>
+                                                    <p className="text-sm text-[#F5E7C6] font-medium group-hover:text-[#FF6D1F] transition-colors line-clamp-1">{issue.title}</p>
                                                     <div className="flex flex-wrap items-center gap-2 mt-1.5">
                                                         {issue.labels.slice(0, 2).map((l) => (
                                                             <span key={l.name} className="px-1.5 py-0.5 text-[9px] rounded-full" style={{ backgroundColor: `#${l.color}25`, color: `#${l.color}` }}>{l.name}</span>
                                                         ))}
-                                                        <span className="text-xs text-[#6e7681]">#{issue.number} • {formatTime(issue.created_at)}</span>
+                                                        <span className="text-xs text-[#6B6580]">#{issue.number} • {formatTime(issue.created_at)}</span>
                                                     </div>
                                                 </div>
                                             </a>
@@ -466,24 +466,24 @@ export default function RepoDetailPage() {
                                             <Link
                                                 key={contributor.id}
                                                 href={`/profile/${contributor.login}`}
-                                                className="flex items-center gap-3 p-4 bg-[#0d1117] rounded-xl border border-[#21262d] hover:border-[#30363d] transition-all group"
+                                                className="flex items-center gap-3 p-4 bg-[#1E2345]/60 rounded-xl border border-[#F5E7C6]/10 hover:border-[#FF6D1F]/30 transition-all group"
                                             >
                                                 <Image
                                                     src={contributor.avatar_url}
                                                     alt={contributor.login}
                                                     width={40}
                                                     height={40}
-                                                    className="rounded-full ring-2 ring-white/10"
+                                                    className="rounded-full ring-2 ring-[#F5E7C6]/10"
                                                 />
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-sm text-white font-medium group-hover:text-[#58a6ff] transition-colors">
+                                                    <p className="text-sm text-[#F5E7C6] font-medium group-hover:text-[#FF6D1F] transition-colors">
                                                         @{contributor.login}
                                                     </p>
-                                                    <p className="text-xs text-[#6e7681]">
+                                                    <p className="text-xs text-[#6B6580]">
                                                         {contributor.contributions.toLocaleString()} commits
                                                     </p>
                                                 </div>
-                                                <div className="px-3 py-1.5 bg-purple-500/10 text-purple-400 text-xs font-medium rounded-lg border border-purple-500/20">
+                                                <div className="px-3 py-1.5 bg-[#FF6D1F]/10 text-[#FF6D1F] text-xs font-medium rounded-lg border border-[#FF6D1F]/20">
                                                     {contributor.contributions.toLocaleString()}
                                                 </div>
                                             </Link>
@@ -493,7 +493,7 @@ export default function RepoDetailPage() {
                                     {((activeTab === "commits" && commits.length === 0) ||
                                         (activeTab === "issues" && issues.length === 0) ||
                                         (activeTab === "contributors" && contributors.length === 0)) && (
-                                            <div className="flex items-center justify-center h-40 text-[#6e7681]">
+                                            <div className="flex items-center justify-center h-40 text-[#6B6580]">
                                                 No {activeTab} found
                                             </div>
                                         )}
@@ -501,11 +501,11 @@ export default function RepoDetailPage() {
 
                                 {/* Pagination Footer */}
                                 {totalPages > 1 && (
-                                    <div className="flex items-center justify-center gap-2 p-4 border-t border-[#21262d] bg-[#0d1117]">
+                                    <div className="flex items-center justify-center gap-2 p-4 border-t border-[#F5E7C6]/10 bg-[#1E2345]/60">
                                         <button
                                             onClick={() => setPage((p) => Math.max(1, p - 1))}
                                             disabled={page === 1}
-                                            className="px-4 py-2 bg-[#21262d] hover:bg-[#30363d] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm rounded-lg transition-all"
+                                            className="px-4 py-2 bg-[#1E2345] hover:bg-[#171B38] disabled:opacity-40 disabled:cursor-not-allowed text-[#F5E7C6] text-sm rounded-lg transition-all border border-[#F5E7C6]/10"
                                         >
                                             Previous
                                         </button>
@@ -516,7 +516,7 @@ export default function RepoDetailPage() {
                                                     <button
                                                         key={pageNum}
                                                         onClick={() => setPage(pageNum)}
-                                                        className={`w-9 h-9 rounded-lg text-sm transition-all ${page === pageNum ? "bg-[#238636] text-white" : "bg-[#21262d] text-[#8b949e] hover:bg-[#30363d]"}`}
+                                                        className={`w-9 h-9 rounded-lg text-sm transition-all ${page === pageNum ? "bg-gradient-to-r from-[#FF6D1F] to-[#CC5719] text-white" : "bg-[#1E2345] text-[#6B6580] hover:bg-[#171B38]"}`}
                                                     >
                                                         {pageNum}
                                                     </button>
@@ -526,7 +526,7 @@ export default function RepoDetailPage() {
                                         <button
                                             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                                             disabled={page === totalPages}
-                                            className="px-4 py-2 bg-[#21262d] hover:bg-[#30363d] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm rounded-lg transition-all"
+                                            className="px-4 py-2 bg-[#1E2345] hover:bg-[#171B38] disabled:opacity-40 disabled:cursor-not-allowed text-[#F5E7C6] text-sm rounded-lg transition-all border border-[#F5E7C6]/10"
                                         >
                                             Next
                                         </button>

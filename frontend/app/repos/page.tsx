@@ -122,11 +122,11 @@ export default function ReposPage() {
     const totalPages = Math.ceil(totalResults / resultsPerPage);
 
     return (
-        <div className="min-h-screen flex flex-col premium-bg text-white">
-            {/* Floating Orbs */}
+        <div className="min-h-screen flex flex-col premium-bg text-[#F5E7C6]">
+            {/* Floating Orbs - Warm tones */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute top-20 left-[10%] w-96 h-96 bg-green-500/10 rounded-full blur-[120px] animate-float" />
-                <div className="absolute top-40 right-[15%] w-80 h-80 bg-blue-500/10 rounded-full blur-[100px] animate-float" style={{ animationDelay: "2s" }} />
+                <div className="absolute top-20 left-[10%] w-96 h-96 bg-[#FF6D1F]/15 rounded-full blur-[120px] animate-float" />
+                <div className="absolute top-40 right-[15%] w-80 h-80 bg-[#F5E7C6]/10 rounded-full blur-[100px] animate-float" style={{ animationDelay: "2s" }} />
             </div>
 
             <Navbar />
@@ -135,8 +135,8 @@ export default function ReposPage() {
                 <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-6 lg:py-8">
                     {/* Header */}
                     <div className="mb-6">
-                        <h1 className="text-3xl font-bold gradient-text mb-2">Repositories</h1>
-                        <p className="text-[#8b949e]">Search and explore GitHub repositories</p>
+                        <h1 className="text-3xl font-bold gradient-text-ember mb-2 font-['Gotham']">Repositories</h1>
+                        <p className="text-[#A8A0B8] font-['Gotham']">Search and explore GitHub repositories</p>
                     </div>
 
                     {/* Search & Filters */}
@@ -144,7 +144,7 @@ export default function ReposPage() {
                         {/* Search Bar */}
                         <div className="flex flex-col sm:flex-row gap-3">
                             <div className="flex-1 relative">
-                                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8b949e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6580]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                                 <input
@@ -153,13 +153,13 @@ export default function ReposPage() {
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     onKeyPress={(e) => e.key === "Enter" && searchRepos(1)}
-                                    className="w-full pl-10 pr-4 py-3 bg-[#0d1117] border border-[#30363d] rounded-lg text-white placeholder:text-[#8b949e] focus:outline-none focus:border-[#58a6ff] focus:ring-1 focus:ring-[#58a6ff]/50 transition-all"
+                                    className="w-full pl-10 pr-4 py-3 bg-[#1E2345]/60 border border-[#F5E7C6]/10 rounded-lg text-[#F5E7C6] placeholder:text-[#6B6580] focus:outline-none focus:border-[#FF6D1F]/50 focus:ring-1 focus:ring-[#FF6D1F]/30 transition-all"
                                 />
                             </div>
                             <button
                                 onClick={() => searchRepos(1)}
                                 disabled={searchLoading}
-                                className="px-6 py-3 bg-[#238636] hover:bg-[#2ea043] disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all flex items-center justify-center gap-2"
+                                className="px-6 py-3 bg-gradient-to-r from-[#FF6D1F] to-[#CC5719] hover:from-[#FF8A47] hover:to-[#FF6D1F] disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#FF6D1F]/20"
                             >
                                 {searchLoading ? (
                                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
@@ -175,11 +175,11 @@ export default function ReposPage() {
                         {/* Filters Row */}
                         <div className="flex flex-wrap gap-3">
                             <div className="flex items-center gap-2">
-                                <label className="text-sm text-[#8b949e]">Language:</label>
+                                <label className="text-sm text-[#6B6580]">Language:</label>
                                 <select
                                     value={filterLanguage}
                                     onChange={(e) => setFilterLanguage(e.target.value)}
-                                    className="px-3 py-1.5 bg-[#21262d] border border-[#30363d] rounded-lg text-white text-sm focus:outline-none focus:border-[#58a6ff]"
+                                    className="px-3 py-1.5 bg-[#1E2345] border border-[#F5E7C6]/10 rounded-lg text-[#F5E7C6] text-sm focus:outline-none focus:border-[#FF6D1F]/50"
                                 >
                                     <option value="">All</option>
                                     {LANGUAGES_LIST.map((lang) => (
@@ -188,21 +188,21 @@ export default function ReposPage() {
                                 </select>
                             </div>
                             <div className="flex items-center gap-2">
-                                <label className="text-sm text-[#8b949e]">Min stars:</label>
+                                <label className="text-sm text-[#6B6580]">Min stars:</label>
                                 <input
                                     type="number"
                                     placeholder="0"
                                     value={minStars}
                                     onChange={(e) => setMinStars(e.target.value)}
-                                    className="w-20 px-3 py-1.5 bg-[#21262d] border border-[#30363d] rounded-lg text-white text-sm focus:outline-none focus:border-[#58a6ff]"
+                                    className="w-20 px-3 py-1.5 bg-[#1E2345] border border-[#F5E7C6]/10 rounded-lg text-[#F5E7C6] text-sm focus:outline-none focus:border-[#FF6D1F]/50"
                                 />
                             </div>
                             <div className="flex items-center gap-2">
-                                <label className="text-sm text-[#8b949e]">Sort:</label>
+                                <label className="text-sm text-[#6B6580]">Sort:</label>
                                 <select
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                                    className="px-3 py-1.5 bg-[#21262d] border border-[#30363d] rounded-lg text-white text-sm focus:outline-none focus:border-[#58a6ff]"
+                                    className="px-3 py-1.5 bg-[#1E2345] border border-[#F5E7C6]/10 rounded-lg text-[#F5E7C6] text-sm focus:outline-none focus:border-[#FF6D1F]/50"
                                 >
                                     <option value="stars">Stars</option>
                                     <option value="forks">Forks</option>
@@ -231,8 +231,8 @@ export default function ReposPage() {
                     {searchResults.length > 0 && (
                         <div className="mb-8">
                             <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-lg font-semibold text-white">
-                                    Search Results <span className="text-[#8b949e] font-normal">({totalResults.toLocaleString()} found)</span>
+                                <h2 className="text-lg font-semibold text-[#F5E7C6]">
+                                    Search Results <span className="text-[#6B6580] font-normal">({totalResults.toLocaleString()} found)</span>
                                 </h2>
                             </div>
 
@@ -253,7 +253,7 @@ export default function ReposPage() {
                                     <button
                                         onClick={() => searchRepos(currentPage - 1)}
                                         disabled={currentPage === 1 || searchLoading}
-                                        className="px-3 py-2 bg-[#21262d] hover:bg-[#30363d] disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-all"
+                                        className="px-3 py-2 bg-[#1E2345] hover:bg-[#171B38] disabled:opacity-50 disabled:cursor-not-allowed text-[#F5E7C6] rounded-lg transition-all border border-[#F5E7C6]/10 hover:border-[#FF6D1F]/50"
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -277,8 +277,8 @@ export default function ReposPage() {
                                                     onClick={() => searchRepos(pageNum)}
                                                     disabled={searchLoading}
                                                     className={`w-10 h-10 rounded-lg transition-all ${currentPage === pageNum
-                                                        ? "bg-[#58a6ff] text-white"
-                                                        : "bg-[#21262d] hover:bg-[#30363d] text-[#8b949e]"
+                                                        ? "bg-gradient-to-r from-[#FF6D1F] to-[#CC5719] text-white"
+                                                        : "bg-[#1E2345] hover:bg-[#171B38] text-[#6B6580] border border-[#F5E7C6]/10"
                                                         }`}
                                                 >
                                                     {pageNum}
@@ -289,13 +289,13 @@ export default function ReposPage() {
                                     <button
                                         onClick={() => searchRepos(currentPage + 1)}
                                         disabled={currentPage === totalPages || searchLoading}
-                                        className="px-3 py-2 bg-[#21262d] hover:bg-[#30363d] disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-all"
+                                        className="px-3 py-2 bg-[#1E2345] hover:bg-[#171B38] disabled:opacity-50 disabled:cursor-not-allowed text-[#F5E7C6] rounded-lg transition-all border border-[#F5E7C6]/10 hover:border-[#FF6D1F]/50"
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                         </svg>
                                     </button>
-                                    <span className="ml-2 text-sm text-[#8b949e]">
+                                    <span className="ml-2 text-sm text-[#6B6580]">
                                         Page {currentPage} of {totalPages}
                                     </span>
                                 </div>
@@ -307,9 +307,9 @@ export default function ReposPage() {
                     {isAuthenticated && searchResults.length === 0 && (
                         <>
                             <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-lg font-semibold text-white">Your Repositories ({processRepos(myRepos).length})</h2>
+                                <h2 className="text-lg font-semibold text-[#F5E7C6]">Your Repositories ({processRepos(myRepos).length})</h2>
                                 {processRepos(myRepos).length > myReposPerPage && (
-                                    <span className="text-sm text-[#8b949e]">
+                                    <span className="text-sm text-[#6B6580]">
                                         Page {myReposPage} of {Math.ceil(processRepos(myRepos).length / myReposPerPage)}
                                     </span>
                                 )}
@@ -317,7 +317,7 @@ export default function ReposPage() {
 
                             {loading && (
                                 <div className="flex items-center justify-center py-12">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#58a6ff]" />
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF6D1F]" />
                                 </div>
                             )}
 
@@ -349,7 +349,7 @@ export default function ReposPage() {
                                             <button
                                                 onClick={() => setMyReposPage((p) => Math.max(1, p - 1))}
                                                 disabled={myReposPage === 1}
-                                                className="px-3 py-2 bg-[#21262d] hover:bg-[#30363d] disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-all"
+                                                className="px-3 py-2 bg-[#1E2345] hover:bg-[#171B38] disabled:opacity-50 disabled:cursor-not-allowed text-[#F5E7C6] rounded-lg transition-all border border-[#F5E7C6]/10 hover:border-[#FF6D1F]/50"
                                             >
                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -373,8 +373,8 @@ export default function ReposPage() {
                                                             key={pageNum}
                                                             onClick={() => setMyReposPage(pageNum)}
                                                             className={`w-10 h-10 rounded-lg transition-all ${myReposPage === pageNum
-                                                                ? "bg-[#58a6ff] text-white"
-                                                                : "bg-[#21262d] hover:bg-[#30363d] text-[#8b949e]"
+                                                                ? "bg-gradient-to-r from-[#FF6D1F] to-[#CC5719] text-white"
+                                                                : "bg-[#1E2345] hover:bg-[#171B38] text-[#6B6580] border border-[#F5E7C6]/10"
                                                                 }`}
                                                         >
                                                             {pageNum}
@@ -385,7 +385,7 @@ export default function ReposPage() {
                                             <button
                                                 onClick={() => setMyReposPage((p) => Math.min(Math.ceil(processRepos(myRepos).length / myReposPerPage), p + 1))}
                                                 disabled={myReposPage === Math.ceil(processRepos(myRepos).length / myReposPerPage)}
-                                                className="px-3 py-2 bg-[#21262d] hover:bg-[#30363d] disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-all"
+                                                className="px-3 py-2 bg-[#1E2345] hover:bg-[#171B38] disabled:opacity-50 disabled:cursor-not-allowed text-[#F5E7C6] rounded-lg transition-all border border-[#F5E7C6]/10 hover:border-[#FF6D1F]/50"
                                             >
                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

@@ -1,81 +1,207 @@
 @import "tailwindcss";
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   DEVSCOPE - WARM MIDNIGHT THEME
+   A distinctive palette: Deep Midnight Navy + Burnt Orange + Champagne
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Gotham Font - Local files */
+@font-face {
+  font-family: 'Gotham';
+  src: url('/fonts/gothamlight-webfont.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gotham';
+  src: url('/fonts/gothambook-webfont.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gotham';
+  src: url('/fonts/gothammedium-webfont.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gotham';
+  src: url('/fonts/gothambold-webfont.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gotham';
+  src: url('/fonts/gothamblack-webfont.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  --background: #000000;
-  --foreground: #ffffff;
-  --accent-blue: #3b82f6;
-  --accent-purple: #8b5cf6;
-  --accent-green: #10b981;
+  /* Core Palette */
+  --midnight: #090B1B;
+  --midnight-light: #0F1229;
+  --midnight-lighter: #171B38;
+  --midnight-surface: #1E2345;
+
+  /* Accent: Burnt Orange */
+  --ember: #FF6D1F;
+  --ember-glow: #FF8A47;
+  --ember-dim: #CC5719;
+
+  /* Secondary: Warm Champagne */
+  --champagne: #F5E7C6;
+  --champagne-soft: #E8D9B5;
+  --champagne-muted: #D4C9A8;
+
+  /* Functional Colors */
+  --text-primary: #F5E7C6;
+  --text-secondary: #A8A0B8;
+  --text-muted: #6B6580;
+
+  /* Borders & Surfaces */
+  --border-subtle: rgba(245, 231, 198, 0.08);
+  --border-medium: rgba(245, 231, 198, 0.15);
+  --border-strong: rgba(255, 109, 31, 0.3);
+
+  /* Glassmorphism */
+  --glass-bg: rgba(15, 18, 41, 0.85);
+  --glass-border: rgba(245, 231, 198, 0.1);
+
+  /* Semantic */
+  --success: #4ADE80;
+  --warning: #FBBF24;
+  --error: #F87171;
+  --info: #60A5FA;
+
+  /* Typography - Gotham */
+  --font-primary: 'Gotham', sans-serif;
+  --font-display: 'Gotham', sans-serif;
+  --font-body: 'Gotham', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Consolas', monospace;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--midnight);
+  --color-foreground: var(--champagne);
+  --font-sans: var(--font-primary);
+  --font-mono: var(--font-mono);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BASE STYLES
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 body {
-  background: #000000;
-  color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  background: var(--midnight);
+  color: var(--champagne);
+  font-family: var(--font-primary);
+  letter-spacing: -0.01em;
 }
 
-/* Premium Background Effects */
+/* Body text for readability */
+.prose-body {
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.7;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ATMOSPHERIC BACKGROUNDS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 .premium-bg {
   background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59, 130, 246, 0.15), transparent),
-    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(139, 92, 246, 0.1), transparent),
-    radial-gradient(ellipse 60% 40% at 0% 100%, rgba(16, 185, 129, 0.08), transparent),
-    #000000;
+    /* Warm ember glow from top-left */
+    radial-gradient(ellipse 60% 40% at 10% 0%, rgba(255, 109, 31, 0.12), transparent 50%),
+    /* Subtle champagne light from right */
+    radial-gradient(ellipse 50% 50% at 100% 30%, rgba(245, 231, 198, 0.04), transparent 50%),
+    /* Deep midnight gradient */
+    linear-gradient(180deg, #090B1B 0%, #0F1229 50%, #090B1B 100%);
 }
 
+/* Subtle grid for texture */
+.grid-pattern {
+  background-image:
+    linear-gradient(rgba(245, 231, 198, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245, 231, 198, 0.015) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARD STYLES - Glassmorphism with warm tones
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 .premium-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(135deg,
+      rgba(30, 35, 69, 0.8) 0%,
+      rgba(15, 18, 41, 0.9) 100%);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-subtle);
+  box-shadow:
+    0 4px 24px -4px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 0 rgba(245, 231, 198, 0.03);
 }
 
 .premium-card:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border-color: var(--border-medium);
+  box-shadow:
+    0 8px 32px -4px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 109, 31, 0.1),
+    inset 0 1px 0 0 rgba(245, 231, 198, 0.05);
 }
 
-/* Glow Effects */
-.glow-blue {
-  box-shadow: 0 0 40px -10px rgba(59, 130, 246, 0.5);
+/* ═══════════════════════════════════════════════════════════════════════════
+   GLOW EFFECTS - Ember-based
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.glow-ember {
+  box-shadow:
+    0 0 40px -10px rgba(255, 109, 31, 0.5),
+    0 0 80px -20px rgba(255, 109, 31, 0.3);
 }
 
-.glow-purple {
-  box-shadow: 0 0 40px -10px rgba(139, 92, 246, 0.5);
+.glow-champagne {
+  box-shadow: 0 0 40px -10px rgba(245, 231, 198, 0.3);
 }
 
-.glow-green {
-  box-shadow: 0 0 40px -10px rgba(16, 185, 129, 0.5);
+.glow-success {
+  box-shadow: 0 0 40px -10px rgba(74, 222, 128, 0.5);
 }
 
-.glow-orange {
-  box-shadow: 0 0 40px -10px rgba(251, 146, 60, 0.5);
+.glow-error {
+  box-shadow: 0 0 40px -10px rgba(248, 113, 113, 0.5);
 }
 
-/* Grid Pattern */
-.grid-pattern {
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 60px 60px;
-}
+/* ═══════════════════════════════════════════════════════════════════════════
+   GRADIENT TEXT
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Gradient Text */
 .gradient-text {
-  background: linear-gradient(135deg, #fff 0%, #a5b4fc 50%, #8b5cf6 100%);
+  background: linear-gradient(135deg, var(--champagne) 0%, var(--ember) 50%, var(--champagne) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-ember {
+  background: linear-gradient(135deg, #FF6D1F 0%, #FF8A47 50%, #FFB347 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .gradient-text-premium {
-  background: linear-gradient(135deg, #FFD700 0%, #FFA500 30%, #FFD700 60%, #FFF 100%);
+  background: linear-gradient(135deg, var(--champagne) 0%, var(--ember-glow) 30%, var(--champagne) 60%, #FFF 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -83,7 +209,10 @@ body {
   background-size: 200% auto;
 }
 
-/* Animations */
+/* ═══════════════════════════════════════════════════════════════════════════
+   ANIMATIONS - Smooth, purposeful motion
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 @keyframes slide-up {
   from {
     transform: translateY(100%);
@@ -114,7 +243,7 @@ body {
   }
 
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-8px);
   }
 }
 
@@ -135,12 +264,12 @@ body {
   0%,
   100% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
+    box-shadow: 0 0 0 0 rgba(255, 109, 31, 0.5);
   }
 
   50% {
-    transform: scale(1.05);
-    box-shadow: 0 0 30px 10px rgba(255, 215, 0, 0.3);
+    transform: scale(1.02);
+    box-shadow: 0 0 30px 5px rgba(255, 109, 31, 0.2);
   }
 }
 
@@ -154,12 +283,62 @@ body {
   }
 }
 
+@keyframes ember-pulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 20px -5px rgba(255, 109, 31, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 30px -2px rgba(255, 109, 31, 0.6);
+  }
+}
+
+@keyframes slide-up-chat {
+  from {
+    transform: translateY(100%) scale(0.95);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes bounce-subtle {
+
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+
+  40% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes message-appear {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animation Classes */
 .animate-slide-up {
-  animation: slide-up 0.3s ease-out;
+  animation: slide-up-chat 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .animate-fade-in {
-  animation: fade-in 0.3s ease-out;
+  animation: fade-in 0.4s ease-out;
 }
 
 .animate-float {
@@ -171,86 +350,153 @@ body {
 }
 
 .animate-pulse-slow {
-  animation: pulse-slow 2s ease-in-out infinite;
+  animation: pulse-slow 2.5s ease-in-out infinite;
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 109, 31, 0.1), transparent);
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
 
-/* Scrollbar */
+.animate-ember-pulse {
+  animation: ember-pulse 2s ease-in-out infinite;
+}
+
+.chatbot-message-enter {
+  animation: message-appear 0.25s ease-out;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CUSTOM SCROLLBAR - Warm tones
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0a0a0a;
+  background: var(--midnight);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #333;
+  background: var(--midnight-surface);
   border-radius: 4px;
+  border: 2px solid var(--midnight);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #444;
+  background: rgba(255, 109, 31, 0.4);
 }
 
-/* Input Focus Ring */
+/* ═══════════════════════════════════════════════════════════════════════════
+   FORM ELEMENTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 input:focus,
-textarea:focus {
+textarea:focus,
+select:focus {
   outline: none;
+  border-color: var(--ember) !important;
+  box-shadow: 0 0 0 3px rgba(255, 109, 31, 0.15);
 }
 
-/* Mobile optimizations */
+/* Override for chat textarea - no focus effects */
+.chat-input-no-focus:focus {
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Selection */
+::selection {
+  background: rgba(255, 109, 31, 0.3);
+  color: var(--champagne);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BUTTON STYLES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.btn-ember {
+  background: linear-gradient(135deg, var(--ember) 0%, var(--ember-dim) 100%);
+  color: #FFF;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px -2px rgba(255, 109, 31, 0.4);
+}
+
+.btn-ember:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px -2px rgba(255, 109, 31, 0.5);
+}
+
+.btn-ember:active {
+  transform: translateY(0);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--champagne);
+  border: 1px solid var(--border-medium);
+}
+
+.btn-ghost:hover {
+  background: rgba(245, 231, 198, 0.05);
+  border-color: var(--champagne-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE OPTIMIZATIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 @media (max-width: 640px) {
   .premium-bg {
     background:
-      radial-gradient(ellipse 100% 50% at 50% 0%, rgba(59, 130, 246, 0.12), transparent),
-      #000000;
+      radial-gradient(ellipse 100% 40% at 50% 0%, rgba(255, 109, 31, 0.1), transparent),
+      var(--midnight);
   }
 }
 
-/* Dev AI Chatbot Animations */
-@keyframes slide-up-chat {
-  from {
-    transform: translateY(100%) scale(0.95);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
+/* Safe area padding for mobile */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
-@keyframes bounce-subtle {
-  0%, 80%, 100% {
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateY(-4px);
-  }
+/* ═══════════════════════════════════════════════════════════════════════════
+   SPECIAL EFFECTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Ember underline effect */
+.ember-underline {
+  position: relative;
 }
 
-.animate-slide-up {
-  animation: slide-up-chat 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+.ember-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--ember), transparent);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
 }
 
-/* Chatbot message bubble animations */
-@keyframes message-appear {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.ember-underline:hover::after {
+  transform: scaleX(1);
 }
 
-.chatbot-message-enter {
-  animation: message-appear 0.2s ease-out;
+/* Warm vignette overlay */
+.warm-vignette {
+  position: relative;
+}
+
+.warm-vignette::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(9, 11, 27, 0.8) 100%);
+  pointer-events: none;
 }

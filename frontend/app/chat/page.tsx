@@ -23,8 +23,6 @@ export default function ChatPage() {
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const [sidebarWidth, setSidebarWidth] = useState(288); // 288px = 18rem = w-72
-    const [isResizing, setIsResizing] = useState(false);
     const [isLoadingConversations, setIsLoadingConversations] = useState(true);
     const [isSwitching, setIsSwitching] = useState(false);
     const [latestResponseId, setLatestResponseId] = useState<number | null>(null);
@@ -96,34 +94,6 @@ export default function ChatPage() {
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, []);
-
-    // Sidebar resize handlers
-    const handleMouseDown = (e: React.MouseEvent) => {
-        e.preventDefault();
-        setIsResizing(true);
-    };
-
-    useEffect(() => {
-        const handleMouseMove = (e: MouseEvent) => {
-            if (!isResizing) return;
-            const newWidth = Math.min(Math.max(e.clientX, 200), 500); // Min 200px, Max 500px
-            setSidebarWidth(newWidth);
-        };
-
-        const handleMouseUp = () => {
-            setIsResizing(false);
-        };
-
-        if (isResizing) {
-            document.addEventListener('mousemove', handleMouseMove);
-            document.addEventListener('mouseup', handleMouseUp);
-        }
-
-        return () => {
-            document.removeEventListener('mousemove', handleMouseMove);
-            document.removeEventListener('mouseup', handleMouseUp);
-        };
-    }, [isResizing]);
 
     // Export conversation as Markdown
     const exportConversation = () => {
@@ -425,22 +395,13 @@ export default function ChatPage() {
     // Loading state
     if (loading) {
         return (
-            <div className="h-screen flex flex-col bg-[#09090b]">
+            <div className="h-screen flex flex-col premium-bg">
                 <Navbar />
                 <div className="flex-1 flex items-center justify-center flex-col gap-4">
-                    {/* Keyboard Shortcuts Hint - Hidden on mobile */}
-                    <div className="hidden md:flex items-center gap-4 text-xs text-zinc-500">
-                        <div className="flex items-center gap-1.5">
-                            <kbd className="px-1.5 py-0.5 bg-[#21262d] border border-[#30363d] rounded text-[10px] font-mono text-zinc-400">⌘</kbd>
-                            <span>+</span>
-                            <kbd className="px-1.5 py-0.5 bg-[#21262d] border border-[#30363d] rounded text-[10px] font-mono text-zinc-400">K</kbd>
-                            <span>to clear</span>
-                        </div>
-                    </div>
                     <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-zinc-600 rounded-full animate-pulse" />
-                        <div className="w-2 h-2 bg-zinc-600 rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
-                        <div className="w-2 h-2 bg-zinc-600 rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
+                        <div className="w-2 h-2 bg-[#FF6D1F] rounded-full animate-pulse" />
+                        <div className="w-2 h-2 bg-[#FF6D1F] rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
+                        <div className="w-2 h-2 bg-[#FF6D1F] rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
                     </div>
                 </div>
             </div>
@@ -450,16 +411,13 @@ export default function ChatPage() {
     if (!isAuthenticated) return null;
 
     return (
-        <div className="h-screen flex flex-col bg-[#09090b] text-white overflow-hidden">
+        <div className="h-screen flex flex-col premium-bg text-[#F5E7C6] overflow-hidden">
             <Navbar />
 
             <main className="flex-1 flex overflow-hidden relative">
                 <ChatSidebar
                     isSidebarOpen={isSidebarOpen}
                     setIsSidebarOpen={setIsSidebarOpen}
-                    sidebarWidth={sidebarWidth}
-                    isResizing={isResizing}
-                    handleMouseDown={handleMouseDown}
                     isLoadingConversations={isLoadingConversations}
                     conversations={conversations}
                     currentConversation={currentConversation}

@@ -22,10 +22,10 @@ export function AIAnalysisResult({
 
     return (
         <div
-            className={`premium-card p-4 border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-transparent ${className}`}
+            className={`premium-card p-4 border-[#FF6D1F]/20 bg-gradient-to-br from-[#FF6D1F]/5 to-transparent ${className}`}
         >
             <div className="flex items-start justify-between gap-2 mb-2">
-                <h4 className="text-xs font-semibold text-purple-400 uppercase tracking-wider flex items-center gap-2">
+                <h4 className="text-xs font-semibold text-[#FF6D1F] uppercase tracking-wider flex items-center gap-2">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z" />
                     </svg>
@@ -34,7 +34,7 @@ export function AIAnalysisResult({
                 {showClearButton && onClear && (
                     <button
                         onClick={onClear}
-                        className="text-[#6e7681] hover:text-white text-xs transition-colors"
+                        className="text-[#6B6580] hover:text-[#F5E7C6] text-xs transition-colors"
                     >
                         Clear
                     </button>
@@ -42,12 +42,12 @@ export function AIAnalysisResult({
             </div>
 
             {error && (
-                <div className="mb-2 text-xs text-yellow-500 bg-yellow-500/10 px-2 py-1 rounded">
+                <div className="mb-2 text-xs text-[#FF8A47] bg-[#FF6D1F]/10 px-2 py-1 rounded">
                     ⚠️ Using fallback analysis (API error)
                 </div>
             )}
 
-            <div className="text-sm text-[#c9d1d9] whitespace-pre-wrap leading-relaxed prose prose-invert prose-sm max-w-none">
+            <div className="text-sm text-[#D4C9A8] whitespace-pre-wrap leading-relaxed prose prose-invert prose-sm max-w-none font-['Gotham']">
                 {formatAnalysisResult(result)}
             </div>
         </div>
@@ -75,21 +75,21 @@ function formatInlineText(text: string): React.ReactNode[] {
         if (matched.startsWith("**") && matched.endsWith("**")) {
             // Bold
             result.push(
-                <strong key={key++} className="text-white font-semibold">
+                <strong key={key++} className="text-[#F5E7C6] font-semibold">
                     {matched.slice(2, -2)}
                 </strong>
             );
         } else if (matched.startsWith("`") && matched.endsWith("`")) {
             // Inline code
             result.push(
-                <code key={key++} className="px-1.5 py-0.5 bg-[#161b22] text-[#f0883e] rounded text-xs font-mono">
+                <code key={key++} className="px-1.5 py-0.5 bg-[#1E2345] text-[#FF6D1F] rounded text-xs font-['JetBrains_Mono']">
                     {matched.slice(1, -1)}
                 </code>
             );
         } else if ((matched.startsWith("*") && matched.endsWith("*")) || (matched.startsWith("_") && matched.endsWith("_"))) {
             // Italic
             result.push(
-                <em key={key++} className="text-gray-300 italic">
+                <em key={key++} className="text-[#D4C9A8] italic">
                     {matched.slice(1, -1)}
                 </em>
             );
@@ -125,7 +125,7 @@ function formatAnalysisResult(text: string): React.ReactNode {
                     <ul key={key++} className="my-2 ml-4 space-y-1">
                         {currentList.items.map((item, idx) => (
                             <li key={idx} className="flex items-start gap-2">
-                                <span className="text-purple-400 mt-1">•</span>
+                                <span className="text-[#FF6D1F] mt-1">•</span>
                                 <span>{item.content}</span>
                             </li>
                         ))}
@@ -136,7 +136,7 @@ function formatAnalysisResult(text: string): React.ReactNode {
                     <ol key={key++} className="my-2 ml-4 space-y-1">
                         {currentList.items.map((item, idx) => (
                             <li key={idx} className="flex items-start gap-2">
-                                <span className="text-purple-400 font-semibold min-w-[1.5rem]">{item.num}</span>
+                                <span className="text-[#FF6D1F] font-semibold min-w-[1.5rem]">{item.num}</span>
                                 <span>{item.content}</span>
                             </li>
                         ))}
@@ -156,8 +156,8 @@ function formatAnalysisResult(text: string): React.ReactNode {
             if (inCodeBlock) {
                 // End code block
                 elements.push(
-                    <pre key={key++} className="my-2 p-3 bg-[#161b22] border border-[#30363d] rounded-lg overflow-x-auto">
-                        <code className="text-xs font-mono text-[#e6edf3]">
+                    <pre key={key++} className="my-2 p-3 bg-[#1E2345] border border-[#F5E7C6]/10 rounded-lg overflow-x-auto">
+                        <code className="text-xs font-['JetBrains_Mono'] text-[#F5E7C6]">
                             {codeBlockContent.join("\n")}
                         </code>
                     </pre>
@@ -187,7 +187,7 @@ function formatAnalysisResult(text: string): React.ReactNode {
         if (trimmedLine.match(/^[-*_]{3,}$/)) {
             flushList();
             elements.push(
-                <hr key={key++} className="my-3 border-t border-[#30363d]" />
+                <hr key={key++} className="my-3 border-t border-[#F5E7C6]/10" />
             );
             continue;
         }
@@ -199,14 +199,14 @@ function formatAnalysisResult(text: string): React.ReactNode {
             const level = headerMatch[1].length;
             const content = headerMatch[2];
             const headerStyles: Record<number, string> = {
-                1: "text-lg font-bold text-white mt-4 mb-2 flex items-center gap-2",
-                2: "text-base font-semibold text-white mt-3 mb-2 flex items-center gap-2",
-                3: "text-sm font-semibold text-purple-300 mt-2 mb-1",
-                4: "text-sm font-medium text-gray-300 mt-2 mb-1",
+                1: "text-lg font-bold text-[#F5E7C6] mt-4 mb-2 flex items-center gap-2 font-['Gotham']",
+                2: "text-base font-semibold text-[#F5E7C6] mt-3 mb-2 flex items-center gap-2 font-['Gotham']",
+                3: "text-sm font-semibold text-[#FF8A47] mt-2 mb-1",
+                4: "text-sm font-medium text-[#D4C9A8] mt-2 mb-1",
             };
             const headerContent = (
                 <>
-                    {level <= 2 && <span className="text-purple-400">◆</span>}
+                    {level <= 2 && <span className="text-[#FF6D1F]">◆</span>}
                     {formatInlineText(content)}
                 </>
             );
