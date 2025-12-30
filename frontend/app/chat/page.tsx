@@ -471,7 +471,7 @@ export default function ChatPage() {
             <DeleteConfirmationModal
                 isOpen={deleteConfirmId !== null}
                 onClose={() => setDeleteConfirmId(null)}
-                onDelete={() => deleteConfirmId && deleteConversation(deleteConfirmId)}
+                onDelete={async () => { if (deleteConfirmId) await deleteConversation(deleteConfirmId); }}
             />
 
             <CodeModal

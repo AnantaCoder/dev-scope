@@ -1,7 +1,8 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { api } from '@/lib/api';
+import { SessionTimeoutModal } from '@/components/SessionTimeoutModal';
 
 interface User {
   id: number;
@@ -37,6 +38,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [error, _setError] = useState<string | null>(null);
+  const [showTimeoutModal, setShowTimeoutModal] = useState(false);
+
+  const handleLogout = useCallback(async () => {
+    try {
+      await api.logout();
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
+    setUser(null);
+    setShowTimeoutModal(false);
+    window.location.href = '/?session=expired';
+  }, []);
 
   // Check authentication status on mount
   useEffect(() => {
@@ -44,10 +57,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Listen for session expiration events
     const handleSessionExpired = () => {
-      console.log('Session expired, logging out...');
-      setUser(null);
-      // Redirect to home page with message
-      window.location.href = '/?session=expired';
+      console.log('Session expired, showing timeout modal...');
+      setShowTimeoutModal(true);
     };
 
     window.addEventListener('session-expired', handleSessionExpired);
@@ -117,6 +128,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }}
     >
       {children}
+      <SessionTimeoutModal
+        isOpen={showTimeoutModal}
+        onLogout={handleLogout}
+      />
     </AuthContext.Provider>
   );
 }
@@ -128,3 +143,4 @@ export function useAuth() {
   }
   return context;
 }
+

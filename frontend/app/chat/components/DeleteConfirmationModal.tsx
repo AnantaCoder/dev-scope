@@ -1,16 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface DeleteConfirmationModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onDelete: () => void;
+    onDelete: () => Promise<void> | void;
 }
 
 export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({ isOpen, onClose, onDelete }) => {
+    const [isDeleting, setIsDeleting] = useState(false);
+
     if (!isOpen) return null;
 
+    const handleDelete = async () => {
+        setIsDeleting(true);
+        try {
+            await onDelete();
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#090B1B]/80 backdrop-blur-sm" onClick={onClose}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#090B1B]/80 backdrop-blur-sm" onClick={!isDeleting ? onClose : undefined}>
             <div
                 className="bg-[#0F1229] border border-[#F5E7C6]/10 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl shadow-black/40"
                 onClick={(e) => e.stopPropagation()}
@@ -32,15 +43,24 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
                 <div className="flex gap-3">
                     <button
                         onClick={onClose}
-                        className="flex-1 px-4 py-2.5 bg-[#1E2345] hover:bg-[#171B38] text-[#A8A0B8] hover:text-[#F5E7C6] rounded-xl text-sm font-medium transition-colors"
+                        disabled={isDeleting}
+                        className="flex-1 px-4 py-2.5 bg-[#1E2345] hover:bg-[#171B38] text-[#A8A0B8] hover:text-[#F5E7C6] rounded-xl text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         Cancel
                     </button>
                     <button
-                        onClick={onDelete}
-                        className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl text-sm font-medium transition-colors"
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                        className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-500 disabled:bg-red-600/50 text-white rounded-xl text-sm font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                        Delete
+                        {isDeleting ? (
+                            <>
+                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                Deleting...
+                            </>
+                        ) : (
+                            'Delete'
+                        )}
                     </button>
                 </div>
             </div>
