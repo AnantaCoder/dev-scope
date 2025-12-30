@@ -12,6 +12,7 @@ import { HomeAnalysisAnimation } from "@/components/HomeAnalysisAnimation";
 import { AIAnalysisButton } from "@/components/AIAnalysisButton";
 import { AIAnalysisResult } from "@/components/AIAnalysisResult";
 import { useAIAnalysis } from "@/hooks/useAIAnalysis";
+import { useRecentSearches } from "@/hooks/useRecentSearches";
 import Image from "next/image";
 
 export default function Home() {
@@ -31,6 +32,9 @@ export default function Home() {
 
   // AI Analysis hook with rate limiting
   const aiAnalysis = useAIAnalysis({ cooldownSeconds: 30 });
+
+  // Recent searches hook for session storage
+  const { recentUsers, comparedPairs, addRecentUser, addComparedPair, clearRecent } = useRecentSearches();
 
   useEffect(() => {
     fetchCacheStats();
@@ -66,6 +70,42 @@ export default function Home() {
         setSingleUser(result.user);
         setTechStack(result.tech_stack || null);
         setStreak(result.streak || null);
+        // Save to recent searches
+        addRecentUser({
+          login: result.user.login,
+          avatar_url: result.user.avatar_url,
+          name: result.user.name
+        });
+        fetchCacheStats();
+      }
+    } catch (err: unknown) {
+      const errorMessage = err && typeof err === 'object' && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : undefined;
+      setError(errorMessage || "Failed to fetch user. Make sure the Go server is running.");
+    }
+    finally { setLoading(false); }
+  };
+
+  // Search by direct username (for recent searches clicks)
+  const searchByUsername = async (targetUsername: string) => {
+    setUsername(targetUsername);
+    if (!targetUsername.trim()) return;
+    setLoading(true); setError(""); setSingleUser(null); setTechStack(null); setStreak(null);
+    setTotalSearches(prev => prev + 1);
+    try {
+      const result = await api.getExtendedUserInfo(targetUsername);
+      if (result.error) {
+        setError(result.message || "User not found");
+      } else if (result.user) {
+        setSingleUser(result.user);
+        setTechStack(result.tech_stack || null);
+        setStreak(result.streak || null);
+        addRecentUser({
+          login: result.user.login,
+          avatar_url: result.user.avatar_url,
+          name: result.user.name
+        });
         fetchCacheStats();
       }
     } catch (err: unknown) {
@@ -86,7 +126,21 @@ export default function Home() {
     try {
       const result = await api.getBatchStatus(usernames);
       if (result.error) { setError("Failed to fetch batch data"); }
-      else { setBatchResults(result.results); fetchCacheStats(); }
+      else {
+        setBatchResults(result.results);
+        // Save compared users to session storage
+        const successfulUsers = Object.values(result.results)
+          .filter((r: APIResponse) => !r.error && r.data)
+          .map((r: APIResponse) => ({
+            login: (r.data as GitHubUser).login,
+            avatar_url: (r.data as GitHubUser).avatar_url,
+            name: (r.data as GitHubUser).name
+          }));
+        if (successfulUsers.length >= 2) {
+          addComparedPair(successfulUsers);
+        }
+        fetchCacheStats();
+      }
     } catch { setError("Failed to fetch batch data. Make sure the Go server is running."); }
     finally { setLoading(false); }
   };
@@ -350,6 +404,50 @@ export default function Home() {
 
             {/* Sidebar */}
             <aside className="xl:col-span-4 space-y-4">
+              {/* Recent Searches */}
+              {recentUsers.length > 0 && (
+                <div className="premium-card overflow-hidden">
+                  <div className="px-4 py-3 border-b border-[#F5E7C6]/5 flex items-center justify-between">
+                    <h3 className="text-sm font-semibold flex items-center gap-2">
+                      <svg className="w-4 h-4 text-[#FF8A47]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-[#F5E7C6]">Recent Searches</span>
+                    </h3>
+                    <button
+                      onClick={clearRecent}
+                      className="px-2 py-1 text-xs font-medium text-red-400 hover:bg-red-500/10 rounded transition-all"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                  <div className="p-3 space-y-1">
+                    {recentUsers.slice(0, 5).map((user) => (
+                      <button
+                        key={user.login}
+                        onClick={() => searchByUsername(user.login)}
+                        className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-[#1E2345]/60 transition-all group"
+                      >
+                        <Image
+                          src={user.avatar_url}
+                          alt={user.login}
+                          width={32}
+                          height={32}
+                          className="rounded-full ring-1 ring-[#F5E7C6]/10"
+                        />
+                        <div className="flex-1 text-left min-w-0">
+                          <p className="text-sm font-medium text-[#F5E7C6] truncate">{user.name || user.login}</p>
+                          <p className="text-xs text-[#6B6580] truncate">@{user.login}</p>
+                        </div>
+                        <svg className="w-4 h-4 text-[#6B6580] group-hover:text-[#FF6D1F] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Quick Stats Card */}
               <div className="premium-card overflow-hidden">
                 <div className="px-4 py-3 border-b border-[#F5E7C6]/5 flex items-center justify-between">
