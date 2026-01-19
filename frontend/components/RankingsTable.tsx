@@ -22,22 +22,24 @@ interface UserRanking {
 }
 
 // Score breakdown calculation (mirrors backend algorithm)
+// Weights: Followers 33% (social proof), Stars 15% (quality), Repos 27% (productivity),
+// Forks 15% (impact), Contributions 10% (activity)
 function calculateScoreBreakdown(ranking: UserRanking) {
-  const followerScore = ranking.followers * 0.40;
-  const starScore = ranking.total_stars * 0.30;
-  const repoScore = ranking.public_repos * 0.15;
-  const forkScore = ranking.total_forks * 0.10;
-  const contributionScore = ranking.contribution_count * 0.05;
+  const followerScore = ranking.followers * 0.33;
+  const starScore = ranking.total_stars * 0.15;
+  const repoScore = ranking.public_repos * 0.27;
+  const forkScore = ranking.total_forks * 0.15;
+  const contributionScore = ranking.contribution_count * 0.10;
 
   const rawTotal = followerScore + starScore + repoScore + forkScore + contributionScore;
   const scaledScore = rawTotal > 0 ? Math.log10(rawTotal + 1) * 100 : 0;
 
   return {
-    followers: { raw: ranking.followers, weight: 40, contribution: followerScore },
-    stars: { raw: ranking.total_stars, weight: 30, contribution: starScore },
-    repos: { raw: ranking.public_repos, weight: 15, contribution: repoScore },
-    forks: { raw: ranking.total_forks, weight: 10, contribution: forkScore },
-    contributions: { raw: ranking.contribution_count, weight: 5, contribution: contributionScore },
+    followers: { raw: ranking.followers, weight: 33, contribution: followerScore },
+    stars: { raw: ranking.total_stars, weight: 15, contribution: starScore },
+    repos: { raw: ranking.public_repos, weight: 27, contribution: repoScore },
+    forks: { raw: ranking.total_forks, weight: 15, contribution: forkScore },
+    contributions: { raw: ranking.contribution_count, weight: 10, contribution: contributionScore },
     rawTotal,
     scaledScore: Math.round(scaledScore * 100) / 100,
   };

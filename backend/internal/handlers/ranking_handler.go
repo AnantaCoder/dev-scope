@@ -178,3 +178,100 @@ func (h *RankingHandler) UpdateUserRankHandler(w http.ResponseWriter, r *http.Re
 		"ranking": ranking,
 	})
 }
+
+// RecalculateAllRankingsHandler recalculates scores for all users (admin only)
+func (h *RankingHandler) RecalculateAllRankingsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeJSON(w, http.StatusMethodNotAllowed, map[string]interface{}{
+			"error":   true,
+			"message": "Method not allowed",
+		})
+		return
+	}
+
+	// Get current user from context
+	user, ok := r.Context().Value("user").(*models.User)
+	if !ok {
+		writeJSON(w, http.StatusUnauthorized, map[string]interface{}{
+			"error":   true,
+			"message": "Unauthorized",
+		})
+		return
+	}
+
+	// Verify user is admin
+	if !IsAdminUser(user) {
+		writeJSON(w, http.StatusForbidden, map[string]interface{}{
+			"error":   true,
+			"message": "Forbidden: Admin access required",
+		})
+		return
+	}
+
+	log.Printf("🔄 [Rankings] Admin %s triggered full recalculation", user.Username)
+
+	ctx := r.Context()
+	successCount, failCount, err := h.rankingService.RecalculateAllRankings(ctx)
+	if err != nil {
+		log.Printf("❌ [Rankings] Recalculation failed: %v", err)
+		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"error":   true,
+			"message": "Failed to recalculate rankings",
+		})
+		return
+	}
+
+	log.Printf("✅ [Rankings] Recalculation complete: %d success, %d failed", successCount, failCount)
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"error":         false,
+		"message":       "Rankings recalculated successfully",
+		"success_count": successCount,
+		"fail_count":    failCount,
+	})
+}
+
+// GetAllUsernamesHandler returns all usernames in the rankings (admin only)
+func (h *RankingHandler) GetAllUsernamesHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeJSON(w, http.StatusMethodNotAllowed, map[string]interface{}{
+			"error":   true,
+			"message": "Method not allowed",
+		})
+		return
+	}
+
+	// Get current user from context
+	user, ok := r.Context().Value("user").(*models.User)
+	if !ok {
+		writeJSON(w, http.StatusUnauthorized, map[string]interface{}{
+			"error":   true,
+			"message": "Unauthorized",
+		})
+		return
+	}
+
+	// Verify user is admin
+	if !IsAdminUser(user) {
+		writeJSON(w, http.StatusForbidden, map[string]interface{}{
+			"error":   true,
+			"message": "Forbidden: Admin access required",
+		})
+		return
+	}
+
+	ctx := r.Context()
+	usernames, err := h.rankingService.GetAllUsernames(ctx)
+	if err != nil {
+		log.Printf("❌ [Rankings] Failed to get usernames: %v", err)
+		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"error":   true,
+			"message": "Failed to get usernames",
+		})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"error":     false,
+		"usernames": usernames,
+	})
+}

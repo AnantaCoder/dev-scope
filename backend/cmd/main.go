@@ -142,6 +142,8 @@ func main() {
 
 	// Protected endpoints (require authentication)
 	http.HandleFunc("/api/rankings/update", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(rankingHandler.UpdateUserRankHandler)))
+	http.HandleFunc("/api/rankings/recalculate-all", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(rankingHandler.RecalculateAllRankingsHandler)))
+	http.HandleFunc("/api/rankings/usernames", handlers.SecureCORSMiddleware(authMiddleware.RequireAuth(rankingHandler.GetAllUsernamesHandler)))
 
 	// Cache endpoints (public for now, can be protected later)
 	http.HandleFunc("/api/cache/stats", handlers.SecureCORSMiddleware(server.CacheStatsHandler))

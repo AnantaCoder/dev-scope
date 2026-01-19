@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { api } from "@/lib/api";
 import { AnalysisAnimation } from "./AnalysisAnimation";
 
@@ -14,16 +14,17 @@ interface AdminStatus {
     admin_username: string;
 }
 
-interface UpdateResult {
-    success: boolean;
-    message: string;
-    total_users: number;
-    success_count: number;
-    fail_count: number;
-    duration: string;
-    failed_users?: string[];
-    disabled_count?: number;
-    disabled_users?: string[];
+interface ProgressState {
+    isOpen: boolean;
+    title: string;
+    total: number;
+    current: number;
+    currentUser: string;
+    successCount: number;
+    failCount: number;
+    completedUsers: { username: string; success: boolean; score?: number; message?: string }[];
+    isComplete: boolean;
+    operationType: "ranking" | "privateData" | null;
 }
 
 export function AdminPanel() {
@@ -31,11 +32,31 @@ export function AdminPanel() {
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
-    const [result, setResult] = useState<UpdateResult | null>(null);
+    const [recalculating, setRecalculating] = useState(false);
+    const [progress, setProgress] = useState<ProgressState>({
+        isOpen: false,
+        title: "",
+        total: 0,
+        current: 0,
+        currentUser: "",
+        successCount: 0,
+        failCount: 0,
+        completedUsers: [],
+        isComplete: false,
+        operationType: null,
+    });
+    const progressListRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         checkAdminStatus();
     }, []);
+
+    // Auto-scroll to bottom of progress list
+    useEffect(() => {
+        if (progressListRef.current) {
+            progressListRef.current.scrollTop = progressListRef.current.scrollHeight;
+        }
+    }, [progress.completedUsers]);
 
     const checkAdminStatus = async () => {
         try {
@@ -51,23 +72,152 @@ export function AdminPanel() {
 
     const handleUpdate = async () => {
         setUpdating(true);
-        setResult(null);
+
+        // Initialize progress modal for private data update
+        setProgress({
+            isOpen: true,
+            title: "Updating Private Data",
+            total: 0,
+            current: 0,
+            currentUser: "Starting bulk update...",
+            successCount: 0,
+            failCount: 0,
+            completedUsers: [],
+            isComplete: false,
+            operationType: "privateData",
+        });
+
         try {
             const data = await api.triggerPrivateDataUpdate();
-            setResult(data);
-            // Refresh status after update
+
+            // Update progress with final results
+            setProgress(prev => ({
+                ...prev,
+                total: data.total_users,
+                current: data.total_users,
+                currentUser: data.success ? "Complete!" : "Failed",
+                successCount: data.success_count,
+                failCount: data.fail_count,
+                isComplete: true,
+                completedUsers: [
+                    ...(data.failed_users || []).map(u => ({ username: u, success: false, message: "Failed" })),
+                    ...(data.disabled_users || []).map(u => ({ username: u, success: false, message: "Disabled" })),
+                ],
+            }));
+
             await checkAdminStatus();
         } catch (error) {
-            setResult({
-                success: false,
-                message: error instanceof Error ? error.message : "Update failed",
-                total_users: 0,
-                success_count: 0,
-                fail_count: 0,
-                duration: "0s",
-            });
+            setProgress(prev => ({
+                ...prev,
+                isComplete: true,
+                currentUser: error instanceof Error ? error.message : "Update failed",
+            }));
         } finally {
             setUpdating(false);
+        }
+    };
+
+    const handleRecalculateRankings = async () => {
+        setRecalculating(true);
+
+        // Initialize progress modal
+        setProgress({
+            isOpen: true,
+            title: "Recalculating Rankings",
+            total: 0,
+            current: 0,
+            currentUser: "Fetching user list...",
+            successCount: 0,
+            failCount: 0,
+            completedUsers: [],
+            isComplete: false,
+            operationType: "ranking",
+        });
+
+        try {
+            // First, get all usernames
+            const usernamesResponse = await api.getAllRankedUsernames();
+            if (usernamesResponse.error || !usernamesResponse.usernames) {
+                throw new Error("Failed to get usernames");
+            }
+
+            const usernames = usernamesResponse.usernames;
+            setProgress(prev => ({
+                ...prev,
+                total: usernames.length,
+                currentUser: "Starting...",
+            }));
+
+            let successCount = 0;
+            let failCount = 0;
+
+            // Process each user one by one
+            for (let i = 0; i < usernames.length; i++) {
+                const username = usernames[i];
+
+                setProgress(prev => ({
+                    ...prev,
+                    current: i + 1,
+                    currentUser: username,
+                }));
+
+                try {
+                    const result = await api.updateSingleUserRanking(username);
+                    const success = !result.error;
+
+                    if (success) {
+                        successCount++;
+                    } else {
+                        failCount++;
+                    }
+
+                    setProgress(prev => ({
+                        ...prev,
+                        successCount,
+                        failCount,
+                        completedUsers: [
+                            ...prev.completedUsers,
+                            {
+                                username,
+                                success,
+                                score: result.ranking?.score,
+                            },
+                        ],
+                    }));
+                } catch {
+                    failCount++;
+                    setProgress(prev => ({
+                        ...prev,
+                        successCount,
+                        failCount,
+                        completedUsers: [
+                            ...prev.completedUsers,
+                            { username, success: false },
+                        ],
+                    }));
+                }
+            }
+
+            // Mark as complete
+            setProgress(prev => ({
+                ...prev,
+                isComplete: true,
+                currentUser: "Complete!",
+            }));
+        } catch (error) {
+            setProgress(prev => ({
+                ...prev,
+                isComplete: true,
+                currentUser: error instanceof Error ? error.message : "Failed",
+            }));
+        } finally {
+            setRecalculating(false);
+        }
+    };
+
+    const closeProgressModal = () => {
+        if (progress.isComplete) {
+            setProgress(prev => ({ ...prev, isOpen: false }));
         }
     };
 
@@ -79,8 +229,266 @@ export function AdminPanel() {
         return null;
     }
 
+    const isAnyOperationRunning = updating || recalculating;
+
     return (
         <div>
+            {/* Progress Modal */}
+            {progress.isOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+                    <div className={`w-full max-w-2xl mx-4 rounded-2xl border ${progress.operationType === "privateData" ? "border-yellow-500/30" : "border-blue-500/30"} bg-[#0d1117] shadow-2xl`}>
+                        {/* Header */}
+                        <div className="flex items-center justify-between p-4 border-b border-gray-700">
+                            <div className="flex items-center gap-3">
+                                {!progress.isComplete ? (
+                                    <svg className={`animate-spin h-5 w-5 ${progress.operationType === "privateData" ? "text-yellow-500" : "text-blue-500"}`} fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                    </svg>
+                                ) : (
+                                    <svg className="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                )}
+                                <h3 className="text-lg font-semibold text-white">{progress.title}</h3>
+                            </div>
+                            {progress.isComplete && (
+                                <button
+                                    onClick={closeProgressModal}
+                                    className="text-gray-400 hover:text-white transition-colors"
+                                >
+                                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div className="p-4 border-b border-gray-700">
+                            {/* Current Status */}
+                            <div className="flex items-center justify-between text-sm mb-3">
+                                <span className="text-gray-400">
+                                    {progress.operationType === "privateData" ? "Status: " : "Processing: "}
+                                    <span className={`${progress.operationType === "privateData" ? "text-yellow-400" : "text-blue-400"} font-mono font-medium`}>{progress.currentUser}</span>
+                                </span>
+                            </div>
+
+                            {/* Progress Bar Container */}
+                            <div className="relative">
+                                {/* Background */}
+                                <div className="w-full h-6 bg-gray-800 rounded-lg overflow-hidden border border-gray-700">
+                                    {/* Indeterminate Progress (when total is 0 and not complete) */}
+                                    {progress.total === 0 && !progress.isComplete ? (
+                                        <div
+                                            className={`h-full w-1/3 relative ${progress.operationType === "privateData"
+                                                ? "bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-400"
+                                                : "bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400"
+                                                }`}
+                                            style={{
+                                                animation: 'indeterminate-progress 1.5s ease-in-out infinite',
+                                            }}
+                                        >
+                                            {/* Animated Stripes */}
+                                            <div
+                                                className="absolute inset-0 opacity-30"
+                                                style={{
+                                                    backgroundImage: 'linear-gradient(45deg, rgba(255,255,255,0.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.15) 75%, transparent 75%, transparent)',
+                                                    backgroundSize: '20px 20px',
+                                                    animation: 'progress-stripes 1s linear infinite',
+                                                }}
+                                            />
+                                            {/* Shine effect */}
+                                            <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent" />
+                                        </div>
+                                    ) : (
+                                        /* Determinate Progress Fill */
+                                        <div
+                                            className={`h-full transition-all duration-500 ease-out relative ${progress.operationType === "privateData"
+                                                ? "bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-400"
+                                                : "bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400"
+                                                }`}
+                                            style={{
+                                                width: progress.total > 0
+                                                    ? `${(progress.current / progress.total) * 100}%`
+                                                    : '100%'
+                                            }}
+                                        >
+                                            {/* Animated Stripes */}
+                                            {!progress.isComplete && (
+                                                <div
+                                                    className="absolute inset-0 opacity-30"
+                                                    style={{
+                                                        backgroundImage: 'linear-gradient(45deg, rgba(255,255,255,0.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.15) 75%, transparent 75%, transparent)',
+                                                        backgroundSize: '20px 20px',
+                                                        animation: 'progress-stripes 1s linear infinite',
+                                                    }}
+                                                />
+                                            )}
+                                            {/* Shine effect */}
+                                            <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent" />
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Percentage Text Overlay */}
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <span className="text-white text-sm font-bold drop-shadow-lg">
+                                        {progress.total === 0 && !progress.isComplete
+                                            ? 'Processing...'
+                                            : progress.total > 0
+                                                ? `${Math.round((progress.current / progress.total) * 100)}%`
+                                                : '100%'}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Stats Row */}
+                            <div className="flex items-center justify-between mt-3">
+                                <div className="flex items-center gap-4 text-sm">
+                                    <span className="flex items-center gap-1.5 text-green-400">
+                                        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                        </svg>
+                                        <span className="font-medium">{progress.successCount}</span>
+                                        <span className="text-gray-500">success</span>
+                                    </span>
+                                    <span className="flex items-center gap-1.5 text-red-400">
+                                        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                        </svg>
+                                        <span className="font-medium">{progress.failCount}</span>
+                                        <span className="text-gray-500">failed</span>
+                                    </span>
+                                </div>
+                                {progress.total > 0 && (
+                                    <span className="text-gray-400 text-sm font-mono">
+                                        {progress.current} / {progress.total}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* User List */}
+                        <div
+                            ref={progressListRef}
+                            className="max-h-64 overflow-y-auto p-4 space-y-1"
+                        >
+                            {/* Ranking recalculation - show each user as they complete */}
+                            {progress.operationType === "ranking" && progress.completedUsers.map((user, idx) => (
+                                <div
+                                    key={`${user.username}-${idx}`}
+                                    className={`flex items-center justify-between px-3 py-1.5 rounded text-sm ${user.success
+                                        ? "bg-green-500/10 text-green-400"
+                                        : "bg-red-500/10 text-red-400"
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        {user.success ? (
+                                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        ) : (
+                                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        )}
+                                        <span className="font-mono">@{user.username}</span>
+                                        {user.message && <span className="text-xs text-gray-500">({user.message})</span>}
+                                    </div>
+                                    {user.success && user.score !== undefined && (
+                                        <span className="text-xs text-gray-400">
+                                            Score: <span className="text-blue-400">{user.score.toFixed(2)}</span>
+                                        </span>
+                                    )}
+                                </div>
+                            ))}
+
+                            {/* Loading state - waiting for data */}
+                            {progress.completedUsers.length === 0 && !progress.isComplete && (
+                                <div className="text-center text-gray-500 py-4">
+                                    <div className="flex items-center justify-center gap-2">
+                                        <svg className="animate-pulse h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                                        </svg>
+                                        {progress.operationType === "privateData"
+                                            ? "Processing bulk update... This may take a while."
+                                            : "Waiting for updates..."}
+                                    </div>
+                                </div>
+                            )}
+                            {/* Success summary for private data (bulk operation doesn't return individual success list) */}
+                            {progress.completedUsers.length === 0 && progress.isComplete && progress.operationType === "privateData" && progress.successCount > 0 && (
+                                <div className="text-center py-6">
+                                    <div className="flex flex-col items-center gap-3">
+                                        <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center">
+                                            <svg className="h-8 w-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                        <div className="text-green-400 font-medium text-lg">
+                                            All {progress.successCount} users updated successfully!
+                                        </div>
+                                        <div className="text-gray-500 text-sm">
+                                            Private data has been refreshed for all users.
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            {/* Show failed users list for private data if any */}
+                            {progress.completedUsers.length > 0 && progress.isComplete && progress.operationType === "privateData" && (
+                                <div className="py-2">
+                                    {progress.successCount > 0 && (
+                                        <div className="flex items-center gap-2 px-3 py-2 mb-2 rounded bg-green-500/10 text-green-400">
+                                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            <span className="text-sm">{progress.successCount} users updated successfully</span>
+                                        </div>
+                                    )}
+                                    {progress.failCount > 0 && (
+                                        <div className="text-xs text-gray-500 mb-2 px-3">Failed/Disabled users:</div>
+                                    )}
+                                    {progress.completedUsers.map((user, idx) => (
+                                        <div
+                                            key={`${user.username}-${idx}`}
+                                            className="flex items-center justify-between px-3 py-1.5 rounded text-sm bg-red-500/10 text-red-400"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                                <span className="font-mono">@{user.username}</span>
+                                                {user.message && <span className="text-xs text-gray-500">({user.message})</span>}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Footer */}
+                        {progress.isComplete && (
+                            <div className="p-4 border-t border-gray-700">
+                                <div className="flex items-center justify-between">
+                                    <div className="text-sm text-gray-400">
+                                        Completed: {progress.successCount} success, {progress.failCount} failed
+                                    </div>
+                                    <button
+                                        onClick={closeProgressModal}
+                                        className={`px-4 py-2 rounded-lg text-white text-sm font-medium transition-colors ${progress.operationType === "privateData"
+                                            ? "bg-yellow-600 hover:bg-yellow-700"
+                                            : "bg-blue-600 hover:bg-blue-700"}`}
+                                    >
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
             {/* Visual Analysis Animation */}
             <AnalysisAnimation />
 
@@ -146,7 +554,7 @@ export function AdminPanel() {
                 {/* Update Button */}
                 <button
                     onClick={handleUpdate}
-                    disabled={updating}
+                    disabled={isAnyOperationRunning}
                     className="w-full py-2 px-4 rounded-lg bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium flex items-center justify-center gap-2 transition-colors"
                 >
                     {updating ? (
@@ -167,74 +575,29 @@ export function AdminPanel() {
                     )}
                 </button>
 
-                {/* Result */}
-                {result && (
-                    <div
-                        className={`mt-4 p-3 rounded-lg text-sm ${result.success
-                            ? "bg-green-500/10 text-green-500 border border-green-500/30"
-                            : "bg-red-500/10 text-red-500 border border-red-500/30"
-                            }`}
-                    >
-                        <div className="flex items-center gap-2 font-medium">
-                            {result.success ? (
-                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            ) : (
-                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            )}
-                            {result.message}
-                        </div>
-                        {result.success && (
-                            <div className="mt-2 text-xs opacity-80">
-                                Success: {result.success_count} | Failed: {result.fail_count} | Disabled: {result.disabled_count ?? 0} |
-                                Duration: {result.duration}
-                            </div>
-                        )}
-                        {result.fail_count > 0 && result.failed_users && result.failed_users.length > 0 && (
-                            <div className="mt-2 text-xs text-red-500">
-                                <b>Failed Users:</b>
-                                <div className="mt-1 flex flex-wrap gap-2">
-                                    {result.failed_users.map((u) => (
-                                        (/^\d+$/.test(u) ? (
-                                            <span key={u} className="text-xs text-red-400">#{u}</span>
-                                        ) : (
-                                            <a
-                                                key={u}
-                                                href={`/profile/${u}`}
-                                                className="text-xs text-red-400 hover:underline"
-                                            >
-                                                @{u}
-                                            </a>
-                                        ))
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                        {result.disabled_count && result.disabled_count > 0 && result.disabled_users && result.disabled_users.length > 0 && (
-                            <div className="mt-2 text-xs text-red-400">
-                                <b>Disabled Users:</b>
-                                <div className="mt-1 flex flex-wrap gap-2">
-                                    {result.disabled_users.map((u) => (
-                                        (/^\d+$/.test(u) ? (
-                                            <span key={u} className="text-xs text-red-400">#{u}</span>
-                                        ) : (
-                                            <a
-                                                key={u}
-                                                href={`/profile/${u}`}
-                                                className="text-xs text-red-400 hover:underline"
-                                            >
-                                                @{u}
-                                            </a>
-                                        ))
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                )}
+                {/* Recalculate Rankings Button */}
+                <button
+                    onClick={handleRecalculateRankings}
+                    disabled={isAnyOperationRunning}
+                    className="w-full mt-3 py-2 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium flex items-center justify-center gap-2 transition-colors"
+                >
+                    {recalculating ? (
+                        <>
+                            <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                            </svg>
+                            Recalculating Rankings...
+                        </>
+                    ) : (
+                        <>
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            Recalculate All Rankings
+                        </>
+                    )}
+                </button>
             </div>
         </div>
     );

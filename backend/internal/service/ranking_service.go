@@ -33,13 +33,19 @@ func NewRankingService(rankingRepo *repository.RankingRepository, githubService 
 // CalculateUserScore calculates a comprehensive score for a user
 func CalculateUserScore(ranking *models.UserRanking) float64 {
 	// Weighted scoring algorithm
-	// Followers: 40%, Stars: 30%, Repos: 15%, Forks: 10%, Contributions: 5%
+	// Followers: 33% (social proof), Stars: 15% (project quality),
+	// Repos: 27% (productivity), Forks: 15% (project impact), Contributions: 10% (recent activity)
 
-	followerScore := float64(ranking.Followers) * 0.40
-	starScore := float64(ranking.TotalStars) * 0.30
-	repoScore := float64(ranking.PublicRepos) * 0.15
-	forkScore := float64(ranking.TotalForks) * 0.10
-	contributionScore := float64(ranking.ContributionCount) * 0.05
+	followerScore := float64(ranking.Followers) * 0.33
+	starScore := float64(ranking.TotalStars) * 0.15
+	repoScore := float64(ranking.PublicRepos) * 0.27
+	forkScore := float64(ranking.TotalForks) * 0.15
+	contributionScore := float64(ranking.ContributionCount) * 0.10
+
+	log.Printf("========== SCORE CALCULATION ==========")
+	log.Printf("User: %s | Followers: %d (×0.33=%.2f) | Stars: %d (×0.15=%.2f) | Repos: %d (×0.27=%.2f) | Forks: %d (×0.15=%.2f) | Contributions: %d (×0.10=%.2f)",
+		ranking.Username, ranking.Followers, followerScore, ranking.TotalStars, starScore,
+		ranking.PublicRepos, repoScore, ranking.TotalForks, forkScore, ranking.ContributionCount, contributionScore)
 
 	totalScore := followerScore + starScore + repoScore + forkScore + contributionScore
 
@@ -195,6 +201,36 @@ func (s *RankingService) RefreshRankings(ctx context.Context, usernames []string
 	s.lastUpdate = time.Now()
 	log.Printf("✅ [Ranking] Refresh completed successfully")
 	return nil
+}
+
+// GetAllUsernames retrieves all usernames from rankings
+func (s *RankingService) GetAllUsernames(ctx context.Context) ([]string, error) {
+	return s.rankingRepo.GetAllUsernames(ctx)
+}
+
+// RecalculateAllRankings fetches and recalculates rankings for all existing users
+func (s *RankingService) RecalculateAllRankings(ctx context.Context) (int, int, error) {
+	usernames, err := s.rankingRepo.GetAllUsernames(ctx)
+	if err != nil {
+		return 0, 0, fmt.Errorf("failed to get usernames: %w", err)
+	}
+
+	log.Printf("🔄 [Ranking] Recalculating scores for %d users with new algorithm", len(usernames))
+
+	successCount := 0
+	failCount := 0
+
+	for _, username := range usernames {
+		if err := s.UpdateUserRanking(ctx, username); err != nil {
+			log.Printf("⚠️ [Ranking] Failed to recalculate %s: %v", username, err)
+			failCount++
+		} else {
+			successCount++
+		}
+	}
+
+	log.Printf("✅ [Ranking] Recalculation complete: %d success, %d failed", successCount, failCount)
+	return successCount, failCount, nil
 }
 
 // StartPeriodicRefresh starts a background job to refresh rankings periodically

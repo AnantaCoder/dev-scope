@@ -29,26 +29,27 @@ axiosInstance.interceptors.response.use(
     // Check if error is 401 Unauthorized (session expired/invalid)
     if (error.response?.status === 401) {
       const currentPath = window.location.pathname;
-      
+
       // Don't redirect if already on auth pages
-      if (!currentPath.includes('/choose-signin') && 
-          !currentPath.includes('/auth/callback') &&
-          currentPath !== '/') {
-        
+      if (
+        !currentPath.includes("/choose-signin") &&
+        !currentPath.includes("/auth/callback") &&
+        currentPath !== "/"
+      ) {
         // Trigger custom event for session expiration
-        window.dispatchEvent(new CustomEvent('session-expired'));
-        
+        window.dispatchEvent(new CustomEvent("session-expired"));
+
         // Optional: Show a notification
-        console.warn('Session expired or invalid. Please login again.');
+        console.warn("Session expired or invalid. Please login again.");
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 // Type guard for Axios errors
 function isAxiosError(
-  error: unknown
+  error: unknown,
 ): error is AxiosError<{ message?: string }> {
   return axios.isAxiosError(error);
 }
@@ -169,7 +170,7 @@ export const api = {
   async getAIComparison(users: GitHubUser[]): Promise<AIComparisonResponse> {
     const { data } = await axiosInstance.post<AIComparisonResponse>(
       "/api/ai/compare",
-      { users }
+      { users },
     );
     return data;
   },
@@ -177,7 +178,7 @@ export const api = {
   async getAIAnalysis(request: AIAnalyzeRequest): Promise<AIAnalyzeResponse> {
     const { data } = await axiosInstance.post<AIAnalyzeResponse>(
       "/api/ai/analyze",
-      request
+      request,
     );
     return data;
   },
@@ -238,7 +239,7 @@ export const api = {
   // Rankings endpoints
   async getRankings(
     page: number = 1,
-    pageSize: number = 50
+    pageSize: number = 50,
   ): Promise<RankingsResponse> {
     try {
       const { data } = await axiosInstance.get("/api/rankings", {
@@ -321,8 +322,48 @@ export const api = {
     disabled_users?: string[];
   }> {
     const { data } = await axiosInstance.post(
-      "/api/admin/update-all-private-data"
+      "/api/admin/update-all-private-data",
+      {},
+      { timeout: 600000 }, // 10 minutes timeout for bulk operations
     );
+    return data;
+  },
+
+  async recalculateAllRankings(): Promise<{
+    error: boolean;
+    message: string;
+    success_count: number;
+    fail_count: number;
+  }> {
+    const { data } = await axiosInstance.post(
+      "/api/rankings/recalculate-all",
+      {},
+      {
+        timeout: 300000, // 5 minutes timeout for bulk operations
+      },
+    );
+    return data;
+  },
+
+  async getAllRankedUsernames(): Promise<{
+    error: boolean;
+    usernames: string[];
+  }> {
+    const { data } = await axiosInstance.get("/api/rankings/usernames");
+    return data;
+  },
+
+  async updateSingleUserRanking(username: string): Promise<{
+    error: boolean;
+    message: string;
+    ranking?: {
+      username: string;
+      score: number;
+    };
+  }> {
+    const { data } = await axiosInstance.post("/api/rankings/update", {
+      username,
+    });
     return data;
   },
 };

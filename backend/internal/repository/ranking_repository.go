@@ -72,7 +72,7 @@ func (r *RankingRepository) GetTopRankings(ctx context.Context, limit, offset in
 		ORDER BY rank_position ASC, score DESC
 		LIMIT $1 OFFSET $2
 	`
-    fmt.Printf("Executing GetTopRankings query: %s, with params: limit=%d, offset=%d\n", query, limit, offset)
+	fmt.Printf("Executing GetTopRankings query: %s, with params: limit=%d, offset=%d\n", query, limit, offset)
 
 	rows, err := r.db.QueryContext(ctx, query, limit, offset)
 	if err != nil {
@@ -133,4 +133,24 @@ func (r *RankingRepository) DeleteOldRankings(ctx context.Context, days int) err
 	query := fmt.Sprintf(`DELETE FROM user_rankings WHERE updated_at < NOW() - INTERVAL '%d days'`, days)
 	_, err := r.db.ExecContext(ctx, query)
 	return err
+}
+
+// GetAllUsernames retrieves all usernames from the rankings table
+func (r *RankingRepository) GetAllUsernames(ctx context.Context) ([]string, error) {
+	query := `SELECT username FROM user_rankings ORDER BY rank_position ASC`
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var usernames []string
+	for rows.Next() {
+		var username string
+		if err := rows.Scan(&username); err != nil {
+			return nil, err
+		}
+		usernames = append(usernames, username)
+	}
+	return usernames, rows.Err()
 }
